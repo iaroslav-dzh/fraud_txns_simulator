@@ -5,7 +5,9 @@ notebooks/03_data_generation_v1_moscow_area.ipynb
 .ssh/
 data/raw_data/fraudTest.csv.zip
 data/cleaned_data/clients_with_geo.csv
+data/cleaned_data/clients_with_geo.gpkg
 data/cleaned_data/offline_merchants_points.csv
+data/cleaned_data/offline_merchants_points.gpkg
 data/cleaned_data/transaction_df_clean.csv 
 data/raw_data/trans.asc
 data/raw_data/geo/
