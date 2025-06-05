@@ -294,7 +294,7 @@ def plot_all_patterns(time_weights):
 
  # 5. Функция генерации времени в виде timestamp-а и unix времени. Выдает и то и другое одновременно в виде двух значений
 
- def get_time_for_trans(trans_df, client_id, is_fraud, time_weights, timestamps, online=None, rule=None, geo_distance=None, lag=None):
+def get_time_for_trans(trans_df, client_id, is_fraud, time_weights, timestamps, online=None, rule=None, geo_distance=None, lag=None):
     """
     trans_df - датафрейм с транзакциями. Откуда брать информацию по предыдущим транзакциям
     client_id - id клиента, число, клиент чьи транзакции проверяются
