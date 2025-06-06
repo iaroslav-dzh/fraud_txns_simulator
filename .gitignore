@@ -1,8 +1,11 @@
-# Игнорировать все .ipynb_checkpoints (у Jupyter) в папке notebooks
+# notebooks
 notebooks/.ipynb_checkpoints/
 notebooks/03_data_generation_v1_moscow_area.ipynb
+notebooks/05DUPLICATE.ipynb
 # и т.д.
 .ssh/
+
+# data
 data/raw_data/fraudTest.csv.zip
 data/cleaned_data/clients_with_geo.csv
 data/cleaned_data/clients_with_geo.gpkg
