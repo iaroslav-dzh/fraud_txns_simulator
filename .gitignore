@@ -16,3 +16,4 @@ data/raw_data/geo/
 # и т.д.
 .ssh/
 scratchpad.txt
+scratchpad.py
