@@ -12,8 +12,10 @@ data/cleaned_data/offline_merchants_points.gpkg
 data/cleaned_data/transaction_df_clean.csv 
 data/raw_data/trans.asc
 data/raw_data/geo/
+data/test_data/
 
 # и т.д.
 .ssh/
+sessions/
 scratchpad.txt
 scratchpad.py
