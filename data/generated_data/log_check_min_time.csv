@@ -1,2 +1,0 @@
-,client_id,txn_time,txn_unix,online,closest_offline_time,closest_offline_unix,closest_online_time,closest_online_unix,last_txn_time,last_txn_unix,last_online,condition
-0,28.0,2025-01-31 10:01:19,1738317679.0,True,2025-01-31 09:16:00,1738314960.0,2025-01-31 08:14:00,1738311240.0,2025-01-31 09:16:00,1738314960.0,False,online_to_online
