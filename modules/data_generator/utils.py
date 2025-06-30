@@ -1,7 +1,7 @@
 # Модуль с общими вспомогательными функциями
 
 from scipy.stats import truncnorm
-
+from pyproj import Geod
 
 # 1. 
 
@@ -62,4 +62,27 @@ def get_values_from_truncnorm(low_bound, high_bound, mean, std, size=1):
     """
     return truncnorm.rvs((low_bound - mean) / std, (high_bound - mean) / std, loc=mean, scale=std, size=size)
 
+# 4.
+
+def calc_distance(lat_01, lon_01, lat_02, lon_02, km=True):
+    """
+    Считает растояние между двумя координатами на Земном шаре.
+    Между координатами последней по времени транзакции и переданными координатами.
+    -----------------------------
+    lat_01 - float. Широта первой точки
+    lon_01 - float. Долгота первой точки
+    lat_02 - float. Широта второй точки
+    lon_02 - float. Долгота второй точки
+    km - bool. Единицы измерения. Либо километры либо метры. Километры округляет до 2-х знаков, метры до целого.
+    """
+    
+    # Геодезический расчёт по эллипсоиду WGS84
+    geod = Geod(ellps="WGS84")
+    # [-1] берет последний элемент из кортежа. Это метры
+    distance_m = geod.inv(lon_01, lat_01, lon_02, lat_02)[-1]
+
+    if km:
+        return round(distance_m / 1000, 2)
+
+    return round(distance_m)
 
