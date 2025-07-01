@@ -87,9 +87,17 @@ def gen_time_for_frequent_trans(last_txn_time, last_txn_unix, freq_low=1, freq_h
         return txn_time, txn_unix, freq
 
 
+
+
+
+
+
+
+
+
 # . Подфункция генерации времени c прибавлением к времени последней транзакции derive_from_last_time
 
-def derive_from_last_time(last_txn_unix, lag_interval, min, max, random_lag=False, geo_distance=0, threshold=800):
+def derive_from_last_time(last_txn_unix, lag_interval, min=0, max=0, random_lag=False, geo_distance=0, threshold=800):
     """
     Создать время основываясь на времени последней транзакции.
     Либо на основании гео дистанции между транзакциями либо на основании заданного лага по времени.
@@ -98,7 +106,7 @@ def derive_from_last_time(last_txn_unix, lag_interval, min, max, random_lag=Fals
     last_txn_unix - int. Unix время последней транзакции в секундах.
     lag_interval - int. Желаемый лаг по времени от последней транзакции в минутах.
     min - int. Минуты. Минимальное значение если нужен случайный лаг по времени. Выставляется когда random_lag - True
-    max - int. Минуты. Максимальное значение если нужен случайный лаг по времени. Не включается в возможные выбор, ставить на 1 больше.
+    max - int. Минуты. Максимальное значение если нужен случайный лаг по времени. Не включается в возможный выбор, ставить на 1 больше.
                Выставляется когда random_lag - True
     random_lag - bool. Должно ли значение лага быть случайным. Берется по равномерному распределению.
     geo_distance - int. Расстояние между координатами текущей и последней транзакции в километрах.
