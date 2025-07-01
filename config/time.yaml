@@ -1,0 +1,25 @@
+time_weights_args:
+  Offline_24h_Legit:
+    is_fraud: false
+    round_clock: true
+    online: false
+  Offline_24h_Fraud:
+    is_fraud: true
+    round_clock: true
+    online: false
+  Online_Legit:
+    is_fraud: false
+    round_clock: true
+    online: true
+  Online_Fraud:
+    is_fraud: true
+    round_clock: true
+    online: true
+  Offline_Day_Legit:
+    is_fraud: false
+    round_clock: false
+    online: false
+  Offline_Day_Fraud:
+    is_fraud: true
+    round_clock: false
+    online: false

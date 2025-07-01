@@ -1,7 +1,9 @@
 # Модуль с общими вспомогательными функциями
-
+import pandas as pd
+import numpy as np
 from scipy.stats import truncnorm
 from pyproj import Geod
+from dataclasses import dataclass
 
 # 1. 
 
@@ -86,3 +88,74 @@ def calc_distance(lat_01, lon_01, lat_02, lon_02, km=True):
 
     return round(distance_m)
 
+
+# . Функция sample_category. На данный момент предназначена только для фрода
+
+def sample_category(categories, online=None, is_fraud=None, rule=None):
+    """
+    categories - pd.DataFrame с категориями и их характеристиками
+    online - bool. Онлайн или оффлайн категория нужна
+    is_fraud - bool. Фрод или не фрод. От этого зависит вероятность категории.
+    """
+
+    if is_fraud and online and rule != "trans_freq_increase":
+        online_categories = categories.loc[categories.online == True]
+        cat_sample = online_categories.sample(1, weights=online_categories.fraud_share)
+        return cat_sample
+
+    elif is_fraud and online and rule == "trans_freq_increase":
+        chosen_categories = categories.loc[categories.category.isin(["shopping_net", "misc_net"])]
+        cat_sample = chosen_categories.sample(1, weights=chosen_categories.fraud_share)
+        return cat_sample
+
+        
+    elif is_fraud and not online:
+        offline_categories = categories.loc[categories.online == False]
+        cat_sample = offline_categories.sample(1, weights=offline_categories.fraud_share)
+        return cat_sample
+
+
+# Функция семплирования антифрод-правила
+
+def sample_rule(rules):
+    """
+    rules - pd.DataFrame с названиями правил и их весами
+    """
+    return rules.rule.sample(1, weights=rules.weight).iat[0]
+
+
+# . Датакласс для конфигов транзакций. Это данные на основе которых будут генерироваться транзакции
+# на данный момент этот класс служит только для фрода
+
+@dataclass
+class ConfigForTrans:
+    """
+    Это данные на основе которых будут генерироваться транзакции
+    ---------------------
+    clients: pd.DataFrame
+    timestamps: pd.DataFrame
+    transactions: pd.DataFrame
+    client_devices: pd.DataFrame
+    offline_merchants: pd.DataFrame
+    categories: pd.DataFrame
+    online_merchant_ids: pd.Series
+    time_weights_dict: dict
+    rules: pd.DataFrame
+    cities: pd.DataFrame
+    fraud_devices: pd.DataFrame
+    fraud_ips: pd.DataFrame
+    fraud_amounts: pd.DataFrame 
+    """
+    clients: pd.DataFrame
+    timestamps: pd.DataFrame
+    transactions: pd.DataFrame
+    client_devices: pd.DataFrame
+    offline_merchants: pd.DataFrame
+    categories: pd.DataFrame
+    online_merchant_ids: pd.Series
+    time_weights_dict: dict
+    rules: pd.DataFrame
+    cities: pd.DataFrame
+    fraud_devices: pd.DataFrame
+    fraud_ips: pd.DataFrame
+    fraud_amounts: pd.DataFrame 

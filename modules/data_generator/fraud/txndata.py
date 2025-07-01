@@ -1,4 +1,4 @@
-# Функции и классы относящиеся к генерации фрода
+# Функции и классы относящиеся к генерации данных фрод транзакций, кроме времени.
 
 import pandas as pd
 import numpy as np
@@ -17,12 +17,10 @@ import pyarrow
 from datetime import datetime
 import sys
 import importlib
-from dataclasses import dataclass
 
-sys.path.append(os.path.abspath(os.path.join("..", "..", "modules")))
 
-from data_generator.general_time import *
-from data_generator.utils import build_transaction
+from data_generator.utils import get_values_from_truncnorm
+    
 
 #
 
@@ -216,3 +214,66 @@ class FraudTransPartialData:
             
         if used_devices:
             self.used_devices = pd.Series()
+
+
+# .
+
+class TransAmount: 
+    """
+    Генерация суммы транзакции
+    """
+
+    def __init__(self, categories_stats):
+        """
+        categories_stats - pd.DataFrame с категориями и характеристиками их сумм
+        """
+        self.categories = categories_stats
+        
+
+    def fraud_amount(self, category_name):
+        """
+        Фрод транзакции. Генерация суммы с выставленными минимумом, максимумом, средним и отклонением
+        """
+        
+        category = self.categories[self.categories.category == category_name]
+        low = category.fraud_low
+        high = category.fraud_high
+        mean = category.fraud_mean
+        std = category.fraud_std
+
+        # Генерация числа и округление до десятков
+        return get_values_from_truncnorm(low_bound=low, high_bound=high, mean=mean, std=std)[0] // 10 * 10
+
+    def freq_trans_amount(self, low=2000, high=10000, mean=4000, std=1500):
+        """
+        Генерация суммы специально для правила freq_trans_amount
+        """
+        
+        # Генерация числа и округление до десятков
+        return get_values_from_truncnorm(low_bound=low, high_bound=high, mean=mean, std=std)[0] // 10 * 10
+    
+
+# .
+
+def sample_category(categories, online=None, is_fraud=None, rule=None):
+    """
+    categories - pd.DataFrame с категориями и их характеристиками
+    online - bool. Онлайн или оффлайн категория нужна
+    is_fraud - bool. Фрод или не фрод. От этого зависит вероятность категории.
+    """
+
+    if is_fraud and online and rule != "trans_freq_increase":
+        online_categories = categories.loc[categories.online == True]
+        cat_sample = online_categories.sample(1, weights=online_categories.fraud_share)
+        return cat_sample
+
+    elif is_fraud and online and rule == "trans_freq_increase":
+        chosen_categories = categories.loc[categories.category.isin(["shopping_net", "misc_net"])]
+        cat_sample = chosen_categories.sample(1, weights=chosen_categories.fraud_share)
+        return cat_sample
+
+        
+    elif is_fraud and not online:
+        offline_categories = categories.loc[categories.online == False]
+        cat_sample = offline_categories.sample(1, weights=offline_categories.fraud_share)
+        return cat_sample
