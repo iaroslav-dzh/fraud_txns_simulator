@@ -144,6 +144,7 @@ class FraudTransPartialData:
         
         return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, type
 
+
     def freq_trans(self, client_city, category_name, another_city):
         """
         another_city - bool. Должен ли IP быть отличного от клиентского города.
@@ -152,6 +153,26 @@ class FraudTransPartialData:
         
         return self.last_txn
 
+
+    def original_purchase(self, online=True):
+        """
+        Оригинальные данные клиента для операций покупок.
+        На данный момент это для дропов.
+        Для операций на криптобирже и для покупки товаров дропами
+        """
+        if online:
+            merchant_id = self.online_merchant_ids.sample(n=1).iat[0]
+            # Координаты города и название
+            trans_lat = self.client_info.lat
+            trans_lon = self.client_info.lon
+            trans_ip = self.client_info.home_ip
+            trans_city = self.client_info.area        
+            # Семпл девайса клиента
+            devices = self.client_devices.loc[self.client_devices.client_id == self.client_info.client_id]
+            device_id = devices.device_id.sample(1).iloc[0]
+
+        # Не генерируем channel. Он должен быть определен вовне
+        return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, type
 
         
     def original_data(self, online, receive=None):
