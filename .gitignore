@@ -18,6 +18,7 @@ data/test_data/
 # и т.д.
 .ssh/
 sessions/
+scratchpads/
 scratchpad.txt
 scratchpad.py
 scratchpad_fraud.txt

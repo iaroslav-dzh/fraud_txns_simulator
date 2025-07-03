@@ -88,13 +88,6 @@ def gen_time_for_frequent_trans(last_txn_time, last_txn_unix, freq_low=1, freq_h
 
 
 
-
-
-
-
-
-
-
 # . Подфункция генерации времени c прибавлением к времени последней транзакции derive_from_last_time
 
 def derive_from_last_time(last_txn_unix, lag_interval, min=0, max=0, random_lag=False, geo_distance=0, threshold=800):

@@ -1,7 +1,7 @@
 ## Генерация счетов клиентов и внешних счетов
 
-**Счета клиентов**  
-Пускай начинаются с 10000
+# **Счета клиентов**  
+# Пускай начинаются с 10000
 
 accounts = clients_with_geo[["client_id"]].copy()
 
@@ -30,8 +30,8 @@ accounts["is_drop"] = False
 
 accounts.head()
 
-**Внешние счета**  
-Счета начинающиеся с максимального номера счета нашего клиента + 1
+# **Внешние счета**  
+# Счета начинающиеся с максимального номера счета нашего клиента + 1
 
 # Пусть будет 10000 счетов
 
@@ -44,7 +44,7 @@ outer_accounts
 
 assert accounts.merge(outer_accounts, on="account_id").empty, "Clients account ids are in the outer account ids"
 
-**Сохранение счетов в файлы**
+# **Сохранение счетов в файлы**
 
 accounts.to_csv("./data/generated_data/accounts.csv", index=False)
 
