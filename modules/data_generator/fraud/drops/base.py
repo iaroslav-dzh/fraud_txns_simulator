@@ -3,8 +3,125 @@
 
 import pandas as pd
 import numpy as np
+from dataclasses import dataclass
 
-from data_generator.utils import DropConfigs
+from data_generator.utils import get_values_from_truncnorm
+
+# . Датакласс для конфигов транзакций дропов-распределителей
+
+@dataclass
+class DropDistributorCfg:
+    """
+    Это данные на основе которых будут генерироваться транзакции дропов-распределителей
+    ---------------------
+    clients: pd.DataFrame
+    timestamps: pd.DataFrame
+    transactions: pd.DataFrame
+    accounts: pd.DataFrame. Номера счетов клиентов. 
+    outer_accounts: pd.Series. Номера внешних счетов для транзакций вне банка.
+    client_devices: pd.DataFrame
+    offline_merchants: pd.DataFrame
+    categories: pd.DataFrame
+    online_merchant_ids: pd.Series
+    time_weights_dict: dict
+    rules: pd.DataFrame
+    cities: pd.DataFrame
+    fraud_amounts: pd.DataFrame
+    period_in_lim: int. Количество входящих транзакций после которых дроп уходит на паузу.
+    period_out_lim: int. Количество исходящих транзакций после которых дроп уходит на паузу.
+    lag_interval: int. Минуты. На сколько дроп должен делать паузу после
+                       достижения лимита входящих и/или исходящих транзакций.
+                       Например 1440 минут(сутки). Отсчет идет от первой транзакции в последнем периоде активности.
+    two_way_delta: dict. Минимум и максимум дельты времени. Для случаев когда дельта может быть и положительной и отрицательной.
+                         Эта дельта прибавляется к lag_interval, чтобы рандомизировать время возобновления активности,
+                         чтобы оно не было ровным. Берется из конфига drops.yaml
+    pos_delta: dict. Минимум и максимум случайной дельты времени в минутах. Для случаев когда дельта может быть только положительной.
+                          Эта дельта - промежуток между транзакциями дропа в одном периоде. Просто прибавляется ко времени последней транзакции.
+    chunks: dict. Характеристики для генератора сумм транзакций по частям.
+    inbound_amt: dict. Настройки для сумм входящих транзакций
+    round: int. Округление целой части сумм транзакций. Напр. 500 значит что суммы будут кратны 500 - кончаться на 500 или 000
+    """
+    clients: pd.DataFrame
+    timestamps: pd.DataFrame
+    transactions: pd.DataFrame
+    accounts: pd.DataFrame
+    outer_accounts: pd.Series
+    client_devices: pd.DataFrame
+    offline_merchants: pd.DataFrame
+    categories: pd.DataFrame
+    online_merchant_ids: pd.Series
+    time_weights_dict: dict
+    rules: pd.DataFrame
+    cities: pd.DataFrame
+    fraud_amounts: pd.DataFrame
+    period_in_lim: int
+    period_out_lim: int
+    lag_interval: int
+    two_way_delta: dict
+    pos_delta: dict
+    chunks: dict
+    inbound_amt: dict
+    round: dict
+
+
+# . Датакласс для конфигов транзакций дропов-покупателей 
+
+@dataclass
+class DropPurchaserCfg: # <-------------------- in development. Совсем не откорректирован.
+    """
+    Это данные на основе которых будут генерироваться транзакции дропов-покупателей
+    ---------------------
+    clients: pd.DataFrame
+    timestamps: pd.DataFrame
+    transactions: pd.DataFrame
+    accounts: pd.DataFrame. Номера счетов клиентов. 
+    outer_accounts: pd.Series. Номера внешних счетов для транзакций вне банка.
+    client_devices: pd.DataFrame
+    offline_merchants: pd.DataFrame
+    categories: pd.DataFrame
+    online_merchant_ids: pd.Series
+    time_weights_dict: dict
+    rules: pd.DataFrame
+    cities: pd.DataFrame
+    fraud_amounts: pd.DataFrame
+    period_in_lim: int. Количество входящих транзакций после которых дроп уходит на паузу.
+    period_out_lim: int. Количество исходящих транзакций после которых дроп уходит на паузу.
+    lag_interval: int. Минуты. На сколько дроп должен делать паузу после
+                       достижения лимита входящих и/или исходящих транзакций.
+                       Например 1440 минут(сутки). Отсчет идет от первой транзакции в последнем периоде активности.
+    two_way_delta: dict. Минимум и максимум дельты времени. Для случаев когда дельта может быть и положительной и отрицательной.
+                         Эта дельта прибавляется к lag_interval, чтобы рандомизировать время возобновления активности,
+                         чтобы оно не было ровным. Берется из конфига drops.yaml
+    pos_delta: dict. Минимум и максимум случайной дельты времени в минутах. Для случаев когда дельта может быть только положительной.
+                          Эта дельта - промежуток между транзакциями дропа в одном периоде. Просто прибавляется ко времени последней транзакции.
+    chunks: dict. Характеристики для генератора сумм транзакций по частям.
+    inbound_amt: dict. Настройки для сумм входящих транзакций
+    round: int. Округление целой части сумм транзакций. Напр. 500 значит что суммы будут кратны 500 - кончаться на 500 или 000
+    """
+    clients: pd.DataFrame
+    timestamps: pd.DataFrame
+    transactions: pd.DataFrame
+    accounts: pd.DataFrame
+    outer_accounts: pd.Series
+    client_devices: pd.DataFrame
+    offline_merchants: pd.DataFrame
+    categories: pd.DataFrame
+    online_merchant_ids: pd.Series
+    time_weights_dict: dict
+    rules: pd.DataFrame
+    cities: pd.DataFrame
+    fraud_amounts: pd.DataFrame
+    period_in_lim: int
+    period_out_lim: int
+    lag_interval: int
+    two_way_delta: dict
+    pos_delta: dict
+    chunks: dict
+    inbound_amt: dict
+    round: dict
+
+
+# .
 
 class DropAccountHandler:
     """
@@ -21,7 +138,7 @@ class DropAccountHandler:
                     По умолчанию пустая. name="account_id"
     """
 
-    def __init__(self, configs: DropConfigs):
+    def __init__(self, configs: DropDistributorCfg):
         """
         configs - pd.DataFrame. Данные для создания транзакций: отсюда берем номера счетов клиентов и внешних счетов.
         """
@@ -81,36 +198,65 @@ class DropAccountHandler:
         """
         self.used_accounts = pd.Series(name="account_id")
 
-
+# .
 class DropAmountHandler: 
     """
     Генератор сумм входящих/исходящих транзакций, сумм снятий.
     Управление балансом текущего дропа.
+    -------------
+    Атрибуты:
+    balance: float, int. Текущий баланс дропа. По умолчанию 0.
+    batch_txns: int. Счетчик транзакций сделанных в рамках распределения полученной партии денег.
+                      По умолчанию 0.
+    chunk_size: int, float. Последний созданный размер части баланса для перевода по частям
+                             По умолчанию 0.
+    chunks: dict. Содержит ключи:
+        atm_min: int. Минимальная сумма для снятий в банкомате.
+        atm_share: float. Доля от баланса, которую дроп снимает в случае снятия в банкомате
+        low: int. Минимальная сумма исходящего перевода частями.
+        high: int. Максимальная сумма исходящего перевода частями.
+        step: int. Шаг возможных сумм. Чем меньше шаг, тем больше вариантов.
+        rand_rate: float. От 0 до 1.
+                   Процент случаев, когда каждый НЕ первый чанк будет случайным и не зависеть от предыдущего.
+                   Но возможны случайные совпадаения с предыдущим размером чанка.
+                   Доля случайных размеров подряд будет:
+                   p(c) - вероятность взять определенный размер (зависит от размера выборки чанков)
+                   p(r) - rand_rate
+                   p(r) - (p(r) * p(c)). Например p(r) = 0.9; и 5 вариантов размеров чанка - p(c) = 0.20
+                   0.9 - (0.9 * 0.2) = 0.72
+                   В около 72% случаев размеры чанков не будут подряд одинаковыми 
+    inbound_amt: dict. Настройки для сумм входящих транзакций. Содержит ключи:
+        low: int
+        high: int
+        mean: int
+        std: int
+    round: int. Округление целой части сумм транзакций. Напр. 500 значит что суммы будут кратны 500 - кончаться на 500 или 000                  
     """
-    def __init__(self, accounts, account, outer_accounts, balance=0, batch_txns=0, chunk_size=0, used_accounts=pd.Series(name="account_id")):
-        """
-        accounts - pd.DataFrame. Счета клиентов банка.
-        account - int. Номер счета текущего дропа.
-        outer_accounts - pd.Series. Номера счетов для входящих и исходящих переводов в/из других банков.
-        balance - float. Текущий баланс дропа
-        batch_txns - int. Счетчик транзакций сделанных в рамках распределения полученной партии денег
-        chunk_size - int, float. Последний созданный размер части баланса для перевода по частям.
-        used_accounts - pd.Series. Счета на которые дропы уже отправляли деньги.
-        """
-        self.accounts = accounts
-        self.account = account
-        self.outer_accounts = outer_accounts
-        self.balance = balance
-        self.batch_txns = batch_txns
-        self.chunk_size = chunk_size
-        self.used_accounts = used_accounts
 
-    def update_balance(self, amount, add=False, declined=False):
+    def __init__(self, configs: DropDistributorCfg | DropPurchaserCfg):
+        """
+        configs: DropDistributorCfg | DropPurchaserCfg. Данные на основании, которых генерируются транзакции.
+                 Отсюда берутся: atm_min, atm_share, min, step, rand_rate.
+        """
+        self.balance = 0
+        self.batch_txns = 0
+        self.chunk_size = 0
+        self.chunks = configs.chunks
+        self.inbound_amt = configs.inbound_amt
+        self.round = configs.round
+        # self.atm_min = configs.chunks["atm_min"]
+        # self.atm_share = configs.chunks["atm_share"]
+        # self.min = configs.chunks["min"]
+        # self.max = configs.chunks["max"]
+        # self.step = configs.chunks["step"]
+        # self.rand_rate = configs.chunks["rand_rate"]
+
+    def update_balance(self, amount, receive=False, declined=False):
         """
         Увеличить/уменьшить баланс на указанную сумму
         -------------------
         amount - float, int.
-        add - bool. Прибавлять сумму или отнимать.
+        receive - bool. Входящая ли транзакция. Прибавлять сумму или отнимать.
         declined - bool. Отклонена ли транзакция или одобрена.
         """
         # Не обновлять баланс если транзакция отклонена.
@@ -118,74 +264,62 @@ class DropAmountHandler:
             return
             
         # Увеличить баланс   
-        if add:
+        if receive:
             self.balance += amount
             return
             
         # Уменьшить баланс    
         self.balance -= amount
 
-    def receive(self, declined, low=5000, high=100000, mean=30000, std=20000, round=500):
+    def receive(self, declined):
         """
         Генерация суммы входящего перевода
         --------------------------
         declined - bool. Отклонена ли транзакция или одобрена
-        low - float. Минимальная сумма
-        high - float. Максимальная сумма
-        mean - float. Средняя сумма
-        std - float. Стандартное отклонение
-        round - int. Округление целой части. По умолчанию 500. Значит числа будут либо с 500 либо с 000 на конце
-                     При условии что round не больше low и high. Чтобы отменить округление, нужно выставить 1
         """
+        low = self.inbound_amt["low"]
+        high = self.inbound_amt["high"]
+        mean = self.inbound_amt["mean"]
+        std = self.inbound_amt["std"]
 
         # Генерация суммы. Округление целой части при необходимости
-        amount = get_values_from_truncnorm(low_bound=low, high_bound=high, mean=mean, std=std)[0] // round * round
+        amount = get_values_from_truncnorm(low_bound=low, high_bound=high, mean=mean, std=std)[0] // self.round * self.round
         
         # Обновляем баланс если транзакция не отклонена
-        self.update_balance(amount=amount, add=True, declined=declined)
+        self.update_balance(amount=amount, receive=True, declined=declined)
         
         return amount
 
-    def get_chunk_size(self, online=False, atm_min=10000, atm_share=0.5, round=500, rand_rate=0.9, start=0, stop=0, step=0):
+    def get_chunk_size(self, online=False):
         """
         Вернуть случайный размер суммы перевода для перевода по частям
         либо вернуть долю от баланса для снятия/перевода по частям.
         -------------------------------
         online - bool. Онлайн или оффлайн. Перевод или банкомат. Если банкомат, то снимается доля atm_share от баланса, но не меньше atm_min
-        atm_min - int, float. Минимальная сумма снятия дропом в банкомате.
-        atm_share - float. Доля от баланса если снятие через банкомат.
-        round - int. Округление целой части. По умолчанию 500. 
-                     Значит суммы будут округлены до тысяч или пяти сотен
-        rand_rate - float. От 0 до 1. Процент случаев, когда каждый НЕ первый чанк будет случайным и не зависеть от предыдущего.
-                           Но возможны случайные совпадаения с предыдущим размером чанка.
-                           Доля случайных размеров подряд будет:
-                           p(c) - вероятность взять определенный размер (зависит от размера выборки чанков)
-                           p(rr) - rand_rate
-                           p(rr) - (p(rr) * p(c)). Например p(rr) = 0.9, 5 вариантов размеров чанка - p(c) = 0.20
-                           0.9 - (0.9 * 0.2) = 0.72
-                           В около 72% случаев размеры чанков не будут подряд одинаковыми 
-        start - int. Минимальный размер. Прописываем если генерация не через share.
-                     То же самое для stop и step
-        stop - int. Максимальный размер - не входит в возможный выбор.
-                    Максимальное генерируемое значение равно stop - step
-        step - int. Шаг размеров.
         --------------------
         Возвращает np.int64
         Результат кэшируется в self.chunk_size
         """
         # Если это не первая транзакция в серии транзакции для одной полученной дропом суммы
         # И случайное число больше rand_rate, то просто возвращаем ранее созданный размер чанка
+        rand_rate = self.chunks["rand_rate"]
         if self.batch_txns != 0 and np.random.uniform(0,1) > rand_rate:
             return self.chunk_size
 
         # Если перевод
         if online:
-            sampling_array = np.arange(start, stop, step)
+            low = self.chunks["low"]
+            high = self.chunks["high"]
+            step = self.chunks["step"]
+            # прибавим шаг, чтобы было понятнее передавать аргументы в конфиге и не учитывать исключение stop в np.arange
+            sampling_array = np.arange(low, high + step, step)
             self.chunk_size = np.random.choice(sampling_array)
             return self.chunk_size
-            
-        # Если снятие    
-        self.chunk_size = max(atm_min, self.balance * atm_share // round * round)
+        
+        # Если снятие
+        atm_min = self.chunk["atm_min"]
+        atm_share = self.chunk["atm_share"]
+        self.chunk_size = max(atm_min, self.balance * atm_share // self.round * self.round)
         return self.chunk_size
             
         
@@ -205,7 +339,7 @@ Passed amount: {amount}""")
         # Если перевод не по частям. Пробуем перевестит все с баланса. 
         if not in_chunks:
             amount = self.balance
-            self.update_balance(amount=self.balance, add=False, declined=declined)
+            self.update_balance(amount=self.balance, receive=False, declined=declined)
             # Прибавляем счетчик транзакции для текущей партии денег
             self.batch_txns += 1
             return amount
@@ -215,57 +349,30 @@ Passed amount: {amount}""")
 
         # Если целое число частей больше 0. Пробуем перевести одну часть
         if chunks > 0:
-            self.update_balance(amount=amount, add=False, declined=declined)
+            self.update_balance(amount=amount, receive=False, declined=declined)
             self.batch_txns += 1
             return amount
 
         # Если баланс меньше одной части. Пробуем перевести то что осталось
         rest = self.balance
-        self.update_balance(amount=rest, add=False, declined=declined)
+        self.update_balance(amount=rest, receive=False, declined=declined)
         self.batch_txns += 1
         return rest
 
-    def get_account(self, to_drop):
-        """
-        Номер счета входящего/исходящего перевода
-        to_drop - bool. Перевод другому дропу в нашем банке или нет.
-        """
-        # Фильтруем accounts исключая свой счет и выбирая дропов. Для случая если to_drop
-        drop_accounts = self.accounts.loc[(self.accounts.account_id != self.account) & (self.accounts.is_drop == True)]
 
-        # Если надо отправить другому дропу в нашем банке. При условии что есть другие дропы на текущий момент
-        if to_drop and not drop_accounts.empty: 
-            account = drop_accounts.account_id.sample(1).iat[0]
-            # Добавляем этот счет в использованные как последнюю запись в серии
-            self.used_accounts.loc[self.used_accounts.shape[0]] = account
-            return account
-
-        # Если отправляем/получаем из другого банка.  
-        # Семплируем номер внешнего счета который еще не использовался
-        account = self.outer_accounts.loc[~(self.outer_accounts.isin(self.used_accounts))].sample(1).iat[0]
-        # Добавляем этот счет в использованные как последнюю запись в серии
-        self.used_accounts.loc[self.used_accounts.shape[0]] = account
-        
-        return account
-
-    def reset_cache(self, balance=True, used_accounts=True, chunk_size=True, batch_txns=True):
+    def reset_cache(self, balance=True, chunk_size=True, batch_txns=True):
         """
         Сброс кэшированных значений
         По умолчанию сбрасывается всё. Если что-то надо оставить, то надо выставить False
         для этого
         -----------------
         balance - bool
-        used_accounts - bool
         chunk_size - bool
         batch_txns - bool
         """
         if balance:
             self.balance = 0
-        if used_accounts:
-            self.used_accounts = pd.Series(name="account_id")
         if chunk_size:
             self.chunk_size = 0
         if batch_txns:
             self.batch_txns = 0
-
-   
