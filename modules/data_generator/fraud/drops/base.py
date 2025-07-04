@@ -39,7 +39,8 @@ class DropDistributorCfg:
                           Эта дельта - промежуток между транзакциями дропа в одном периоде. Просто прибавляется ко времени последней транзакции.
     chunks_rate: float. От 0 до 1. Доля случаев, когда дроп распределяет полученные деньги по частям, а не одной операцией.
     chunks: dict. Характеристики для генератора сумм транзакций по частям.
-    inbound_amt: dict. Настройки для сумм входящих транзакций
+    trf_lim: int. 
+    inbound_amt: dict. Лимиты на перевод. Если баланс больше. То разбиваем на части
     round: int. Округление целой части сумм транзакций. Напр. 500 значит что суммы будут кратны 500 - кончаться на 500 или 000
     """
     clients: pd.DataFrame
@@ -57,13 +58,14 @@ class DropDistributorCfg:
     fraud_amounts: pd.DataFrame
     period_in_lim: int
     period_out_lim: int
+    inbound_amt: dict
+    chunks_rate: float
+    chunks: dict
+    trf_lim: int
+    round: dict
     lag_interval: int
     two_way_delta: dict
     pos_delta: dict
-    chunks_rate: float
-    chunks: dict
-    inbound_amt: dict
-    round: dict
 
 
 # . Датакласс для конфигов транзакций дропов-покупателей 
@@ -150,6 +152,7 @@ class DropAccountHandler:
         self.account = 0
         self.used_accounts = pd.Series(name="account_id")
 
+
     def get_account(self, own=False, to_drop=False):
         """
         Номер счета входящего/исходящего перевода
@@ -185,6 +188,7 @@ class DropAccountHandler:
         # Добавляем этот счет в использованные как последнюю запись в серии
         self.used_accounts.loc[self.used_accounts.shape[0]] = account
         return account
+
 
     def label_drop(self):
         """
@@ -248,12 +252,7 @@ class DropAmountHandler:
         self.chunks = configs.chunks.copy()
         self.inbound_amt = configs.inbound_amt.copy()
         self.round = configs.round
-        # self.atm_min = configs.chunks["atm_min"]
-        # self.atm_share = configs.chunks["atm_share"]
-        # self.min = configs.chunks["min"]
-        # self.max = configs.chunks["max"]
-        # self.step = configs.chunks["step"]
-        # self.rand_rate = configs.chunks["rand_rate"]
+
 
     def update_balance(self, amount, receive=False, declined=False):
         """
@@ -266,14 +265,13 @@ class DropAmountHandler:
         # Не обновлять баланс если транзакция отклонена.
         if declined:
             return
-            
         # Увеличить баланс   
         if receive:
             self.balance += amount
             return
-            
         # Уменьшить баланс    
         self.balance -= amount
+
 
     def receive(self, declined):
         """
@@ -293,6 +291,7 @@ class DropAmountHandler:
         self.update_balance(amount=amount, receive=True, declined=declined)
         
         return amount
+
 
     def get_chunk_size(self, online=False):
         """
@@ -349,8 +348,6 @@ class DropAmountHandler:
         return self.chunk_size
         
 
-            
-        
     def one_operation(self, online, declined=False, in_chunks=False):
         """
         Генерация суммы операции дропа.
@@ -360,9 +357,6 @@ class DropAmountHandler:
         in_chunks - bool. Перевод по частям или целиком. Если False, то просто пробуем перевести все с баланса
                           При True нужно указать amount.
         """
-#         if in_chunks and amount <= 0:
-#             raise ValueError(f"""If in_chunks is True, then amount must be greater than 0.
-# Passed amount: {amount}""")
 
         # Если перевод не по частям. Пробуем перевести все с баланса. 
         if not in_chunks:
@@ -405,3 +399,92 @@ class DropAmountHandler:
             self.chunk_size = 0
         if batch_txns:
             self.batch_txns = 0
+
+
+# .
+
+class DropBehaviorHandler:
+    """
+    Управление поведением дропа. Выбор сценария.
+    ----------
+    Атрибуты:
+    --------
+    attempts - int. Сколько попыток совершить операцию будет сделано 
+               дропом после первой отклоненной транзакции. По умолчанию 0.
+    """
+    def __init__(self, configs: DropDistributorCfg, amt_hand: DropAmountHandler):
+        """
+        configs: DropDistributorCfg. Конфиги и данные для создания дроп транзакций.
+        amt_hand: DropAmountHandler. Отсюда узнаем текущий баланс.
+        
+        """
+        # self.in_txns = in_txns
+        # self.out_txns = out_txns
+        # self.in_lim = in_lim
+        # self.out_lim = out_lim
+        self.configs = configs
+        self.amt_hand = amt_hand
+        self.atm_min = amt_hand.chunks["atm_min"]
+        self.attempts = 0
+
+    def sample_scenario(self):
+        """
+        Выбор сценария поведения дропа.
+        """
+        balance = self.amt_hand.balance
+
+        if balance >= self.atm_min and :
+            scen = np.random.choice(["transfer", "atm", "split_transfer", "atm+transfer"])
+        elif balance >= atm_split_limit:
+            scen = sample(["transfer","atm", "split_transfer", "atm+transfer"]) 
+        else:
+            scen = sample(["transfer","atm"])
+
+
+    def stop_after_decline(self, declined):
+        """
+        Будет ли дроп пытаться еще после отклоненной операции
+        или остановится
+        ---------------
+        declined - bool. Отклонена ли операция. Подразумевается что последняя.
+        """
+        if not declined:
+            return
+        
+        if self.attempts == 0:
+            return True
+
+        if self.attempts > 0:
+            return False
+
+            
+    def attempts_after_decline(self, low=0, high=4):
+        """
+        Определение количества попыток после первой отклоненной транзакции
+        ---------------
+        low - int. Минимальное число попыток
+        high - int. Максимальное число попыток.
+        """
+        self.attempts = np.random.randint(low, high + 1)
+            
+        
+    def deduct_attempts(self, declined, receive):
+        """
+        Вычитание попытки операции совершенной при статусе declined
+        ---------------
+        declined - bool. Отклоняется ли текущая транзакция
+        receive - bool. Является ли транзакция входящей
+        """
+        if self.attempts == 0:
+            return 
+            
+        if declined and not receive:
+            self.attempts -= 1
+
+
+    def reset_cache(self):
+        """
+        Сброос кэшированных данных
+        -------------
+        """
+        self.attempts = 0

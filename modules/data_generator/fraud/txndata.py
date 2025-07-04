@@ -101,9 +101,9 @@ class FraudTransPartialData:
             channel = "POS"
 
         
-        type = "purchase"
+        txn_type = "purchase"
             
-        return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, type
+        return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type
 
 
     def new_device_and_ip(self, client_city, category_name, online=True, another_city=True):
@@ -140,9 +140,9 @@ class FraudTransPartialData:
         self.used_devices.loc[self.used_devices.shape[0]] = device_id
 
         channel = "ecom"
-        type = "purchase"
+        txn_type = "purchase"
         
-        return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, type
+        return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type
 
 
     def freq_trans(self, client_city, category_name, another_city):
@@ -170,9 +170,10 @@ class FraudTransPartialData:
             # Семпл девайса клиента
             devices = self.client_devices.loc[self.client_devices.client_id == self.client_info.client_id]
             device_id = devices.device_id.sample(1).iloc[0]
+            txn_type = "purchase"
 
         # Не генерируем channel. Он должен быть определен вовне
-        return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, type
+        return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, txn_type
 
         
     def original_data(self, online, receive=None):
@@ -188,13 +189,13 @@ class FraudTransPartialData:
             trans_ip = "not applicable"
             device_id = pd.NA
             channel = "transfer"
-            type = "inbound"
+            txn_type = "inbound"
             merchant_id = np.nan
             trans_lat = np.nan
             trans_lon = np.nan
             trans_city = "not applicable"
             
-            return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, type
+            return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type
         
         # Исходящий перевод
         elif online:
@@ -203,14 +204,14 @@ class FraudTransPartialData:
             devices = self.client_devices.loc[self.client_devices.client_id == self.client_info.client_id]
             device_id = devices.device_id.sample(1).iloc[0]
             channel = "transfer"
-            type = "outbound"  
+            txn_type = "outbound"  
 
         # Оффлайн
         else:
             trans_ip = "not applicable"
             device_id = pd.NA
             channel = "ATM"
-            type = "withdrawal"
+            txn_type = "withdrawal"
             
         merchant_id = np.nan
         # Локация транзакции просто записываем координаты и название города клиента
@@ -218,7 +219,7 @@ class FraudTransPartialData:
         trans_lon = self.client_info.lon
         trans_city = self.client_info.area
 
-        return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, type
+        return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type
 
 
     def reset_used(self, used_ips=False, used_devices=False):
