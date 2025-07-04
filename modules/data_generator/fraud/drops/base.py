@@ -37,6 +37,7 @@ class DropDistributorCfg:
                          чтобы оно не было ровным. Берется из конфига drops.yaml
     pos_delta: dict. Минимум и максимум случайной дельты времени в минутах. Для случаев когда дельта может быть только положительной.
                           Эта дельта - промежуток между транзакциями дропа в одном периоде. Просто прибавляется ко времени последней транзакции.
+    chunks_rate: float. От 0 до 1. Доля случаев, когда дроп распределяет полученные деньги по частям, а не одной операцией.
     chunks: dict. Характеристики для генератора сумм транзакций по частям.
     inbound_amt: dict. Настройки для сумм входящих транзакций
     round: int. Округление целой части сумм транзакций. Напр. 500 значит что суммы будут кратны 500 - кончаться на 500 или 000
@@ -59,6 +60,7 @@ class DropDistributorCfg:
     lag_interval: int
     two_way_delta: dict
     pos_delta: dict
+    chunks_rate: float
     chunks: dict
     inbound_amt: dict
     round: dict
@@ -121,7 +123,7 @@ class DropPurchaserCfg: # <-------------------- in development. Совсем н�
     round: dict
 
 
-# .
+# . Управление счетами для переводов.
 
 class DropAccountHandler:
     """
@@ -198,7 +200,9 @@ class DropAccountHandler:
         """
         self.used_accounts = pd.Series(name="account_id")
 
-# .
+
+# . Управление балансом и суммами транзакций дропа
+
 class DropAmountHandler: 
     """
     Генератор сумм входящих/исходящих транзакций, сумм снятий.
@@ -241,8 +245,8 @@ class DropAmountHandler:
         self.balance = 0
         self.batch_txns = 0
         self.chunk_size = 0
-        self.chunks = configs.chunks
-        self.inbound_amt = configs.inbound_amt
+        self.chunks = configs.chunks.copy()
+        self.inbound_amt = configs.inbound_amt.copy()
         self.round = configs.round
         # self.atm_min = configs.chunks["atm_min"]
         # self.atm_share = configs.chunks["atm_share"]
@@ -295,7 +299,8 @@ class DropAmountHandler:
         Вернуть случайный размер суммы перевода для перевода по частям
         либо вернуть долю от баланса для снятия/перевода по частям.
         -------------------------------
-        online - bool. Онлайн или оффлайн. Перевод или банкомат. Если банкомат, то снимается доля atm_share от баланса, но не меньше atm_min
+        online - bool. Онлайн или оффлайн. Перевод или банкомат. Если банкомат, то снимается доля self.chunks["atm_share"] от баланса, 
+                 но не меньше self.chunks["atm_min"]
         --------------------
         Возвращает np.int64
         Результат кэшируется в self.chunk_size
@@ -306,37 +311,58 @@ class DropAmountHandler:
         if self.batch_txns != 0 and np.random.uniform(0,1) > rand_rate:
             return self.chunk_size
 
-        # Если перевод
-        if online:
-            low = self.chunks["low"]
-            high = self.chunks["high"]
-            step = self.chunks["step"]
-            # прибавим шаг, чтобы было понятнее передавать аргументы в конфиге и не учитывать исключение stop в np.arange
-            sampling_array = np.arange(low, high + step, step)
-            self.chunk_size = np.random.choice(sampling_array)
+        # Если снятие
+        if not online:
+            atm_min = self.chunks["atm_min"]
+            atm_share = self.chunks["atm_share"]
+            self.chunk_size = max(atm_min, self.balance * atm_share // self.round * self.round)
             return self.chunk_size
         
-        # Если снятие
-        atm_min = self.chunk["atm_min"]
-        atm_share = self.chunk["atm_share"]
-        self.chunk_size = max(atm_min, self.balance * atm_share // self.round * self.round)
+        # Если перевод. 
+        # Берем лимиты под генерацию массива чанков, в зависимости от
+        # полученной дропом суммы
+        small = self.chunks["rcvd_small"]
+        medium = self.chunks["rcvd_medium"] 
+        large = self.chunks["rcvd_large"]
+
+        if self.balance <= small["limit"]:
+            low = small["min"]
+            high = min(self.balance, small["max"]) # не выше суммы на балансе
+
+        elif self.balance <= medium["limit"]:
+            low = medium["min"]
+            high = min(self.balance, medium["max"])
+
+        else:
+            low = large["min"]
+            high = min(self.balance, large["max"])
+
+        step = self.chunks["step"]
+                           
+        # прибавим шаг к максимуму, чтобы было понятнее передавать аргументы в конфиге 
+        # и не учитывать исключение значения stop в np.arange
+        sampling_array = np.arange(low, high + step, step)
+        # Если чанк больше бал
+        self.chunk_size = np.random.choice(sampling_array)
         return self.chunk_size
+        
+
             
         
-    def one_operation(self, amount=0, declined=False, in_chunks=False):
+    def one_operation(self, online, declined=False, in_chunks=False):
         """
         Генерация суммы операции дропа.
         ---------
-        amount - float, int. Сумма перевода если перевод по частям - in_chunks == True
+        online - bool. Перевод или снятие в банкомате.
         declined - bool. Отклонена ли транзакция или одобрена
         in_chunks - bool. Перевод по частям или целиком. Если False, то просто пробуем перевести все с баланса
                           При True нужно указать amount.
         """
-        if in_chunks and amount <= 0:
-            raise ValueError(f"""If in_chunks is True, then amount must be greater than 0.
-Passed amount: {amount}""")
+#         if in_chunks and amount <= 0:
+#             raise ValueError(f"""If in_chunks is True, then amount must be greater than 0.
+# Passed amount: {amount}""")
 
-        # Если перевод не по частям. Пробуем перевестит все с баланса. 
+        # Если перевод не по частям. Пробуем перевести все с баланса. 
         if not in_chunks:
             amount = self.balance
             self.update_balance(amount=self.balance, receive=False, declined=declined)
@@ -344,7 +370,8 @@ Passed amount: {amount}""")
             self.batch_txns += 1
             return amount
 
-        # Иначе считаем сколько частей исходя из размера одной части
+        # Иначе генерируем размер части и считаем сколько частей исходя из размера одной части
+        amount = self.get_chunk_size(online=online)
         chunks = self.balance // amount
 
         # Если целое число частей больше 0. Пробуем перевести одну часть
