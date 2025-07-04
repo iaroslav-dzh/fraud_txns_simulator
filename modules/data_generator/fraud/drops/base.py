@@ -324,21 +324,23 @@ class DropAmountHandler:
         small = self.chunks["rcvd_small"]
         medium = self.chunks["rcvd_medium"] 
         large = self.chunks["rcvd_large"]
+        step = self.chunks["step"]
 
         if self.balance <= small["limit"]:
-            low = small["min"]
-            high = min(self.balance, small["max"]) # не выше суммы на балансе
+            # print("Condition #1")
+            low = min(self.balance, small["min"]) # но не больше суммы на балансе
+            high = min(self.balance, small["max"]) # но не больше суммы на балансе
 
         elif self.balance <= medium["limit"]:
-            low = medium["min"]
+            # print("Condition #2")
+            low = min(self.balance, medium["min"])
             high = min(self.balance, medium["max"])
 
         else:
-            low = large["min"]
+            # print("Condition #3")
+            low = min(self.balance, large["min"])
             high = min(self.balance, large["max"])
-
-        step = self.chunks["step"]
-                           
+   
         # прибавим шаг к максимуму, чтобы было понятнее передавать аргументы в конфиге 
         # и не учитывать исключение значения stop в np.arange
         sampling_array = np.arange(low, high + step, step)
