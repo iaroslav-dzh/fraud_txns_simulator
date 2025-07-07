@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 from scipy.stats import truncnorm
 from pyproj import Geod
-from dataclasses import dataclass
 
 # 1. 
 
@@ -122,40 +121,3 @@ def sample_rule(rules):
     rules - pd.DataFrame с названиями правил и их весами
     """
     return rules.rule.sample(1, weights=rules.weight).iat[0]
-
-
-# . Датакласс для конфигов транзакций. Это данные на основе которых будут генерироваться транзакции
-# на данный момент этот класс служит только для фрода
-
-@dataclass
-class ConfigForTrans:
-    """
-    Это данные на основе которых будут генерироваться транзакции
-    ---------------------
-    clients: pd.DataFrame
-    timestamps: pd.DataFrame
-    transactions: pd.DataFrame
-    client_devices: pd.DataFrame
-    offline_merchants: pd.DataFrame
-    categories: pd.DataFrame
-    online_merchant_ids: pd.Series
-    time_weights_dict: dict
-    rules: pd.DataFrame
-    cities: pd.DataFrame
-    fraud_devices: pd.DataFrame
-    fraud_ips: pd.DataFrame
-    fraud_amounts: pd.DataFrame 
-    """
-    clients: pd.DataFrame
-    timestamps: pd.DataFrame
-    transactions: pd.DataFrame
-    client_devices: pd.DataFrame
-    offline_merchants: pd.DataFrame
-    categories: pd.DataFrame
-    online_merchant_ids: pd.Series
-    time_weights_dict: dict
-    rules: pd.DataFrame
-    cities: pd.DataFrame
-    fraud_devices: pd.DataFrame
-    fraud_ips: pd.DataFrame
-    fraud_amounts: pd.DataFrame

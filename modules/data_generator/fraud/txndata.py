@@ -5,54 +5,51 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
-import re
 import geopandas as gpd
 import random
 from scipy.stats import truncnorm, norm
 from collections import defaultdict
 import math
-from shapely.ops import transform
-from pyproj import Geod
-import pyarrow
-from datetime import datetime
-import sys
-import importlib
+from typing import Union
 
 
 from data_generator.utils import get_values_from_truncnorm
+from data_generator.configs import CompPurchFraudCfg, DropDistributorCfg, DropPurchaserCfg
     
 
-#
+# .
 
-class FraudTransPartialData:
+class FraudTxnPartData:
     """
-    Класс для генерации данных о транзакции, мерчанте, геопозиции, IP адресе.
-    Пока сделан только для фрода.
+    Класс для генерации данных о транзакции для фрода в покупках
+    когда данные/аккаунт клиента скомпрометированы: 
+    канал, тип операции, мерчант, геопозиция, город, IP адрес, иногда статус.
+    ------------------
+    Атрибуты:
+    --------
+    merchants_df - pd.DataFrame. Оффлайн мерчанты
+    client_info - pd.DataFrame или namedtuple. Запись с информацией о клиенте
+    online_merchant_ids- pd.Series. id онлайн мерчантов
+    fraud_ips - pd.DataFrame. ip для фрода с гео информацией
+    used_ips - pd.Series. Сюда записывать ip адреса использованные для фрода.
+    fraud_devices - pd.DataFrame. девайсы для фрода: платформа, id устройства.
+    used_devices - pd.Series. Сюда записывать id девайсов использованные для фрода.
+    client_devices - pd.DataFrame. Девайсы клиентов.
+    last_txn - tuple. Предыдущая транзакция. Записывается при использовании некоторых методов (пока только для freq_trans)
     """
-    def __init__(self, merchants_df, client_info, online_merchant_ids, fraud_ips, used_ips, fraud_devices, \
-                used_devices, client_devices, last_txn=()):
+    def __init__(self, configs: CompPurchFraudCfg):
         """
-        merchants_df - pd.DataFrame. Оффлайн мерчанты
-        client_info - pd.DataFrame или namedtuple. Запись с информацией о клиенте
-        online_merchant_ids- pd.Series. id онлайн мерчантов
-        fraud_ips - pd.DataFrame. ip для фрода с гео информацией
-        used_ips - pd.Series. Сюда записывать ip адреса использованные для фрода.
-        fraud_devices - pd.DataFrame. девайсы для фрода: платформа, id устройства.
-        used_devices - pd.Series. Сюда записывать id девайсов использованные для фрода.
-        client_devices - pd.DataFrame. Девайсы клиентов.
-        last_txn - предыдущая транзакция. Записывается при использовании некоторых методов (пока только для freq_trans)
+        configs: CompPurchFraudCfg. Содержит параметры и конфиги для генерации фрода.
         """
-        # self.online = online
-        self.merchants_df = merchants_df
-        self.client_info = client_info
-        self.online_merchant_ids = online_merchant_ids
-        self.fraud_ips = fraud_ips
-        self.used_ips = used_ips
-        self.fraud_devices = fraud_devices
-        self.used_devices = used_devices
-        self.client_devices = client_devices
-        self.last_txn = last_txn
-
+        self.merchants_df = configs.offline_merchants
+        self.client_info = None
+        self.online_merchant_ids = configs.online_merchant_ids
+        self.fraud_ips = configs.fraud_ips
+        self.used_ips = pd.Series(name="ip_address")
+        self.fraud_devices = configs.fraud_devices
+        self.client_devices = configs.client_devices
+        self.used_devices = pd.Series(name="device_id")
+        self.last_txn = None
     
     def another_city(self, client_city, online, category_name):
         """
@@ -154,74 +151,6 @@ class FraudTransPartialData:
         return self.last_txn
 
 
-    def original_purchase(self, online=True):
-        """
-        Оригинальные данные клиента для операций покупок.
-        На данный момент это для дропов.
-        Для операций на криптобирже и для покупки товаров дропами
-        """
-        if online:
-            merchant_id = self.online_merchant_ids.sample(n=1).iat[0]
-            # Координаты города и название
-            trans_lat = self.client_info.lat
-            trans_lon = self.client_info.lon
-            trans_ip = self.client_info.home_ip
-            trans_city = self.client_info.area        
-            # Семпл девайса клиента
-            devices = self.client_devices.loc[self.client_devices.client_id == self.client_info.client_id]
-            device_id = devices.device_id.sample(1).iloc[0]
-            txn_type = "purchase"
-
-        # Не генерируем channel. Он должен быть определен вовне
-        return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, txn_type
-
-        
-    def original_data(self, online, receive=None):
-        """
-        Пока этот метод для клиентов дропов и, возможно, для переводов мошенникам
-        ------------------------------------
-        client_id - int.
-        online - bool.
-        received - bool.
-        """
-        # Входящий перевод
-        if online and receive:
-            trans_ip = "not applicable"
-            device_id = pd.NA
-            channel = "transfer"
-            txn_type = "inbound"
-            merchant_id = np.nan
-            trans_lat = np.nan
-            trans_lon = np.nan
-            trans_city = "not applicable"
-            
-            return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type
-        
-        # Исходящий перевод
-        elif online:
-            # Для онлайна просто берется home_ip и device_id из данных клиента.
-            trans_ip = self.client_info.home_ip
-            devices = self.client_devices.loc[self.client_devices.client_id == self.client_info.client_id]
-            device_id = devices.device_id.sample(1).iloc[0]
-            channel = "transfer"
-            txn_type = "outbound"  
-
-        # Оффлайн
-        else:
-            trans_ip = "not applicable"
-            device_id = pd.NA
-            channel = "ATM"
-            txn_type = "withdrawal"
-            
-        merchant_id = np.nan
-        # Локация транзакции просто записываем координаты и название города клиента
-        trans_lat = self.client_info.lat
-        trans_lon = self.client_info.lon
-        trans_city = self.client_info.area
-
-        return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type
-
-
     def reset_used(self, used_ips=False, used_devices=False):
         """
         Сброс кэша использованных ip и/или девайсов
@@ -232,10 +161,10 @@ class FraudTransPartialData:
         """
 
         if used_ips:
-            self.used_ips = pd.Series()
+            self.used_ips = pd.Series(name="ip_address")
             
         if used_devices:
-            self.used_devices = pd.Series()
+            self.used_devices = pd.Series(name="device_id")
 
 
 # .
@@ -273,6 +202,102 @@ class TransAmount:
         
         # Генерация числа и округление до десятков
         return get_values_from_truncnorm(low_bound=low, high_bound=high, mean=mean, std=std)[0] // 10 * 10
+    
+
+# . Создание части данных транзакции для дропов.
+
+class DropTxnPartData:
+    """
+    Класс для генерации части данных о транзакции дропа:
+    канал, тип операции, мерчант, геопозиция, город, IP адрес, иногда статус.
+    ------------------
+    Атрибуты:
+    --------
+    atms - pd.DataFrame. id банкоматов и их координаты.
+    client_info - pd.DataFrame или namedtuple. Запись с информацией о клиенте
+    online_merchant_ids- pd.Series. id онлайн мерчантов
+    client_devices - pd.DataFrame. Девайсы клиентов.
+    last_txn - tuple. Для кэширования предыдущей транзакции
+    """
+    def __init__(self, configs: Union[DropDistributorCfg, DropPurchaserCfg]):
+        """
+        configs: Один из датаклассов — DropDistributorCfg или DropPurchaserCfg.
+                 Содержит параметры и конфиги для генерации фрода.
+        """
+        self.atms = configs.atms
+        self.client_info = None
+        self.online_merchant_ids = configs.online_merchant_ids
+        self.client_devices = configs.client_devices
+        self.last_txn = None
+    
+
+    def original_purchase(self, online=True):
+        """
+        Оригинальные данные клиента для операций покупок.
+        На данный момент это для дропов.
+        Для операций на криптобирже и для покупки товаров дропами
+        """
+        if online:
+            merchant_id = self.online_merchant_ids.sample(n=1).iat[0]
+            # Координаты города и название
+            trans_lat = self.client_info.lat
+            trans_lon = self.client_info.lon
+            trans_ip = self.client_info.home_ip
+            trans_city = self.client_info.area        
+            # Семпл девайса клиента
+            devices = self.client_devices.loc[self.client_devices.client_id == self.client_info.client_id]
+            device_id = devices.device_id.sample(1).iloc[0]
+            txn_type = "purchase"
+            # Не генерируем channel. Он должен быть определен вовне
+            channel = None
+
+        return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type
+
+        
+    def original_data(self, online, receive=None):
+        """
+        Пока этот метод для клиентов дропов и, возможно, для переводов мошенникам
+        ------------------------------------
+        client_id - int.
+        online - bool.
+        received - bool.
+        """
+        # Входящий перевод
+        if online and receive:
+            trans_ip = "not applicable"
+            device_id = np.nan
+            channel = "transfer"
+            txn_type = "inbound"
+            merchant_id = np.nan
+            trans_lat = np.nan
+            trans_lon = np.nan
+            trans_city = "not applicable"
+            
+            return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type
+        
+        # Исходящий перевод
+        elif online:
+            # Для онлайна просто берется home_ip и device_id из данных клиента.
+            trans_ip = self.client_info.home_ip
+            devices = self.client_devices.loc[self.client_devices.client_id == self.client_info.client_id]
+            device_id = devices.device_id.sample(1).iloc[0]
+            channel = "transfer"
+            txn_type = "outbound"  
+
+        # Оффлайн. Снятие в банкомате
+        else:
+            trans_ip = "not applicable"
+            device_id = np.nan
+            channel = "ATM"
+            txn_type = "withdrawal"
+            
+        merchant_id = np.nan
+        # Локация транзакции просто записываем координаты и название города клиента
+        trans_lat = self.client_info.lat
+        trans_lon = self.client_info.lon
+        trans_city = self.client_info.area
+
+        return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type
     
 
 # .
