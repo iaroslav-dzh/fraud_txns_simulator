@@ -316,12 +316,12 @@ class DropBehaviorHandler:
         """
         balance = self.amt_hand.balance
 
-        if balance >= self.atm_min and :
-            scen = np.random.choice(["transfer", "atm", "split_transfer", "atm+transfer"])
-        elif balance >= atm_split_limit:
-            scen = sample(["transfer","atm", "split_transfer", "atm+transfer"]) 
-        else:
-            scen = sample(["transfer","atm"])
+        # if balance >= self.atm_min and :
+        #     scen = np.random.choice(["transfer", "atm", "split_transfer", "atm+transfer"])
+        # elif balance >= atm_split_limit:
+        #     scen = sample(["transfer","atm", "split_transfer", "atm+transfer"]) 
+        # else:
+        #     scen = sample(["transfer","atm"])
 
 
     def stop_after_decline(self, declined):
