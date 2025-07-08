@@ -193,13 +193,18 @@ class DropAmountHandler:
         if self.batch_txns != 0 and np.random.uniform(0,1) > rand_rate:
             return self.chunk_size
 
-        # Если снятие
-        if not online:
-            atm_min = self.chunks["atm_min"]
+        atm_min = self.chunks["atm_min"]
+        # Если снятие и баланс больше или равен лимиту для atm
+        if not online and self.balance >= atm_min:
             atm_share = self.chunks["atm_share"]
             self.chunk_size = max(atm_min, self.balance * atm_share // self.round * self.round)
             return self.chunk_size
         
+        # Если снятие и баланс меньше лимита для atm
+        if not online and self.balance < atm_min:
+            self.chunk_size = self.balance
+            return self.chunk_size
+
         # Если перевод. 
         # Берем лимиты под генерацию массива чанков, в зависимости от
         # полученной дропом суммы
@@ -208,6 +213,9 @@ class DropAmountHandler:
         large = self.chunks["rcvd_large"]
         step = self.chunks["step"]
 
+        # Обратите внимание, что отталкиваемся от текущего баланса.
+        # Если будут исходящие транзакции частями, то баланс будет каждый раз разный.
+        # И лимиты на чанки будут в разных диапазонах
         if self.balance <= small["limit"]:
             # print("Condition #1")
             low = min(self.balance, small["min"]) # но не больше суммы на балансе
@@ -286,69 +294,123 @@ class DropAmountHandler:
 
 # .
 
-class DropBehaviorHandler:
+class DistBehaviorHandler:
     """
-    Управление поведением дропа. Выбор сценария.
+    Управление поведением дропа распределителя. Выбор сценария.
     ----------
     Атрибуты:
     --------
-    attempts - int. Сколько попыток совершить операцию будет сделано 
+    split_rate: float. Доля случаев когда полученная сумма будет распределена по частям.
+                При условии что полученная сумма пройдет по лимитам.
+    attempts: int. Сколько попыток совершить операцию будет сделано 
                дропом после первой отклоненной транзакции. По умолчанию 0.
+    first_txn: bool. Является ли транзакция первой исходящей в текущей партии.
+    low: int. Минимальное количество попыток совершить операцию после первой отклоненной
+              операции.
+    high: int. Максимальное количество попыток совершить операцию после первой отклоненной
+              операции.
     """
+
     def __init__(self, configs: DropDistributorCfg, amt_hand: DropAmountHandler):
         """
         configs: DropDistributorCfg. Конфиги и данные для создания дроп транзакций.
         amt_hand: DropAmountHandler. Отсюда узнаем текущий баланс.
         
         """
-        # self.in_txns = in_txns
-        # self.out_txns = out_txns
-        # self.in_lim = in_lim
-        # self.out_lim = out_lim
+        self.scen = None
         self.configs = configs
         self.amt_hand = amt_hand
         self.atm_min = amt_hand.chunks["atm_min"]
+        self.trf_min = amt_hand.chunks["rcvd_small"]["min"]
+        self.trf_lim = amt_hand["trf_lim"]
+        self.split_rate = configs["distributor"]["split_rate"]
         self.attempts = 0
+        self.in_lim = configs["distributor"]["in_lim"]
+        self.out_lim = configs["distributor"]["out_lim"]
+        self.first_txn = True
+        self.low = configs["distributor"]["low"]
+        self.high = configs["distributor"]["high"]
+
 
     def sample_scenario(self):
         """
-        Выбор сценария поведения дропа.
+        Выбор сценария поведения дропа с учётом текущего баланса и актуальных лимитов.
         """
         balance = self.amt_hand.balance
+        split = np.random.uniform(0,1) <= self.split_rate
 
-        # if balance >= self.atm_min and :
-        #     scen = np.random.choice(["transfer", "atm", "split_transfer", "atm+transfer"])
-        # elif balance >= atm_split_limit:
-        #     scen = sample(["transfer","atm", "split_transfer", "atm+transfer"]) 
-        # else:
-        #     scen = sample(["transfer","atm"])
+        # Минимальный баланс для переводов по частям будет самый маленький возможный размер чанка
+        # self.trf_min умноженный на 2
+        large_balance = balance > self.trf_lim
+        atm_eligible = balance >= self.atm_min
+        split_eligible = balance >= self.trf_min * 2
+
+        # Список: (условие, список возможных сценариев)
+        conditions = [
+            (large_balance and split, ["split_transfer", "atm+transfer"]),
+            (large_balance, ["atm"]),
+            (atm_eligible and split, ["split_transfer", "atm+transfer"]),
+            (atm_eligible, ["transfer", "atm"]),
+            (split_eligible and split, ["split_transfer"])
+        ]
+
+        for cond, scen_list in conditions:
+            if cond:
+                self.scen = np.random.choice(scen_list)
+
+        # Если ни одно из условий не сработало — fallback
+        self.scen = "transfer"
+
+
+    def guide_scenario(self):
+        """
+        Направляет выполнение сценария.
+        Возврщает True или False с точки зрения какая должна быть транзакция:
+        онлайн или оффлайн (перевод или снятие).
+        """
+        scen = self.scen
+
+        # В atm+transfer только первая транзакция может быть atm(оффлайн)
+        if scen == "atm+transfer" and self.first_txn:
+            online = False
+        elif scen == "atm+transfer":
+            online = True
+        elif scen == "atm":
+            online = False
+        elif scen in ["split_transfer", "transfer"]:
+            online = True
+
+        self.first_txn = False
+        return online
 
 
     def stop_after_decline(self, declined):
         """
         Будет ли дроп пытаться еще после отклоненной операции
-        или остановится
+        или остановится.
+        Подразумевается что этот метод используется в цикле перед
+        методом self.limit_reached()
         ---------------
-        declined - bool. Отклонена ли операция. Подразумевается что последняя.
+        declined: bool. Отклонена ли предыдущая операция.
+                  
         """
+        # Если предыдущая транзакция уже была отклонена
         if not declined:
             return
-        
         if self.attempts == 0:
             return True
-
         if self.attempts > 0:
             return False
 
             
-    def attempts_after_decline(self, low=0, high=4):
+    def attempts_after_decline(self):
         """
         Определение количества попыток после первой отклоненной транзакции
         ---------------
         low - int. Минимальное число попыток
         high - int. Максимальное число попыток.
         """
-        self.attempts = np.random.randint(low, high + 1)
+        self.attempts = np.random.randint(self.low, self.high + 1)
             
         
     def deduct_attempts(self, declined, receive):
@@ -360,14 +422,13 @@ class DropBehaviorHandler:
         """
         if self.attempts == 0:
             return 
-            
         if declined and not receive:
             self.attempts -= 1
 
 
     def reset_cache(self):
         """
-        Сброос кэшированных данных
+        Сброс кэшированных данных
         -------------
         """
         self.attempts = 0

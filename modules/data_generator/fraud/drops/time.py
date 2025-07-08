@@ -2,17 +2,31 @@
 
 import pandas as pd
 import numpy as np
+from typing import Union
 
 from data_generator.fraud.time import derive_from_last_time
-from data_generator.utils import DropConfigs
+from data_generator.configs import DropDistributorCfg, DropPurchaserCfg
+
 
 class DropTimeHandler:
     """
     Управление временем транзакций дропа
+    --------------
+    Атрибуты:
+    --------
+    configs - DropDistributorCfg | DropPurchaserCfg. Датакласс с конфигами и данными для транзакций.
+    timestamps - pd.DataFrame. Диапазон timestamp-ов с колонками: | timestamp | unix_time | hour |
+    start_unix - int. Во сколько была первая транзакция в периоде. Нужная для отсчета следующего периода
+                      активности. Unix время в секундах. По умолчанию 0.
+    last_unix - int. Время последней транзакции. Unix время в секундах. По умолчанию 0.
+    in_lim - int. Количество входящих транзакций после которых дроп уходит на паузу
+    out_lim - int. Количество исходящих транзакций после которых дроп уходит на паузу
+    in_txns - int. Количество входящих транзакций в периоде активности. По умолчанию 0.
+    out_txns - int. Количество исходящих транзакций в периоде активности. По умолчанию 0.
     """
-    def __init__(self, configs: DropConfigs, start_unix=0, last_unix=0, in_lim=2, out_lim=5, in_txns=0, out_txns=0):
-        """
-        timestamps - pd.DataFrame. Диапазон timestamp-ов с колонками: | timestamp | unix_time |
+    def __init__(self, configs: Union[DropDistributorCfg, DropPurchaserCfg]):
+        """ 
+        configs - DropDistributorCfg | DropPurchaserCfg. Датакласс с конфигами и данными для транзакций.
         in_lim - int. Количество входящих транзакций после которых дроп уходит на паузу
         out_lim - int. Количество исходящих транзакций после которых дроп уходит на паузу
         start_unix - int. Во сколько была первая транзакция в периоде. Нужная для отсчета следующего периода
@@ -20,12 +34,13 @@ class DropTimeHandler:
         last_unix - int. Время последней транзакции. Unix время в секундах.
         """
         self.configs = configs
-        self.start_unix = start_unix
-        self.last_unix = last_unix
-        self.in_lim = in_lim
-        self.out_lim = out_lim
-        self.in_txns = in_txns
-        self.out_txns = out_txns
+        self.timestamps = configs.timestamps
+        self.start_unix = 0
+        self.last_unix = 0
+        self.in_lim = configs.period_in_lim
+        self.out_lim = configs.period_out_lim
+        self.in_txns = 0
+        self.out_txns = 0
 
 
     def get_time_delta(self, two_way, minutes=True):
@@ -36,9 +51,13 @@ class DropTimeHandler:
         minutes - bool. Минуты или секунды
         """
         if two_way:
-            delta = np.random.uniform(self.configs.two_way_delta["min"], self.configs.two_way_delta["max"])
+            two_way_min = self.configs.two_way_delta["min"]
+            two_way_max = self.configs.two_way_delta["max"]
+            delta = np.random.uniform(two_way_min, two_way_max)
         else:
-            delta = np.random.uniform(self.configs.pos_delta["min"], self.configs.pos_delta["max"])
+            pos_min = self.configs.pos_delta["min"]
+            pos_max = self.configs.pos_delta["max"]
+            delta = np.random.uniform(pos_min, pos_max)
 
         if minutes:
             return round(delta)
@@ -77,7 +96,7 @@ class DropTimeHandler:
         self.out_txns += 1
 
 
-    def get_txn_time(self, receive, in_txns, lag_interval=1440):
+    def get_txn_time(self, receive, in_txns):
         """
         Генерация времени транзакции
         ------------------
@@ -89,7 +108,7 @@ class DropTimeHandler:
 
         # Если это самая первая транзакция. Т.к. активность дропа начинается с входящей транзакции
         if receive and in_txns == 0:
-            time_sample = self.configs.timestamps.sample(1)
+            time_sample = self.timestamps.sample(1)
             txn_time = time_sample.timestamp.iat[0]
             self.last_unix = time_sample.unix_time.iat[0]
             self.start_unix = self.last_unix
@@ -148,4 +167,4 @@ class DropTimeHandler:
         self.start_unix = 0
         self.last_unix = 0
         self.in_txns = 0
-        self.out_txns = 0      
+        self.out_txns = 0   

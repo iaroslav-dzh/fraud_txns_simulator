@@ -23,95 +23,6 @@ class CreateDropTxn:
         self.in_lim = in_lim
         self.out_lim = out_lim
         self.last_txn = last_txn
-        self.attempts = attempts
-
-    def get_time_delta(self, min=-180, max=180, minutes=True):
-        """
-        Получение случайного интервала времени в секундах или минутах из равномерного распределения
-        ---------------------
-        min - int. Минимальное возможное значение
-        max - int. Максимальное возможное значение
-        minutes - bool. Минуты или секунды
-        """
-        if minutes:
-            return round(np.random.uniform(min, max))
-            
-        return round(np.random.uniform(min, max) * 60)
-
-    def get_txn_time(self, in_lim=2, out_lim=5, lag_interval=1440):
-        """
-        Генерация времени транзакции
-        ------------------
-        in_lim - int. Количество входящих транзакций после которых дроп уходит на паузу указанную в lag_interval
-                      Т.е. если на момент генерации времени уже сделано in_lim транзакций, то берется время последней
-                      транзакции и прибавляется указанный lag_interval +/- случайное число минут из delta.
-        out_lim - int. Количество исходящих транзакций после которых дроп уходит на паузу указанную в lag_interval
-        lag_interval - int. Желаемый лаг по времени от последней транзакции в минутах.
-                            Используется для перерывов в активности дропа. По умолчанию 1440 минут т.е. 24 часа
-        """
-        # Если это первая транзакция. Т.к. активность дропа начинается с входящей транзакции
-        if self.in_txns == 0:
-            time_sample = self.timestamps.sample(1)
-            txn_time = time_sample.timestamp.iat[0]
-            txn_unix = time_sample.unix_time.iat[0]
-            return txn_time, txn_unix
-
-        # Для последующих транзакций
-        last_txn_unix = self.last_txn["unix_time"]
-
-        # Если достигнуты лимиты активности дропа на период: входящих или исходящих транзакций
-        if self.in_txns == in_lim or self.out_txns == out_lim:
-            # Генерация дельты, чтобы время выглядело не ровным, а случайным.
-            # Слагаем её с lag_interval
-            time_delta = self.get_time_delta(min=-180, max=180)
-            lag_interval += time_delta
-            return derive_from_last_time(last_txn_unix=last_txn_unix, lag_interval=lag_interval)
-
-        # Тоже дельта, но не может быть <= 0 т.к. тут мы ее используем как lag_interval
-        # Это для случаев когда транзакция совершается в тот же период активности что и последняя
-        time_delta = self.get_time_delta(min=30, max=180)
-        
-
-        return derive_from_last_time(last_txn_unix=last_txn_unix, lag_interval=time_delta)
-
-    
-    def stop_after_decline(self, declined):
-        """
-        Будет ли дроп пытаться еще после отклоненной операции
-        или остановится
-        """
-        if not declined:
-            return
-        
-        if self.attempts == 0:
-            return True
-
-        if self.attempts > 0:
-            return False
-
-            
-    def attempts_after_decline(self, min=0, max=4):
-        """
-        Определение количества попыток после первой отклоненной транзакции
-        ---------------
-        min - int. Минимальное число попыток
-        max - int. Максимальное число попыток
-        """
-        self.attempts = np.random.randint(min, max)
-            
-        
-    def deduct_attempts(self, declined, receive):
-        """
-        Вычитание попытки операции совершенной при статусе declined
-        ---------------
-        declined - bool. Отклоняется ли текущая транзакция
-        receive - bool. Является ли транзакция входящей
-        """
-        if self.attempts == 0:
-            return 
-            
-        if declined and not receive:
-            self.attempts -= 1
             
         
     def single_operation(self, online, declined, in_chunks, to_drop_share=0.2, receive=False):
@@ -180,6 +91,7 @@ class CreateDropTxn:
 
         return self.last_txn
 
+
     def limit_reached(self):
         """
         Проверка достижения лимитов входящих и исходящих транзакций
@@ -192,6 +104,7 @@ class CreateDropTxn:
         if self.out_lim == self.out_txns:
             return True
         return False
+
 
     def reset_txn_counters(self, in_txns=False, out_txns=False, batch_txns=False):
         """
