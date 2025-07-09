@@ -159,10 +159,8 @@ class FraudTxnPartData:
         used_ips - bool
         used_devices - bool
         """
-
         if used_ips:
             self.used_ips = pd.Series(name="ip_address")
-            
         if used_devices:
             self.used_devices = pd.Series(name="device_id")
 
@@ -236,6 +234,8 @@ class DropTxnPartData:
         Оригинальные данные клиента для операций покупок.
         На данный момент это для дропов.
         Для операций на криптобирже и для покупки товаров дропами
+        -------
+        online - bool.
         """
         if online:
             merchant_id = self.online_merchant_ids.sample(n=1).iat[0]
@@ -251,11 +251,14 @@ class DropTxnPartData:
             # Не генерируем channel. Он должен быть определен вовне
             channel = None
 
-        return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type
+            self.last_txn = merchant_id, trans_lat, trans_lon, trans_ip, trans_city, \
+                            device_id, channel, txn_type
+            return self.last_txn
 
         
     def original_data(self, online, receive=None):
         """
+        Получение оригинальных данных клиента для транзакции.
         Пока этот метод для клиентов дропов и, возможно, для переводов мошенникам
         ------------------------------------
         client_id - int.
@@ -272,8 +275,10 @@ class DropTxnPartData:
             trans_lat = np.nan
             trans_lon = np.nan
             trans_city = "not applicable"
-            
-            return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type
+
+            self.last_txn = merchant_id, trans_lat, trans_lon, trans_ip, trans_city, \
+                            device_id, channel, txn_type
+            return self.last_txn
         
         # Исходящий перевод
         elif online:
@@ -297,8 +302,15 @@ class DropTxnPartData:
         trans_lon = self.client_info.lon
         trans_city = self.client_info.area
 
-        return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type
+        self.last_txn = merchant_id, trans_lat, trans_lon, trans_ip, trans_city, \
+                        device_id, channel, txn_type
+        return self.last_txn
     
+    def reset_cache(self):
+        """
+        Сброс кэша
+        """
+        self.last_txn = None
 
 # .
 

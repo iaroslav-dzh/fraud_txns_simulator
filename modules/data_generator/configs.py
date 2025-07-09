@@ -57,6 +57,8 @@ class DropDistributorCfg:
     atms: pd.DataFrame. id и координаты банкоматов.
     online_merchant_ids: pd.Series
     cities: pd.DataFrame
+    in_lim: int. лимит входящих транзакций. После его достижения - отклонение всех операций клиента
+    out_lim: int. лимит исходящих транзакций. После его достижения - отклонение всех операций клиента
     period_in_lim: int. Количество входящих транзакций после которых дроп уходит на паузу.
     period_out_lim: int. Количество исходящих транзакций после которых дроп уходит на паузу.
     lag_interval: int. Минуты. На сколько дроп должен делать паузу после
@@ -69,12 +71,13 @@ class DropDistributorCfg:
                           Эта дельта - промежуток между транзакциями дропа в одном периоде. Просто прибавляется ко времени последней транзакции.
     split_rate: float. От 0 до 1. Доля случаев, когда дроп распределяет полученные деньги по частям, а не одной операцией.
     chunks: dict. Характеристики для генератора сумм транзакций по частям. Ключи см. в drops.yaml
-    trf_lim: int. 
+    trf_max: int. 
     inbound_amt: dict. Лимиты на перевод. Если баланс больше. То разбиваем на части
     round: int. Округление целой части сумм транзакций. 
            Напр. 500 значит что суммы будут кратны 500 - кончаться на 500 или 000
     attempts: dict. Лимиты попыток операций после первой отклоненной операции.
               Ключи: low и high
+    to_drops: dict. Параметры переводов другим дропам
     """
     clients: pd.DataFrame
     timestamps: pd.DataFrame
@@ -84,17 +87,20 @@ class DropDistributorCfg:
     atms: pd.DataFrame
     online_merchant_ids: pd.Series
     cities: pd.DataFrame
+    in_lim: int
+    out_lim: int
     period_in_lim: int
     period_out_lim: int
     inbound_amt: dict
     split_rate: float
     chunks: dict
-    trf_lim: int
+    trf_max: int
     round: dict
     lag_interval: int
     two_way_delta: dict
     pos_delta: dict
     attempts: dict
+    to_drops: dict
 
 
 # 3. Датакласс для конфигов транзакций дропов-покупателей 
