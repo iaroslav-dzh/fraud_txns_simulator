@@ -2,14 +2,14 @@
 import pandas as pd
 import numpy as np
 
-from data_generator.utils import sample_category, ConfigForTrans, build_transaction, calc_distance, sample_rule
-from data_generator.fraud.txndata import FraudTransPartialData, TransAmount
+from data_generator.utils import sample_category, CompPurchFraudCfg, build_transaction, calc_distance, sample_rule
+from data_generator.fraud.txndata import FraudTxnPartData, TransAmount
 from data_generator.fraud.time import get_time_fraud_txn
 
 
 # Функция генерации одной фрод транзакции с типом "purchase"
 
-def gen_purchase_fraud_txn(rule, client_info, client_trans_df, configs: ConfigForTrans, trans_partial_data: FraudTransPartialData, \
+def gen_purchase_fraud_txn(rule, client_info, client_trans_df, configs: CompPurchFraudCfg, trans_partial_data: FraudTxnPartData, \
                        fraud_amts: TransAmount, all_time_weights, trans_num=0, lag=False):
     """
     Генерация одной фрод транзакции для клиента
@@ -17,9 +17,9 @@ def gen_purchase_fraud_txn(rule, client_info, client_trans_df, configs: ConfigFo
     rule - str.
     client_info - namedtuple, полученная в результате итерации с помощью .itertuples() через датафрейм с информацией о клиентах
     client_trans_df - датафрейм с транзакциями клиента.
-    configs - ConfigForTrans dataclass. 
+    configs - CompPurchFraudCfg. 
     client_device_ids - pd.Series. id девайсов клиента.
-    trans_partial_data - FraudTransPartialData class.
+    trans_partial_data - FraudTxnPartData.
     fraud_amts - TransAmount class.
     all_time_weights - dict. Датафреймы с весами времени для всех временных паттернов.
     trans_num - int. Какая по счету транзакция в данном фрод кейсе.
@@ -130,8 +130,8 @@ def gen_purchase_fraud_txn(rule, client_info, client_trans_df, configs: ConfigFo
 
 # . Обертка для gen_purchase_fraud_txn под правило trans_freq_increase
 
-def trans_freq_wrapper(client_info, client_txns_temp, txns_total, configs: ConfigForTrans, \
-                       trans_partial_data: FraudTransPartialData, fraud_amts: TransAmount, \
+def trans_freq_wrapper(client_info, client_txns_temp, txns_total, configs: CompPurchFraudCfg, \
+                       trans_partial_data: FraudTxnPartData, fraud_amts: TransAmount, \
                        all_time_weights):
     """
     Генерирует указанное число частых фрод транзакций под правило trans_freq_increase
@@ -141,8 +141,8 @@ def trans_freq_wrapper(client_info, client_txns_temp, txns_total, configs: Confi
     client_info - namedtuple. Запись из датафрейма с информацией о клиенте, полученная при итерировании через .itertuples()
     client_txns_temp - pd.DataFrame. Запись о последней транзакции клиента.
     txns_total - int. Сколько транзакции должно быть сгенерировано.
-    configs - ConfigForTrans. Конфиги для транзакций.
-    trans_partial_data: FraudTransPartialData. Генератор части данных транзакций.
+    configs - CompPurchFraudCfg. Конфиги для транзакций.
+    trans_partial_data: FraudTxnPartData. Генератор части данных транзакций.
     fraud_amts: TransAmount. Генератор сумм транзакций.
     all_time_weights - dict. Датафреймы с весами времени для всех временных паттернов.
     """
@@ -166,13 +166,13 @@ def trans_freq_wrapper(client_info, client_txns_temp, txns_total, configs: Confi
 
 # Функция генерации нескольких фрод транзакций
 
-def gen_multi_fraud_trans(configs: ConfigForTrans, trans_partial_data: FraudTransPartialData, \
+def gen_multi_fraud_trans(configs: CompPurchFraudCfg, trans_partial_data: FraudTxnPartData, \
                          fraud_amts: TransAmount, all_time_weights):
     """
     clients_subset - pd.DataFrame. Клиенты у которых будут фрод транзакции. Сабсет клиентов для кого нагенерили
                      легальных транзакций ранее.
-    configs - ConfigForTrans. Конфиги для транзакций.
-    trans_partial_data: FraudTransPartialData. Генератор части данных транзакций.
+    configs - CompPurchFraudCfg. Конфиги для транзакций.
+    trans_partial_data: FraudTxnPartData. Генератор части данных транзакций.
     fraud_amts: TransAmount. Генератор сумм транзакций.
     all_time_weights - dict. Датафреймы с весами времени для всех временных паттернов. 
     """
@@ -186,7 +186,7 @@ def gen_multi_fraud_trans(configs: ConfigForTrans, trans_partial_data: FraudTran
     
         rule = sample_rule(configs.rules)
         client_txns = configs.transactions.loc[configs.transactions.client_id == client.client_id]
-        # Записываем данные текущего клиента в атрибут client_info класса FraudTransPartialData
+        # Записываем данные текущего клиента в атрибут client_info класса FraudTxnPartData
         trans_partial_data.client_info = client
         
  

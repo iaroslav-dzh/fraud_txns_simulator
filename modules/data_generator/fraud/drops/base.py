@@ -47,6 +47,7 @@ class DropAccountHandler:
         own - bool. Записать номер своего счета в self.account
         to_drop - bool. Перевод другому дропу в нашем банке или нет.
         """
+        assert self.client_id != 0, f"client_id is not passed. client_id is {self.client_id}"
         if own:
             self.account = self.accounts.loc[self.accounts.client_id == self.client_id, "account_id"].iat[0]
             return
@@ -206,8 +207,8 @@ class DropAmountHandler:
         
         # Если снятие и баланс меньше лимита для atm
         if not online and self.balance < atm_min:
-            self.chunk_size = self.balance
-            return self.chunk_size
+            raise ValueError(f"""If atm withdrawal the balance must be >= atm_min
+            balance: {self.balance} atm_min: {atm_min}""")
 
         # Если перевод. 
         # Берем лимиты под генерацию массива чанков, в зависимости от

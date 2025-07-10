@@ -148,7 +148,7 @@ class DropTimeHandler:
         # Тоже дельта, но не может быть <= 0 т.к. тут мы ее используем как lag_interval
         # Это для случаев когда транзакция совершается в тот же период активности что и последняя
         time_delta = self.get_time_delta(two_way=False)
-        print(time_delta)
+        # print(time_delta)
         last_time, self.last_unix = derive_from_last_time(last_txn_unix=self.last_unix, lag_interval=time_delta)
         # +1 к счетчику соответствующего типа
         self.txns_count(receive=receive, reset=False)

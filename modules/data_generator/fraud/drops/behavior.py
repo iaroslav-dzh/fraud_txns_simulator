@@ -30,6 +30,8 @@ class DistBehaviorHandler:
               операции.
     high: int. Максимальное количество попыток совершить операцию после первой отклоненной
               операции.
+    batch_txns: int. Счетчик исходящих транзакций в распределении текущей
+                партии(batch) денег.
     """
 
     def __init__(self, configs: DropDistributorCfg, amt_hand: DropAmountHandler):
@@ -49,6 +51,7 @@ class DistBehaviorHandler:
         self.attempts = 0
         self.low = configs.attempts["low"]
         self.high = configs.attempts["high"]
+        self.batch_txns = 0
 
 
     def sample_scenario(self):
@@ -94,18 +97,22 @@ class DistBehaviorHandler:
             self.in_chunks = True
         
 
-    def guide_scenario(self, first_txn):
+    def guide_scenario(self, receive):
         """
         Направляет выполнение сценария.
         Записывает True или False в self.online с точки зрения какая 
         должна быть транзакция: онлайн или оффлайн (перевод или снятие).
         ------------
-        first_txn: bool. Является ли транзакция первой исходящей в текущей партии.
+        receive: bool. Ставить True если входящая транзакция.
         """
+        if receive:
+            self.online = True
+            return 
+        
         scen = self.scen
 
         # В atm+transfer только первая транзакция может быть atm(оффлайн)
-        if scen == "atm+transfer" and first_txn:
+        if scen == "atm+transfer" and self.batch_txns == 0:
             self.online = False
         elif scen == "atm+transfer":
             self.online = True
@@ -113,6 +120,8 @@ class DistBehaviorHandler:
             self.online = False
         elif scen in ["split_transfer", "transfer"]:
             self.online = True
+
+        self.batch_txns += 1 # +1 транзакция в батче(партии)
 
 
     def stop_after_decline(self, declined):
@@ -157,12 +166,26 @@ class DistBehaviorHandler:
             self.attempts -= 1
 
 
-    def reset_cache(self):
+    def reset_cache(self, all=False):
         """
         Сброс кэшированных данных
         -------------
+        all: bool. Если False, не будут сброшены self.attempts
         """
         self.scen = None
         self.online = None
         self.in_chunks = None
+        self.batch_txns = 0
+        if not all:
+            return
         self.attempts = 0
+
+
+# 2. Управление поведением дропа покупателя
+
+class PurchBehaviorHandler:
+    """
+    Управление поведением дропа покупателя
+    """
+    def __init__(self):
+        pass
