@@ -47,7 +47,6 @@ class CreateDropTxn:
         self.out_txns = 0
         self.in_lim = configs.in_lim
         self.out_lim = configs.out_lim
-        self.to_drop_rate = configs.to_drops["rate"]
         self.categories = categories
         self.last_txn = None
 
@@ -103,7 +102,7 @@ class CreateDropTxn:
             return status, is_fraud, rule
         
 
-    def trf_or_atm(self, declined, receive=False):
+    def trf_or_atm(self, declined, to_drop, receive=False):
         """
         Один входящий/исходящий перевод либо одно снятие в банкомате.
         ---------------------
@@ -120,19 +119,18 @@ class CreateDropTxn:
         # self.behav_hand.sample_scenario() вызывается вовне. До захода в цикл while balance > 0
         # Метод задает атрибут self.behav_hand.in_chunks
         # self.behav_hand.in_chunks_val() вызывается вовне. До захода в цикл while balance > 0
-        self.behav_hand.guide_scenario(receive=receive)
+        # self.behav_hand.guide_scenario() вызывается вовне. В начале while balance > 0
         online = self.behav_hand.online
-        in_chunks = self.behav_hand.in_chunks
-        to_drop_rate = self.to_drop_rate
+        in_chunks = self.behav_hand.in_chunks\
 
         # перевод дропу
         if receive:
             self.in_txns += 1
             amount = self.amt_hand.receive(declined=declined)
             account = self.acc_hand.account
+            online = True # Тут отдельно прописываем т.к. это вне сценариев поведения самого дропа
         # перевод от дропа    
         elif not receive and online:
-            to_drop = np.random.choice([True, False], p=[to_drop_rate, 1 - to_drop_rate])
             self.out_txns += 1
             account = self.acc_hand.get_account(to_drop=to_drop)
         # снятие дропом

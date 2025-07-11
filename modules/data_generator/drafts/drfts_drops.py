@@ -1,16 +1,20 @@
 # Наброски
 
 # 1. Управление активностью дропа от ее начала до завершения
+
+# ВОЗМОЖНО НА КАНВАСЕ БОЛЕЕ АКТУАЛЬНАЯ ВЕРСИЯ
 class DropLifecycleManager:
     """
     Управление активностью дропа от ее начала до завершения
+    -------
+    ВОЗМОЖНО НА КАНВАСЕ БОЛЕЕ АКТУАЛЬНАЯ ВЕРСИЯ
     """
     def __init__():
         self.Behav = BehavHand
         self.AccHand = AccHand
         self.AmtHand = AmtHand
         self.CreatTxn = CreateTxn
-        self.declined = False
+        self.declined = False # МБ переписать в метод property как ГПТ советовал
         self.alltxns = []
     
     def process_batch():
@@ -23,7 +27,6 @@ class DropLifecycleManager:
             else:
                 part_out = CreateTxn.trf_or_atm(receive=False,
                                             declined=declined)
-                    
             all_txns5.append(part_out)
             Behav.deduct_attempts(declined=declined, receive=False)
             
@@ -65,4 +68,61 @@ class DropLifecycleManager:
             self.BehavHand.reset_cache(all=False)
             
         self.reset_cache() # сброс всего кэша после завершения активности дропа
+
+
+# Возможный метод для DistBehavior
+@property
+def to_crypto(self):
+    """
+    """
+    # Если не онлайн, то невозможен перевод в крипту
+    if not self.online: 
+        return
+    
+    drop_rate = self.to_drop_rate
+    # Возвращаем True или False
+    return np.random.uniform(0,1) < drop_rate
+
+
+def switch_online(self, declined):
+    """
+    """
+    if not declined:
+        return
+    scen = self.scen
+    if scen in ["atm", "atm+transfer"]:
+        pass
+
+def switch_online(self, prev_declined):
+    """
+    Направляет выполнение сценария.
+    Записывает True или False в self.online с точки зрения какая 
+    должна быть транзакция: онлайн или оффлайн (перевод или снятие).
+    ------------
+    """
+    if not prev_declined:
+        return
+    
+    scen = self.scen
+    {"method01->method02":0.6,
+     "method01->method01":0.4}
+    # В atm+transfer только первая транзакция может быть atm(оффлайн)
+    if scen == "atm+transfer" and not self.last_online:
+        self.online = True
+    elif scen == "atm+transfer"and self.last_online:
+        self.online = False
+    elif scen == "atm":
+        self.online = True
+    elif scen in ["split_transfer", "transfer"]:
+        self.online = True
+
+
+min_drops = dist_configs.to_drops["min_drops"]
+print(min_drops)
+drop_acc_hand1.accounts["is_drop"] = False
+drop_acc_hand1.get_account(own=True)
+
+accs_samp = drop_acc_hand1.accounts.query("client_id != @own_id").client_id.sample(n=min_drops - 1)
+drop_acc_hand1.accounts.loc[drop_acc_hand1.accounts.client_id.isin(accs_samp), "is_drop"] = True
+drop_acc_hand1.accounts.query("client_id != @own_id and is_drop == True").shape[0]
     

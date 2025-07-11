@@ -83,6 +83,7 @@ class DropDistributorCfg:
     attempts: dict. Лимиты попыток операций после первой отклоненной операции.
               Ключи: low и high
     to_drops: dict. Параметры переводов другим дропам
+    crypto_rate: float. Доля переводов в крипту от переводов дропа
     """
     clients: pd.DataFrame
     timestamps: pd.DataFrame
@@ -106,6 +107,7 @@ class DropDistributorCfg:
     pos_delta: dict
     attempts: dict
     to_drops: dict
+    crypto_rate: float
 
 
 # 3. Датакласс для конфигов транзакций дропов-покупателей 

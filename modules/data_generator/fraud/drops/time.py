@@ -158,13 +158,11 @@ class DropTimeHandler:
 
     def reset_cache(self):
         """
-        Очистка кэшированных данных в атрибутах:
-        self.start_unix
-        self.last_unix
-        self.in_txns
-        self.out_txns
+        Очистка кэшированных данных и счетчиков
+        ------------
         """
         self.start_unix = 0
         self.last_unix = 0
         self.in_txns = 0
-        self.out_txns = 0   
+        self.out_txns = 0
+        

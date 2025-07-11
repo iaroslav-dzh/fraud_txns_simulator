@@ -47,7 +47,9 @@ class DropAccountHandler:
         own - bool. Записать номер своего счета в self.account
         to_drop - bool. Перевод другому дропу в нашем банке или нет.
         """
-        assert self.client_id != 0, f"client_id is not passed. client_id is {self.client_id}"
+        assert self.client_id != 0, \
+            f"client_id is not passed. client_id is {self.client_id}"
+
         if own:
             self.account = self.accounts.loc[self.accounts.client_id == self.client_id, "account_id"].iat[0]
             return
@@ -61,9 +63,9 @@ class DropAccountHandler:
             return account
         
         # Если надо отправить другому дропу в нашем банке. При условии что есть другие дропы на текущий момент
-        # Фильтруем accounts исключая свой счет и использованные счета, и выбирая дропов. Для случая если to_drop
-        drop_accounts = self.accounts.loc[(self.accounts.client_id != self.client_id) & (self.accounts.is_drop == True) \
-                                          & ~(self.accounts.account_id.isin(self.used_accounts))]
+        # Фильтруем accounts исключая свой счет и выбирая дропов. Для случая если to_drop
+        drop_accounts = self.accounts.loc[(self.accounts.client_id != self.client_id) \
+                                          & (self.accounts.is_drop == True)]
         
         # Если счетов дропов ещё нет или меньше лимита. Берем внешний неиспользованный счет
         if drop_accounts.shape[0] < self.min_drops:
@@ -279,21 +281,22 @@ class DropAmountHandler:
         return rest
 
 
-    def reset_cache(self, balance=True, chunk_size=True, batch_txns=True):
+    def reset_cache(self, life_end=False):
         """
         Сброс кэшированных значений
-        По умолчанию сбрасывается всё. Если что-то надо оставить, то надо выставить False
-        для этого
         -----------------
-        balance - bool
-        chunk_size - bool
-        batch_txns - bool
+        life_end: bool. Если True - сброс всего.
+            Если False, то только self.batch_txns
+            и self.chunk_size
         """
-        if balance:
-            self.balance = 0
-        if chunk_size:
-            self.chunk_size = 0
-        if batch_txns:
+        if not life_end:
             self.batch_txns = 0
+            self.chunk_size = 0
+            return
+        
+        self.batch_txns = 0
+        self.balance = 0
+        self.chunk_size = 0
+            
 
 

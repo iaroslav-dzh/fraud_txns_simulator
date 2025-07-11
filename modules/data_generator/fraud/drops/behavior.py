@@ -22,6 +22,7 @@ class DistBehaviorHandler:
     trf_max: int. Максимальная сумма перевода.
     split_rate: float. Доля случаев когда полученная сумма будет распределена по частям.
                 При условии что полученная сумма пройдет по лимитам.
+    to_drop_rate: float. Доля исходящих транзакций другим дропам.
     online: bool. Какая должна быть транзакция: онлайн или оффлайн (перевод или снятие).
     in_chunks: bool. Распределяет ли дроп деньги по частям. По умолчанию None.
     attempts: int. Сколько попыток совершить операцию будет сделано 
@@ -46,12 +47,13 @@ class DistBehaviorHandler:
         self.trf_min = amt_hand.chunks["rcvd_small"]["min"]
         self.trf_max = configs.trf_max
         self.split_rate = configs.split_rate
+        self.to_drop_rate = configs.to_drops["rate"]
+        self.crypto_rate = configs.crypto_rate
         self.online = None
         self.in_chunks = None
         self.attempts = 0
         self.low = configs.attempts["low"]
         self.high = configs.attempts["high"]
-        self.batch_txns = 0
 
 
     def sample_scenario(self):
@@ -80,8 +82,7 @@ class DistBehaviorHandler:
             if cond:
                 self.scen = np.random.choice(scen_list)
                 return
-
-        # Если ни одно из условий не сработало — fallback
+        # Если ни одно из условий не сработало
         self.scen = "transfer"
 
 
@@ -97,22 +98,18 @@ class DistBehaviorHandler:
             self.in_chunks = True
         
 
-    def guide_scenario(self, receive):
+    def guide_scenario(self):
         """
         Направляет выполнение сценария.
         Записывает True или False в self.online с точки зрения какая 
         должна быть транзакция: онлайн или оффлайн (перевод или снятие).
         ------------
-        receive: bool. Ставить True если входящая транзакция.
         """
-        if receive:
-            self.online = True
-            return 
-        
         scen = self.scen
+        batch_txns = self.amt_hand.batch_txns
 
         # В atm+transfer только первая транзакция может быть atm(оффлайн)
-        if scen == "atm+transfer" and self.batch_txns == 0:
+        if scen == "atm+transfer" and batch_txns == 0:
             self.online = False
         elif scen == "atm+transfer":
             self.online = True
@@ -120,8 +117,35 @@ class DistBehaviorHandler:
             self.online = False
         elif scen in ["split_transfer", "transfer"]:
             self.online = True
+            
+        # отменил. Надо чтобы batch_txns прибавлялось внутри amt_hand при расчете суммы
+        # транзакции
+        # self.amt_hand.batch_txns += 1 # +1 транзакция в батче(партии) - 
 
-        self.batch_txns += 1 # +1 транзакция в батче(партии)
+
+    @property
+    def to_drop(self):
+        """
+        Случайно определить будет ли транзакция
+        другому дропу
+        """
+        drop_rate = self.to_drop_rate
+        # Возвращаем True или False
+        return np.random.uniform(0,1) < drop_rate
+
+    @property
+    def to_crypto(self):
+        """
+        Случайно определить будет ли онлайн
+        перевод на криптобиржу
+        """
+        # Если не онлайн, то невозможен перевод в крипту
+        if not self.online: 
+            return False
+        
+        to_crypto_rate = self.crypto_rate
+        # Возвращаем True или False
+        return np.random.uniform(0,1) < to_crypto_rate
 
 
     def stop_after_decline(self, declined):
@@ -175,7 +199,6 @@ class DistBehaviorHandler:
         self.scen = None
         self.online = None
         self.in_chunks = None
-        self.batch_txns = 0
         if not all:
             return
         self.attempts = 0
