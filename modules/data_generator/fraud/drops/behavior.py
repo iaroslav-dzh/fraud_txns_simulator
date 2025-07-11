@@ -117,7 +117,7 @@ class DistBehaviorHandler:
             self.online = False
         elif scen in ["split_transfer", "transfer"]:
             self.online = True
-            
+
         # отменил. Надо чтобы batch_txns прибавлялось внутри amt_hand при расчете суммы
         # транзакции
         # self.amt_hand.batch_txns += 1 # +1 транзакция в батче(партии) - 
@@ -129,6 +129,9 @@ class DistBehaviorHandler:
         Случайно определить будет ли транзакция
         другому дропу
         """
+        if not self.online: # Если текущая транз-ция не онлайн
+            return False
+        
         drop_rate = self.to_drop_rate
         # Возвращаем True или False
         return np.random.uniform(0,1) < drop_rate
