@@ -91,12 +91,14 @@ class DistBehaviorHandler:
         Запись значения атрибута in_chunks в зависимости от
         сценария.
         """
-        if self.scen in ["transfer", "atm"]:
+        scen = self.scen
+
+        if scen in ["transfer", "atm"]:
             self.in_chunks = False
             return
-        if self.scen in ["atm+transfer", "split_transfer"]:
+        if scen in ["atm+transfer", "split_transfer"]:
             self.in_chunks = True
-        
+
 
     def guide_scenario(self):
         """
@@ -118,10 +120,6 @@ class DistBehaviorHandler:
         elif scen in ["split_transfer", "transfer"]:
             self.online = True
 
-        # отменил. Надо чтобы batch_txns прибавлялось внутри amt_hand при расчете суммы
-        # транзакции
-        # self.amt_hand.batch_txns += 1 # +1 транзакция в батче(партии) - 
-
 
     @property
     def to_drop(self):
@@ -135,6 +133,7 @@ class DistBehaviorHandler:
         drop_rate = self.to_drop_rate
         # Возвращаем True или False
         return np.random.uniform(0,1) < drop_rate
+
 
     @property
     def to_crypto(self):

@@ -209,7 +209,7 @@ class DropTxnPartData:
     client_info - pd.DataFrame или namedtuple. Запись с информацией о клиенте
     online_merchant_ids- pd.Series. id онлайн мерчантов
     client_devices - pd.DataFrame. Девайсы клиентов.
-    last_txn - tuple. Для кэширования предыдущей транзакции
+    last_txn - tuple. Для кэширования данных любой последней транзакции.
     """
     def __init__(self, configs: Union[DropDistributorCfg, DropPurchaserCfg]):
         """
@@ -230,15 +230,20 @@ class DropTxnPartData:
             f"self.client_info is {type(self.client_info)}"
 
 
-    def original_purchase(self, online=True):
+    def original_purchase(self, online=True, get_cached=False):
         """
         Оригинальные данные клиента для операций покупок.
         На данный момент это для дропов.
         Для операций на криптобирже и для покупки товаров дропами
         -------
-        online - bool.
+        online: bool.
+        get_cached: bool. Пробовать ли вернуть последние кэшированные данные
+                    вместо генерации новых.
         """
         self.assert_client_info()
+
+        if get_cached and self.last_txn is not None:
+            return self.last_txn
 
         if online:
             merchant_id = self.online_merchant_ids.sample(n=1).iat[0]
@@ -256,6 +261,7 @@ class DropTxnPartData:
 
             self.last_txn = merchant_id, trans_lat, trans_lon, trans_ip, trans_city, \
                             device_id, channel, txn_type
+            self.last_txn = self.last_txn
             return self.last_txn
 
         
@@ -311,6 +317,26 @@ class DropTxnPartData:
         self.last_txn = merchant_id, trans_lat, trans_lon, trans_ip, trans_city, \
                         device_id, channel, txn_type
         return self.last_txn
+    
+    
+    def check_previous(self, dist, last_full):
+        """
+        Решить можно ли вернуть данные последней транзакции
+        из кэша. True может вернуть только для дропа распределителя.
+        ------
+        dist: bool. Дроп распределитель или нет.
+        last_full: dict. Полные данные последней транзакции.
+                   Нужны, чтобы узнать channel.
+        """
+        if not dist:
+            return False
+        if last_full is None:
+            return False
+        if last_full["channel"] == "crypto_exchange":
+            return True
+        
+        return False
+
     
     def reset_cache(self):
         """

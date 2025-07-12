@@ -189,12 +189,16 @@ class CreateDropTxn:
         in_chunks = self.behav_hand.in_chunks
         self.out_txns += 1
 
+        # Брать ли данные последней транзакции. Для случаев когда это дроп распределитель
+        get_cached = self.txn_part_data.check_previous(dist=dist, last_full=self.last_txn)
+
         # Генерация части данных транзакции. Здесь прописывается аргумент online
+        # Вместо channel нижнее подчеркивание т.к. этот метод вернет None для channel
         merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, _, txn_type = \
-                                                self.txn_part_data.original_purchase(online=online)
+                                            self.txn_part_data.original_purchase(online=online, get_cached=get_cached)
         
         
-        amount = self.amt_hand.one_operation(declined=declined, in_chunks=in_chunks)
+        amount = self.amt_hand.one_operation(online=online, declined=declined, in_chunks=in_chunks)
 
         channel, category_name = self.category_and_channel(dist=dist)
         status, is_fraud, rule = self.status_and_rule(declined=declined, dist=dist)
@@ -209,6 +213,7 @@ class CreateDropTxn:
                                           merchant_id=merchant_id, trans_city=trans_city, trans_lat=trans_lat, \
                                           trans_lon=trans_lon, trans_ip=trans_ip, device_id=device_id, account=account, \
                                           is_fraud=is_fraud, is_suspicious=is_suspicious, status=status, rule=rule)
+        return self.last_txn
         
 
     def limit_reached(self):

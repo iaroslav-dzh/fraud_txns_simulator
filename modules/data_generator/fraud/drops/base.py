@@ -106,8 +106,12 @@ class DropAmountHandler:
     balance: float, int. Текущий баланс дропа. По умолчанию 0.
     batch_txns: int. Счетчик транзакций сделанных в рамках распределения полученной партии денег.
                       По умолчанию 0.
+    declined_txns: int. Счетчик отклоненных транзакций.
+                      По умолчанию 0.
     chunk_size: int, float. Последний созданный размер части баланса для перевода по частям
                              По умолчанию 0.
+    last_amt: int. Последняя сгенерированная сумма.
+    first_decl: int. Сумма первой отклоненной транзакции.
     chunks: dict. Содержит ключи:
         atm_min: int. Минимальная сумма для снятий в банкомате.
         atm_share: float. Доля от баланса, которую дроп снимает в случае снятия в банкомате
@@ -138,8 +142,12 @@ class DropAmountHandler:
         """
         self.balance = 0
         self.batch_txns = 0
+        self.declined_txns = 0
         self.chunk_size = 0
+        self.last_amt = 0
+        self.first_decl = 0
         self.chunks = configs.chunks.copy()
+        self.reduce_share = configs.reduce_share
         self.inbound_amt = configs.inbound_amt.copy()
         self.round = configs.round
 
@@ -155,11 +163,11 @@ class DropAmountHandler:
         # Не обновлять баланс если транзакция отклонена.
         if declined:
             return
-        # Увеличить баланс   
+        # Получение денег, увеличить баланс   
         if receive:
             self.balance += amount
             return
-        # Уменьшить баланс    
+        # Исх. транзакция. Уменьшить баланс    
         self.balance -= amount
 
 
@@ -182,6 +190,16 @@ class DropAmountHandler:
         
         return amount
 
+    @property
+    def get_atm_share(self):
+        """
+        Получить случайный коэффициент доли баланса.
+        Для снятия в банкомате.
+        """
+        low = self.chunks["atm_share"]["min"]
+        high = self.chunks["atm_share"]["max"]
+        return np.random.uniform(low, high)
+
 
     def get_chunk_size(self, online=False):
         """
@@ -203,7 +221,7 @@ class DropAmountHandler:
         atm_min = self.chunks["atm_min"]
         # Если снятие и баланс больше или равен лимиту для atm
         if not online and self.balance >= atm_min:
-            atm_share = self.chunks["atm_share"]
+            atm_share = self.get_atm_share
             self.chunk_size = max(atm_min, self.balance * atm_share // self.round * self.round)
             return self.chunk_size
         
@@ -244,7 +262,55 @@ class DropAmountHandler:
         # Если чанк больше бал
         self.chunk_size = np.random.choice(sampling_array)
         return self.chunk_size
+
+
+    def count_and_cache(self, declined, amount):
+        """
+        Счетчик исходящих транзакций.
+        Считает все транзакции и отклоненные.
+        Кэширует сумму первой отклоненной транзакции
+        и любой последней транзакции.
+        ----------
+        declined: отклонена ли текущая транзакция.
+        amount: int | float. Сумма текущей транзакции.
+        """
+        self.batch_txns += 1
+        self.last_amt = amount
+        if not declined:
+            return
+    
+        self.declined_txns += 1
+        declined_txns = self.declined_txns
+        if declined_txns == 1:
+            self.first_decl = amount
+
+
+    def reduce_amt(self, online):
+        """
+        Уменьшение суммы относительно первой отклоненной транзакции
+        """
+        balance = self.balance
+        trf_min = self.chunks["rcvd_small"]["min"]
+        atm_min = self.chunks["atm_min"]
+        atm_eligible = balance >= atm_min
+        split_eligible = balance >= trf_min * 2
+
+        if online and not split_eligible:
+            return balance
+        if not online and not atm_eligible:
+            return balance
         
+        if online: # перевод
+            reduce_share = self.reduce_share
+            reduce_by = self.first_decl  * reduce_share // self.round * self.round
+            reduced_amt = max(trf_min, self.last_amt - reduce_by)
+            return reduced_amt
+        # снятие
+        reduce_share = self.reduce_share
+        reduce_by = self.first_decl  * reduce_share // self.round * self.round
+        reduced_amt = max(atm_min, self.last_amt - reduce_by)
+        return reduced_amt
+
 
     def one_operation(self, online, declined=False, in_chunks=False):
         """
@@ -256,12 +322,20 @@ class DropAmountHandler:
                           При True нужно указать amount.
         """
 
+        # Если это не первая отклоненная транзакция, то дроп уменьшает сумму транз.
+        if self.declined_txns >= 1:
+            amount = self.reduce_amt(online=online)
+            self.update_balance(amount=amount, receive=False, declined=declined)
+            # Прибавляем счетчик транзакций и кэшируем сумму
+            self.count_and_cache(declined=declined, amount=amount)
+            return amount
+
         # Если перевод не по частям. Пробуем перевести все с баланса. 
         if not in_chunks:
             amount = self.balance
             self.update_balance(amount=self.balance, receive=False, declined=declined)
-            # Прибавляем счетчик транзакции для текущей партии денег
-            self.batch_txns += 1
+            # Прибавляем счетчик транзакций и кэшируем сумму
+            self.count_and_cache(declined=declined, amount=amount)
             return amount
 
         # Иначе генерируем размер части и считаем сколько частей исходя из размера одной части
@@ -271,13 +345,13 @@ class DropAmountHandler:
         # Если целое число частей больше 0. Пробуем перевести одну часть
         if chunks > 0:
             self.update_balance(amount=amount, receive=False, declined=declined)
-            self.batch_txns += 1
+            self.count_and_cache(declined=declined, amount=amount)
             return amount
 
         # Если баланс меньше одной части. Пробуем перевести то что осталось
         rest = self.balance
         self.update_balance(amount=rest, receive=False, declined=declined)
-        self.batch_txns += 1
+        self.count_and_cache(declined=declined, amount=amount)
         return rest
 
 
@@ -297,6 +371,9 @@ class DropAmountHandler:
         self.batch_txns = 0
         self.balance = 0
         self.chunk_size = 0
+        self.last_amt = 0
+        self.first_decl = 0
+        self.declined_txns = 0
             
 
 
