@@ -1,3 +1,25 @@
 # Общие конфигурации
 
+# Колонки датафрейма транзакций
+txns_df:
+  client_id: int64
+  txn_time: datetime64[ns]
+  unix_time: int64
+  amount: float64
+  type: str
+  channel: str
+  category: str
+  online: bool
+  merchant_id: int64
+  trans_city: str
+  trans_lat: float64
+  trans_lon: float64
+  trans_ip: str
+  device_id: int64
+  account: int64
+  is_fraud: bool
+  is_suspicious: bool
+  status: str
+  rule: str
+
 

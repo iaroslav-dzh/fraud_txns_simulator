@@ -27,12 +27,7 @@ class DistBehaviorHandler:
     in_chunks: bool. Распределяет ли дроп деньги по частям. По умолчанию None.
     attempts: int. Сколько попыток совершить операцию будет сделано 
                дропом после первой отклоненной транзакции. По умолчанию 0.
-    low: int. Минимальное количество попыток совершить операцию после первой отклоненной
-              операции.
-    high: int. Максимальное количество попыток совершить операцию после первой отклоненной
-              операции.
-    batch_txns: int. Счетчик исходящих транзакций в распределении текущей
-                партии(batch) денег.
+    attempts_cfg: dict. Лимиты возможных попыток: для переводов и снятий.
     """
 
     def __init__(self, configs: DropDistributorCfg, amt_hand: DropAmountHandler):
@@ -52,8 +47,7 @@ class DistBehaviorHandler:
         self.online = None
         self.in_chunks = None
         self.attempts = 0
-        self.low = configs.attempts["low"]
-        self.high = configs.attempts["high"]
+        self.attempts_cfg = configs.attempts
 
 
     def sample_scenario(self):
@@ -169,16 +163,31 @@ class DistBehaviorHandler:
             return False
 
             
-    def attempts_after_decline(self):
+    def attempts_after_decline(self, declined):
         """
-        Определение количества попыток после первой отклоненной транзакции
+        Рандомизация количества попыток дропа совершить операцию после первой
+        отклоненной транзакции.
+        Зависит от self.online. Для онлайна и оффлайна можно ставить свои
+        границы попыток.
         ---------------
-        low - int. Минимальное число попыток
-        high - int. Максимальное число попыток.
+        declined: отклоняется ли текущая транзакция.
         """
-        self.attempts = np.random.randint(self.low, self.high + 1)
-            
+        if not declined:
+            return
         
+        online = self.online
+
+        if online: # Для переводов
+            trf_min = self.attempts_cfg["trf_min"]
+            trf_max = self.attempts_cfg["trf_max"]
+            self.attempts = np.random.randint(trf_min, trf_max + 1)
+            return
+        # Для снятий.
+        atm_min = self.attempts_cfg["atm_min"]
+        atm_max = self.attempts_cfg["atm_max"]
+        self.attempts = np.random.randint(atm_min, atm_max + 1)
+
+            
     def deduct_attempts(self, declined, receive=False):
         """
         Вычитание попытки исходящей операции совершенной при статусе declined

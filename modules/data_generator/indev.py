@@ -235,7 +235,8 @@ class CreateDropTxn:
         Сброос кэшированных данных
         -------------
         only_counters: bool. Если True будут сброшены: self.in_txns, self.out_txns.
-                       Если False то также сбросится информация о последней транзакции self.last_txn
+                       Если False то также сбросится информация 
+                       о последней транзакции self.last_txn
         """
         self.in_txns = 0
         self.out_txns = 0

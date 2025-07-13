@@ -115,9 +115,21 @@ def sample_category(categories, online=None, is_fraud=None, rule=None):
 
 
 # Функция семплирования антифрод-правила
-
 def sample_rule(rules):
     """
     rules - pd.DataFrame с названиями правил и их весами
     """
     return rules.rule.sample(1, weights=rules.weight).iat[0]
+
+
+# Функция создания пустого датафрейма под транзакции
+def create_txns_df(configs):
+    """
+    configs: dict. Словарь с парами 'название колонки':'тип данных'
+    """
+    to_df = {}
+    for key in configs.keys():
+        data_type = configs[key]
+        to_df[key] = pd.Series(dtype=data_type)
+
+    return pd.DataFrame(to_df)
