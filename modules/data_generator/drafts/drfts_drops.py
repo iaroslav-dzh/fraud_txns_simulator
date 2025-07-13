@@ -117,12 +117,16 @@ def switch_online(self, prev_declined):
         self.online = True
 
 
-min_drops = dist_configs.to_drops["min_drops"]
-print(min_drops)
-drop_acc_hand1.accounts["is_drop"] = False
-drop_acc_hand1.get_account(own=True)
+import data_generator.fraud.drops.base
+import data_generator.indev
+import data_generator.configs
 
-accs_samp = drop_acc_hand1.accounts.query("client_id != @own_id").client_id.sample(n=min_drops - 1)
-drop_acc_hand1.accounts.loc[drop_acc_hand1.accounts.client_id.isin(accs_samp), "is_drop"] = True
-drop_acc_hand1.accounts.query("client_id != @own_id and is_drop == True").shape[0]
-    
+importlib.reload(data_generator.indev)
+importlib.reload(data_generator.configs)
+importlib.reload(data_generator.fraud.drops.base)
+
+from data_generator.indev import DropConfigBuilder
+from data_generator.configs import DropDistributorCfg
+
+drop_cfg_build = DropConfigBuilder(base_cfg=base_cfg, fraud_cfg=fraud_cfg, drop_cfg=drops_cfg)
+dist_configs = drop_cfg_build.build_dist_cfg()

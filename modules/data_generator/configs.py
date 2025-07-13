@@ -2,11 +2,6 @@
 
 import pandas as pd
 from dataclasses import dataclass
-from typing import Union
-from data_generator.fraud.drops.base import DropAccountHandler, DropAmountHandler
-from data_generator.fraud.txndata import DropTxnPartData
-from data_generator.fraud.drops.time import DropTimeHandler
-from data_generator.fraud.drops.behavior import DistBehaviorHandler, PurchBehaviorHandler
 
 
 # 1. Датакласс под конфиги фрода в покупках, когда аккаунт или карта клиента скомпрометированы
@@ -59,7 +54,6 @@ class DropDistributorCfg:
     accounts: pd.DataFrame. Номера счетов клиентов.
     outer_accounts: pd.Series. Номера внешних счетов для транзакций вне банка.
     client_devices: pd.DataFrame
-    atms: pd.DataFrame. id и координаты банкоматов.
     online_merchant_ids: pd.Series
     cities: pd.DataFrame
     in_lim: int. лимит входящих транзакций. После его достижения - отклонение всех операций клиента
@@ -94,7 +88,6 @@ class DropDistributorCfg:
     accounts: pd.DataFrame
     outer_accounts: pd.Series
     client_devices: pd.DataFrame
-    atms: pd.DataFrame
     online_merchant_ids: pd.Series
     cities: pd.DataFrame
     in_lim: int
@@ -118,23 +111,19 @@ class DropDistributorCfg:
 # 3. Датакласс для конфигов транзакций дропов-покупателей 
 
 @dataclass
-class DropPurchaserCfg: # <-------------------- in development. Совсем не откорректирован.
+class DropPurchaserCfg:
     """
-    Это данные на основе которых будут генерироваться транзакции дропов-покупателей
+    Это данные на основе которых будут генерироваться транзакции дропов-распределителей
     ---------------------
     clients: pd.DataFrame
     timestamps: pd.DataFrame
-    transactions: pd.DataFrame
-    accounts: pd.DataFrame. Номера счетов клиентов. 
+    accounts: pd.DataFrame. Номера счетов клиентов.
     outer_accounts: pd.Series. Номера внешних счетов для транзакций вне банка.
     client_devices: pd.DataFrame
-    offline_merchants: pd.DataFrame
-    categories: pd.DataFrame
     online_merchant_ids: pd.Series
-    time_weights_dict: dict
-    rules: pd.DataFrame
     cities: pd.DataFrame
-    fraud_amounts: pd.DataFrame
+    in_lim: int. лимит входящих транзакций. После его достижения - отклонение всех операций клиента
+    out_lim: int. лимит исходящих транзакций. После его достижения - отклонение всех операций клиента
     period_in_lim: int. Количество входящих транзакций после которых дроп уходит на паузу.
     period_out_lim: int. Количество исходящих транзакций после которых дроп уходит на паузу.
     lag_interval: int. Минуты. На сколько дроп должен делать паузу после
@@ -145,47 +134,39 @@ class DropPurchaserCfg: # <-------------------- in development. Совсем н�
                          чтобы оно не было ровным. Берется из конфига drops.yaml
     pos_delta: dict. Минимум и максимум случайной дельты времени в минутах. Для случаев когда дельта может быть только положительной.
                           Эта дельта - промежуток между транзакциями дропа в одном периоде. Просто прибавляется ко времени последней транзакции.
-    chunks: dict. Характеристики для генератора сумм транзакций по частям.
-    inbound_amt: dict. Настройки для сумм входящих транзакций
-    round: int. Округление целой части сумм транзакций. Напр. 500 значит что суммы будут кратны 500 - кончаться на 500 или 000
+    split_rate: float. От 0 до 1. Доля случаев, когда дроп распределяет полученные деньги по частям, а не одной операцией.
+    chunks: dict. Характеристики для генератора сумм транзакций по частям. Ключи см. в drops.yaml
+    trf_max: int. Максимальная сумма для одного исх. перевода.
+    reduce_share: float. Доля уменьшения суммы от первой отклоненной откл. транз.
+                  Если после первой откл. транз. дроп будет пытаться еще, то он будет
+                  уменьшать след. сумму на: сумму первой откл. транз умн. на reduce_share.
+                  Если это не больше чем текущий баланс.
+    inbound_amt: dict. Лимиты на перевод. Если баланс больше. То разбиваем на части
+    round: int. Округление целой части сумм транзакций. 
+           Напр. 500 значит что суммы будут кратны 500 - кончаться на 500 или 000
+    attempts: dict. Лимиты попыток операций после первой отклоненной операции.
+              Ключи: min, max.
     """
     clients: pd.DataFrame
     timestamps: pd.DataFrame
-    transactions: pd.DataFrame
     accounts: pd.DataFrame
-    outer_accounts: pd.Series
     client_devices: pd.DataFrame
-    offline_merchants: pd.DataFrame
-    categories: pd.DataFrame
     online_merchant_ids: pd.Series
-    time_weights_dict: dict
-    rules: pd.DataFrame
     cities: pd.DataFrame
-    fraud_amounts: pd.DataFrame
+    in_lim: int
+    out_lim: int
     period_in_lim: int
     period_out_lim: int
+    inbound_amt: dict
+    split_rate: float
+    chunks: dict
+    amt_max: int
+    reduce_share: float
+    round: dict
     lag_interval: int
     two_way_delta: dict
     pos_delta: dict
-    chunks: dict
-    inbound_amt: dict
-    round: dict
+    attempts: dict
 
 
-# 4. Агрегатор базовых классов для дропов
 
-@dataclass
-class DropBaseClasses:
-    """
-    acc_hand: DropAccountHandler. Управление счетами транзакций.
-    amt_hand: DropAmountHandler. Управление суммами транзакций.
-    part_data: DropTxnPartData. Генерация части данных транзакции:
-               гео, ip, город, мерчант id и т.п.
-    time_hand: DropTimeHandler. Генерация времени транзакций.
-    behav_hand: DistBehaviorHandler| PurchBehaviorHandler. Управление поведением дропа
-    """
-    acc_hand: DropAccountHandler
-    amt_hand: DropAmountHandler
-    part_data: DropTxnPartData
-    time_hand: DropTimeHandler
-    behav_hand: Union[DistBehaviorHandler, PurchBehaviorHandler]

@@ -3,6 +3,7 @@
 
 import pandas as pd
 import numpy as np
+from typing import Union
 
 from data_generator.utils import get_values_from_truncnorm
 from data_generator.configs import DropDistributorCfg, DropPurchaserCfg
@@ -19,17 +20,20 @@ class DropAccountHandler:
     --------
     accounts - pd.DataFrame. Счета клиентов. Колонки: |client_id|account_id|is_drop|
     outer_accounts - pd.Series. Номера внешних счетов - вне нашего банка.
+                     Атрибут только для DropDistributorCfg
     min_drops: int. Минимальное число дропов в accounts для возможности отправки
-               переводов другим дропам.
+               переводов другим дропам. Атрибут только для DropDistributorCfg
     client_id - int. id текущего дропа. По умолчанию 0.
     account - int. Номер счета текущего дропа. По умолчанию 0.
     used_accounts - pd.Series. Счета на которые дропы уже отправляли деньги.
                     По умолчанию пустая. name="account_id"
     """
 
-    def __init__(self, configs: DropDistributorCfg):
+    def __init__(self, configs: Union[DropDistributorCfg, DropPurchaserCfg]):
         """
-        configs - pd.DataFrame. Данные для создания транзакций: отсюда берем номера счетов клиентов и внешних счетов.
+        configs: DropDistributorCfg | DropPurchaserCfg.
+                 Данные для создания транзакций: отсюда берем номера 
+                 счетов клиентов и внешних счетов.
         """
         self.accounts = configs.accounts.copy()
         self.outer_accounts = configs.outer_accounts.copy()
@@ -38,7 +42,6 @@ class DropAccountHandler:
         self.account = 0
         self.used_accounts = pd.Series(name="account_id")
         
-
 
     def get_account(self, own=False, to_drop=False):
         """
