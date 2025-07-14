@@ -18,14 +18,17 @@ class DropAccountHandler:
     -------------
     Атрибуты:
     --------
-    accounts - pd.DataFrame. Счета клиентов. Колонки: |client_id|account_id|is_drop|
-    outer_accounts - pd.Series. Номера внешних счетов - вне нашего банка.
+    configs: DropDistributorCfg | DropPurchaserCfg.
+             Данные для создания транзакций: отсюда берем номера 
+             счетов клиентов и внешних счетов.
+    accounts: pd.DataFrame. Счета клиентов. Колонки: |client_id|account_id|is_drop|
+    outer_accounts: pd.Series. Номера внешних счетов - вне нашего банка.
                      Атрибут только для DropDistributorCfg
     min_drops: int. Минимальное число дропов в accounts для возможности отправки
                переводов другим дропам. Атрибут только для DropDistributorCfg
-    client_id - int. id текущего дропа. По умолчанию 0.
-    account - int. Номер счета текущего дропа. По умолчанию 0.
-    used_accounts - pd.Series. Счета на которые дропы уже отправляли деньги.
+    client_id: int. id текущего дропа. По умолчанию 0.
+    account: int. Номер счета текущего дропа. По умолчанию 0.
+    used_accounts: pd.Series. Счета на которые дропы уже отправляли деньги.
                     По умолчанию пустая. name="account_id"
     """
 
@@ -35,9 +38,11 @@ class DropAccountHandler:
                  Данные для создания транзакций: отсюда берем номера 
                  счетов клиентов и внешних счетов.
         """
+        self.configs = configs
         self.accounts = configs.accounts.copy()
-        self.outer_accounts = configs.outer_accounts.copy()
-        self.min_drops = configs.to_drops["min_drops"]
+        if isinstance(configs, DropDistributorCfg):
+            self.outer_accounts = configs.outer_accounts.copy()
+            self.min_drops = configs.to_drops["min_drops"]
         self.client_id = 0
         self.account = 0
         self.used_accounts = pd.Series(name="account_id")
@@ -57,6 +62,9 @@ class DropAccountHandler:
             self.account = self.accounts.loc[self.accounts.client_id == self.client_id, "account_id"].iat[0]
             return
 
+        assert isinstance(self.configs, DropDistributorCfg), \
+            f"""Other functionality works only for DropDistributorCfg object.
+            But {type(self.configs)} was passed"""
         # Если отправляем/получаем из другого банка.  
         if not to_drop:
             # Семплируем номер внешнего счета который еще не использовался
@@ -149,6 +157,7 @@ class DropAmountHandler:
         self.chunk_size = 0
         self.last_amt = 0
         self.first_decl = 0
+        self.configs = configs
         self.chunks = configs.chunks.copy()
         self.reduce_share = configs.reduce_share
         self.inbound_amt = configs.inbound_amt.copy()
@@ -203,6 +212,27 @@ class DropAmountHandler:
         high = self.chunks["atm_share"]["max"]
         return np.random.uniform(low, high)
 
+    def handle_atm(self):
+        """
+        Сгенерировать сумму чанка для снятия.
+        Если баланс меньше лимита для снятия, то будет ошибка.
+        """
+        assert isinstance(self.configs, DropDistributorCfg), \
+            f"""ATM functionality works only for DropDistributorCfg object.
+            But {type(self.configs)} was passed"""
+
+        atm_min = self.chunks["atm_min"]
+        # Если снятие и баланс больше или равен лимиту для atm
+        if self.balance >= atm_min:
+            atm_share = self.get_atm_share
+            self.chunk_size = max(atm_min, self.balance * atm_share // self.round * self.round)
+            return self.chunk_size
+        
+        # Если снятие и баланс меньше лимита для atm
+        if self.balance < atm_min:
+            raise ValueError(f"""If atm withdrawal the balance must be >= atm_min.
+            balance: {self.balance} atm_min: {atm_min}""")
+
 
     def get_chunk_size(self, online=False):
         """
@@ -221,17 +251,9 @@ class DropAmountHandler:
         if self.batch_txns != 0 and np.random.uniform(0,1) > rand_rate:
             return self.chunk_size
 
-        atm_min = self.chunks["atm_min"]
-        # Если снятие и баланс больше или равен лимиту для atm
-        if not online and self.balance >= atm_min:
-            atm_share = self.get_atm_share
-            self.chunk_size = max(atm_min, self.balance * atm_share // self.round * self.round)
-            return self.chunk_size
-        
-        # Если снятие и баланс меньше лимита для atm
-        if not online and self.balance < atm_min:
-            raise ValueError(f"""If atm withdrawal the balance must be >= atm_min
-            balance: {self.balance} atm_min: {atm_min}""")
+        # Если снятие
+        if not online:
+            return self.handle_atm()
 
         # Если перевод. 
         # Берем лимиты под генерацию массива чанков, в зависимости от
@@ -294,21 +316,27 @@ class DropAmountHandler:
         """
         balance = self.balance
         trf_min = self.chunks["rcvd_small"]["min"]
-        atm_min = self.chunks["atm_min"]
-        atm_eligible = balance >= atm_min
         split_eligible = balance >= trf_min * 2
 
+        # перевод
         if online and not split_eligible:
             return balance
-        if not online and not atm_eligible:
-            return balance
-        
-        if online: # перевод
+        if online: 
             reduce_share = self.reduce_share
             reduce_by = self.first_decl  * reduce_share // self.round * self.round
             reduced_amt = max(trf_min, self.last_amt - reduce_by)
             return reduced_amt
+        
         # снятие
+        assert isinstance(self.configs, DropDistributorCfg), \
+            f"""ATM functionality works only for DropDistributorCfg object.
+            But {type(self.configs)} was passed"""
+        
+        atm_min = self.chunks["atm_min"]
+        atm_eligible = balance >= atm_min
+        if not online and not atm_eligible:
+            return balance
+        
         reduce_share = self.reduce_share
         reduce_by = self.first_decl  * reduce_share // self.round * self.round
         reduced_amt = max(atm_min, self.last_amt - reduce_by)

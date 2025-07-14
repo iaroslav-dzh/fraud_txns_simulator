@@ -2,13 +2,16 @@ import pandas as pd
 import numpy as np
 from typing import Union
 
-from data_generator.configs import DropDistributorCfg, DropPurchaserCfg, DropBaseClasses
+from data_generator.configs import DropDistributorCfg, DropPurchaserCfg
+from data_generator.fraud.drops.builder import DropBaseClasses
 from data_generator.utils import build_transaction
 
 class CreateDropTxn:
     """
     Создание транзакций дропа распределителя под разное поведение.
     -----------------
+    configs: DropDistributorCfg | DropPurchaserCfg.
+             Конфиги и данные для создания дроп транзакций.
     txn_part_data: DropTxnPartData. Генератор части данных транзакции - мерчант,
                     гео, ip, девайс и т.п.
     amt_hand: DropAmountHandler. Генератор активности дропов: суммы, счета, баланс.
@@ -25,8 +28,7 @@ class CreateDropTxn:
                 после достижения этого лимита отклоняются.
     last_txn: dict. Полные данные последней транзакции. По умолчанию None
     """
-    def __init__(self, configs: Union[DropDistributorCfg, DropPurchaserCfg], base: DropBaseClasses, \
-                 categories=None | pd.DataFrame):
+    def __init__(self, configs: Union[DropDistributorCfg, DropPurchaserCfg], base: DropBaseClasses):
         """
         configs: DropDistributorCfg | DropPurchaserCfg.
                  Конфиги и данные для создания дроп транзакций.
@@ -38,8 +40,8 @@ class CreateDropTxn:
         time_hand: DropTimeHandler. Управление временем транзакций дропа
         behav_hand: DistBehaviorHandler. Управление поведением дропа.
                  после достижения этого лимита отклоняются.
-        categories: pd.DataFrame. Категории товаров с весами. Для дропов покупателей.
         """
+        self.configs = configs
         self.txn_part_data = base.part_data
         self.amt_hand = base.amt_hand
         self.acc_hand = base.acc_hand
@@ -49,7 +51,8 @@ class CreateDropTxn:
         self.out_txns = 0
         self.in_lim = configs.in_lim
         self.out_lim = configs.out_lim
-        self.categories = categories
+        if isinstance(self.configs, DropPurchaserCfg):
+            self.categories = configs.categories
         self.last_txn = None
 
     def category_and_channel(self, dist):
@@ -65,6 +68,10 @@ class CreateDropTxn:
             channel = "crypto_exchange"
             category_name = "balance_top_up"
             return channel, category_name
+        
+        assert isinstance(self.configs, DropPurchaserCfg), \
+            f"""'ecom' and sampling categories work only for DropPurchaserCfg object.
+            But {type(self.configs)} was passed"""
         
         # Покупка в интернете
         channel = "ecom"

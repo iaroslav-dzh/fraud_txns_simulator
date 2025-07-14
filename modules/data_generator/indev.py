@@ -7,10 +7,6 @@ from dataclasses import dataclass
 from typing import Union
 
 from data_generator.configs import DropDistributorCfg, DropPurchaserCfg
-from data_generator.fraud.drops.base import DropAccountHandler, DropAmountHandler
-from data_generator.fraud.drops.behavior import DistBehaviorHandler, PurchBehaviorHandler
-from  data_generator.fraud.txndata import DropTxnPartData
-from data_generator.fraud.drops.time import DropTimeHandler
 
 
 class DropConfigBuilder:
@@ -24,7 +20,7 @@ class DropConfigBuilder:
     drop_cfg: dict. Конфиги из drops.yaml
     drops: gdp.GeoDataframe. Семплированные клиенты для дроп фрода.
     """
-    def __init__(self, base_cfg, fraud_cfg, drop_cfg):
+    def __init__(self, base_cfg: dict, fraud_cfg: dict, drop_cfg: dict):
         """
         base_cfg: dict. Конфиги из base.yaml
         fraud_cfg: dict. Конфиги из fraud.yaml
@@ -160,6 +156,7 @@ class DropConfigBuilder:
                                   crypto_rate=crypto_rate
                                   )
 
+
     def build_purch_cfg(self):
         """
         Создать конфиг датакласс для дропов покупателей (purchasers).
@@ -168,60 +165,41 @@ class DropConfigBuilder:
         cleaned_data = "cleaned_data"
         generated_data = "generated_data"
         drop_cfg = self.drop_cfg
-        dist_cfg = drop_cfg["purchaser"]
+        purch_cfg = drop_cfg["purchaser"]
         time_cfg = drop_cfg["time"]
         
         clients = self.get_clients_for_drops(drop_type="purchaser")
         timestamps = self.read_file(category=generated_data, file_key="timestamps")
         accounts = self.read_file(category=generated_data, file_key="accounts")
-        outer_accounts = self.read_file(category=generated_data, file_key="outer_accounts").iloc[:,0] # нужны в виде серии
         client_devices = self.read_file(category=cleaned_data, file_key="client_devices")
-        online_merchant_ids = self.read_file(category=cleaned_data, file_key="online_merchant_ids").iloc[:,0] # нужны в виде серии
+        online_merchant_ids = self.read_file(category=cleaned_data, \
+                                             file_key="online_merchant_ids").iloc[:,0] # нужны в виде серии
+        categories = self.read_file(category=cleaned_data, file_key="drop_purch_cats")
         cities = self.read_file(category=cleaned_data, file_key="districts_ru")
-        in_lim = dist_cfg["in_lim"]
-        out_lim = dist_cfg["out_lim"]
-        period_in_lim = dist_cfg["period_in_lim"]
-        period_out_lim = dist_cfg["period_out_lim"]
+        in_lim = purch_cfg["in_lim"]
+        out_lim = purch_cfg["out_lim"]
+        period_in_lim = purch_cfg["period_in_lim"]
+        period_out_lim = purch_cfg["period_out_lim"]
         inbound_amt = drop_cfg["inbound_amt"]
-        split_rate = dist_cfg["split_rate"]
-        chunks = dist_cfg["chunks"]
-        amt_max = dist_cfg["amt_max"]
-        reduce_share = dist_cfg["reduce_share"]
-        round = dist_cfg["round"]
+        split_rate = purch_cfg["split_rate"]
+        chunks = purch_cfg["chunks"]
+        amt_max = purch_cfg["amt_max"]
+        reduce_share = purch_cfg["reduce_share"]
+        round = purch_cfg["round"]
         lag_interval = time_cfg["lag_interval"]
         two_way_delta = time_cfg["two_way_delta"]
         pos_delta = time_cfg["pos_delta"]
-        attempts = dist_cfg["attempts"]
-        to_drops = dist_cfg["to_drops"]
-        crypto_rate = dist_cfg["crypto_rate"]
+        attempts = purch_cfg["attempts"]
 
         return DropPurchaserCfg(clients=clients, timestamps=timestamps, accounts=accounts, \
-                                  outer_accounts=outer_accounts, client_devices=client_devices, \
-                                  online_merchant_ids=online_merchant_ids, cities=cities, in_lim=in_lim, 
-                                  out_lim=out_lim, period_in_lim=period_in_lim, period_out_lim=period_out_lim, \
-                                  lag_interval=lag_interval, two_way_delta=two_way_delta, pos_delta=pos_delta, \
-                                  split_rate=split_rate, chunks=chunks, inbound_amt=inbound_amt, round=round, \
-                                  amt_max=amt_max, reduce_share=reduce_share, attempts=attempts
-                                  )
-    
-
-    # . Агрегатор базовых классов для дропов
-
-    @dataclass
-    class DropBaseClasses:
-        """
-        acc_hand: DropAccountHandler. Управление счетами транзакций.
-        amt_hand: DropAmountHandler. Управление суммами транзакций.
-        part_data: DropTxnPartData. Генерация части данных транзакции:
-                гео, ip, город, мерчант id и т.п.
-        time_hand: DropTimeHandler. Генерация времени транзакций.
-        behav_hand: DistBehaviorHandler| PurchBehaviorHandler. Управление поведением дропа
-        """
-        acc_hand: DropAccountHandler
-        amt_hand: DropAmountHandler
-        part_data: DropTxnPartData
-        time_hand: DropTimeHandler
-        behav_hand: Union[DistBehaviorHandler, PurchBehaviorHandler]
+                                client_devices=client_devices, \
+                                online_merchant_ids=online_merchant_ids, categories=categories, 
+                                cities=cities, in_lim=in_lim, out_lim=out_lim, period_in_lim=period_in_lim, \
+                                period_out_lim=period_out_lim, lag_interval=lag_interval, \
+                                two_way_delta=two_way_delta, pos_delta=pos_delta, split_rate=split_rate, \
+                                chunks=chunks, inbound_amt=inbound_amt, round=round, \
+                                amt_max=amt_max, reduce_share=reduce_share, attempts=attempts
+                                )
 
         
 

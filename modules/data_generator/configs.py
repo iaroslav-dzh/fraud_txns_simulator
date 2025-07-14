@@ -121,6 +121,7 @@ class DropPurchaserCfg:
     outer_accounts: pd.Series. Номера внешних счетов для транзакций вне банка.
     client_devices: pd.DataFrame
     online_merchant_ids: pd.Series
+    categories: pd.DataFrame. Категории специально для дропов покупателей.
     cities: pd.DataFrame
     in_lim: int. лимит входящих транзакций. После его достижения - отклонение всех операций клиента
     out_lim: int. лимит исходящих транзакций. После его достижения - отклонение всех операций клиента
@@ -152,6 +153,7 @@ class DropPurchaserCfg:
     accounts: pd.DataFrame
     client_devices: pd.DataFrame
     online_merchant_ids: pd.Series
+    categories: pd.DataFrame
     cities: pd.DataFrame
     in_lim: int
     out_lim: int
