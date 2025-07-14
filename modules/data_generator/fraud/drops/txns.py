@@ -3,7 +3,7 @@ import numpy as np
 from typing import Union
 
 from data_generator.configs import DropDistributorCfg, DropPurchaserCfg
-from data_generator.fraud.drops.builder import DropBaseClasses
+from data_generator.fraud.drops.build.builder import DropBaseClasses
 from data_generator.utils import build_transaction
 
 class CreateDropTxn:

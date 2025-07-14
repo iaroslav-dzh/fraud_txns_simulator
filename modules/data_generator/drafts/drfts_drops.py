@@ -131,3 +131,16 @@ part_data = PartData(configs)
 base_classes = BaseCls(acc_hand, amt_hand, time_hand, behav_hand, part_data) # индивидуальный behav_hand
 
 create_txn = CreateTxn(configs, base_classes) 
+
+
+class DropBaseClasses:
+    """
+    acc_hand: DropAccountHandler. Управление счетами транзакций.
+    amt_hand: DropAmountHandler. Управление суммами транзакций.
+    part_data: DropTxnPartData. Генерация части данных транзакции:
+            гео, ip, город, мерчант id и т.п.
+    time_hand: DropTimeHandler. Генерация времени транзакций.
+    behav_hand: DistBehaviorHandler| PurchBehaviorHandler. Управление поведением дропа
+    """
+    def __init__(self, configs: DropConfigBuilder):
+        self.acc_hand = configs

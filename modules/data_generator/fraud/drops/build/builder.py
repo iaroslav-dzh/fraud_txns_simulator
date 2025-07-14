@@ -1,0 +1,97 @@
+import pandas as pd
+import geopandas as gpd
+import numpy as np
+import pyarrow
+import os
+from dataclasses import dataclass
+from typing import Union
+
+from data_generator.configs import DropDistributorCfg, DropPurchaserCfg
+# from data_generator.fraud.drops.build.config import DropConfigBuilder
+from data_generator.fraud.drops.base import DropAccountHandler, DropAmountHandler
+from data_generator.fraud.drops.behavior import DistBehaviorHandler, PurchBehaviorHandler
+from  data_generator.fraud.txndata import DropTxnPartData
+from data_generator.fraud.drops.time import DropTimeHandler
+
+# 1. Агрегатор базовых классов для дропов
+
+
+class DropBaseClasses:
+    """
+    Создание объектов основных классов для дропов.
+    Можно создать выборочно, можно сразу все
+    Объекты пишутся в свои атрибуты.
+    --------
+    configs
+    """
+    def __init__(self, configs):
+        """
+        configs: DropDistributorCfg | DropPurchaserCfg.
+                 Параметры и конфиги для генерации фрода.
+        """
+
+        self.configs = configs
+        self.acc_hand = None
+        self.amt_hand = None
+        self.time_hand = None
+        self.behav_hand = None
+        self.part_data = None
+
+    def build_acc_hand(self):
+        """
+        Создать объект DropAccountHandler.
+        Объект пишется в атрибут acc_hand.
+        """
+        self.acc_hand = DropAccountHandler(self.configs)
+
+    def build_amt_hand(self):
+        """
+        Создать объект DropAmountHandler.
+        Объект пишется в атрибут amt_hand.
+        """
+        self.amt_hand = DropAmountHandler(self.configs)
+
+    def build_time_hand(self):
+        """
+        Создать объект DropTimeHandler
+        Объект пишется в атрибут time_hand.
+        """
+        self.time_hand = DropTimeHandler(self.configs)
+
+    def build_behav_hand(self, drop_type):
+        """
+        Создать объект DistBehaviorHandler или PurchBehaviorHandler.
+        Зависит от типа переданного configs при создании этого класса.
+        Объект пишется в атрибут behav_hand.
+        ----------
+        drop_type: str. 'distributor' либо 'purchaser'
+        """
+        self.build_amt_hand()
+        amt_hand = self.amt_hand
+        configs = self.configs
+        
+        if drop_type == "distributor":
+            self.behav_hand = DistBehaviorHandler(configs=configs, amt_hand=amt_hand)
+            
+        elif drop_type == "purchaser":
+            self.behav_hand = PurchBehaviorHandler(configs=configs, amt_hand=amt_hand)
+            
+    def build_part_data(self):
+        """
+        Создать объект DropTxnPartData.
+        Объект пишется в атрибут part_data.
+        """
+        self.part_data = DropTxnPartData(self.configs)
+
+    
+    def build_all(self, drop_type):
+        """
+        Создать объекты всех классов и записать их в атрибуты.
+        ----------
+        drop_type: str. 'distributor' либо 'purchaser'
+        """
+        self.build_acc_hand()
+        self.build_amt_hand()
+        self.build_time_hand()
+        self.build_behav_hand(drop_type=drop_type)
+        self.build_part_data()
