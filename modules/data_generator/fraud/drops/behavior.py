@@ -145,19 +145,16 @@ class DistBehaviorHandler:
         return np.random.uniform(0,1) < to_crypto_rate
 
 
-    def stop_after_decline(self, declined):
+    def stop_after_decline(self):
         """
         Будет ли дроп пытаться еще после отклоненной операции
         или остановится.
-        Подразумевается что этот метод используется в цикле перед
-        методом self.limit_reached()
         ---------------
-        declined: bool. Отклонена ли предыдущая операция.
-                  
         """
-        # Если предыдущая транзакция уже была отклонена
-        if not declined:
-            return
+        declined_txns = self.amt_hand.declined_txns
+
+        if declined_txns == 0:
+            return False
         if self.attempts == 0:
             return True
         if self.attempts > 0:
@@ -175,7 +172,7 @@ class DistBehaviorHandler:
         """
         declined_txns = self.amt_hand.declined_txns
 
-        if not declined_txns != 1:
+        if declined_txns != 1:
             return
         
         online = self.online
@@ -184,13 +181,15 @@ class DistBehaviorHandler:
             trf_min = self.attempts_cfg["trf_min"]
             trf_max = self.attempts_cfg["trf_max"]
             self.attempts = np.random.randint(trf_min, trf_max + 1)
+            # print("attempts", self.attempts)
             return
         # Для снятий.
         atm_min = self.attempts_cfg["atm_min"]
         atm_max = self.attempts_cfg["atm_max"]
         self.attempts = np.random.randint(atm_min, atm_max + 1)
-
+        # print("attempts", self.attempts)
             
+
     def deduct_attempts(self):
         """
         Вычитание попытки исходящей транзакции совершенной
@@ -303,25 +302,22 @@ class PurchBehaviorHandler:
             self.in_chunks = False
 
 
-    def stop_after_decline(self, declined):
+    def stop_after_decline(self):
         """
         Будет ли дроп пытаться еще после отклоненной операции
         или остановится.
-        Подразумевается что этот метод используется в цикле перед
-        методом self.limit_reached()
         ---------------
-        declined: bool. Отклонена ли предыдущая операция.
-                  
         """
-        # Если предыдущая транзакция уже была отклонена
-        if not declined:
-            return
+        declined_txns = self.amt_hand.declined_txns
+
+        if declined_txns == 0:
+            return False
         if self.attempts == 0:
             return True
         if self.attempts > 0:
             return False
 
-            
+
     def attempts_after_decline(self):
         """
         Рандомизация количества попыток дропа совершить операцию после первой
@@ -331,13 +327,13 @@ class PurchBehaviorHandler:
         """
         declined_txns = self.amt_hand.declined_txns
         
-        if not declined_txns != 1:
+        if declined_txns != 1:
             return
         
         att_min = self.attempts_cfg["min"]
         att_max = self.attempts_cfg["max"]
         self.attempts = np.random.randint(att_min, att_max + 1)
-
+        print("attempts", self.attempts)
             
     def deduct_attempts(self):
         """

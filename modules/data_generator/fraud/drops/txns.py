@@ -111,12 +111,13 @@ class CreateDropTxn:
             return status, is_fraud, rule
         
 
-    def trf_or_atm(self, declined, to_drop, receive=False):
+    def trf_or_atm(self, dist, declined, to_drop, receive=False):
         """
         Один входящий/исходящий перевод либо одно снятие в банкомате.
         ---------------------
-        declined - bool. Будет ли текущая транзакция отклонена.
-        receive - входящий перевод или нет.
+        dist: bool. Тип дропа. True - distributor. False - purchaser.
+        declined: bool. Будет ли текущая транзакция отклонена.
+        receive: входящий перевод или нет.
         """
         client_id = self.txn_part_data.client_info.client_id # берем из namedtuple
         
@@ -130,7 +131,7 @@ class CreateDropTxn:
         # self.behav_hand.in_chunks_val() вызывается вовне. До захода в цикл while balance > 0
         # self.behav_hand.guide_scenario() вызывается вовне. В начале while balance > 0
         online = self.behav_hand.online
-        in_chunks = self.behav_hand.in_chunks\
+        in_chunks = self.behav_hand.in_chunks
 
         # перевод дропу
         if receive:
@@ -157,14 +158,7 @@ class CreateDropTxn:
         if not receive:
             amount = self.amt_hand.one_operation(online=online, declined=declined, in_chunks=in_chunks)
 
-        if declined:
-            status = "declined"
-            is_fraud = True
-            rule = "drop_flow_cashout"
-        else:
-            status = "approved"
-            is_fraud = False
-            rule = "not applicable"
+        status, is_fraud, rule = self.status_and_rule(declined=declined, dist=dist)
 
         # Статичные характеристики
         is_suspicious = False
@@ -231,9 +225,9 @@ class CreateDropTxn:
         ------------------------
         Вернет True если какой либо лимит достигнут
         """
-        if self.in_lim == self.in_txns:
+        if self.in_lim <= self.in_txns:
             return True
-        if self.out_lim == self.out_txns:
+        if self.out_lim <= self.out_txns:
             return True
         return False
 

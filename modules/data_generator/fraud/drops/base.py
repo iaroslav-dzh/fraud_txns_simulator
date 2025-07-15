@@ -382,7 +382,7 @@ class DropAmountHandler:
         # Если баланс меньше одной части. Пробуем перевести то что осталось
         rest = self.balance
         self.update_balance(amount=rest, receive=False, declined=declined)
-        self.count_and_cache(declined=declined, amount=amount)
+        self.count_and_cache(declined=declined, amount=rest)
         return rest
 
 
