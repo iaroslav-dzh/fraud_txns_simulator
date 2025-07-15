@@ -386,22 +386,20 @@ class DropAmountHandler:
         return rest
 
 
-    def reset_cache(self, life_end=False):
+    def reset_cache(self, all=False):
         """
         Сброс кэшированных значений
         -----------------
-        life_end: bool. Если True - сброс всего.
+        all: bool. Если True - сброс всего.
             Если False, то только self.batch_txns
             и self.chunk_size
         """
-        if not life_end:
-            self.batch_txns = 0
-            self.chunk_size = 0
+        self.batch_txns = 0
+        self.chunk_size = 0
+        if not all:
             return
         
-        self.batch_txns = 0
         self.balance = 0
-        self.chunk_size = 0
         self.last_amt = 0
         self.first_decl = 0
         self.declined_txns = 0

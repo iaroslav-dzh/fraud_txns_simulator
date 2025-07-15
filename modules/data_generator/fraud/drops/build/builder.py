@@ -22,14 +22,25 @@ class DropBaseClasses:
     Можно создать выборочно, можно сразу все
     Объекты пишутся в свои атрибуты.
     --------
-    configs
+    configs: DropDistributorCfg | DropPurchaserCfg.
+             Данные для создания транзакций: отсюда берем номера 
+             счетов клиентов и внешних счетов.
+    acc_hand: DropAccountHandler. Генератор номеров счетов входящих/исходящих транзакций.
+              Учет использованных счетов.
+    amt_hand: DropAmountHandler. Генератор сумм входящих/исходящих транзакций, сумм снятий.
+              Управление балансом текущего дропа.
+    time_hand: DropTimeHandler.
+               Управление временем транзакций дропа.
+    behav_hand: DistBehaviorHandler | PurchBehaviorHandler.
+                Управление поведением дропа: распределителя или покупателя.
+    part_data: DropTxnPartData.
+               Генерация части данных о транзакции дропа.
     """
     def __init__(self, configs):
         """
         configs: DropDistributorCfg | DropPurchaserCfg.
                  Параметры и конфиги для генерации фрода.
         """
-
         self.configs = configs
         self.acc_hand = None
         self.amt_hand = None

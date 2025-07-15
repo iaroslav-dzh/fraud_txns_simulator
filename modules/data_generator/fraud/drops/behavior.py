@@ -164,16 +164,18 @@ class DistBehaviorHandler:
             return False
 
             
-    def attempts_after_decline(self, declined):
+    def attempts_after_decline(self):
         """
         Рандомизация количества попыток дропа совершить операцию после первой
         отклоненной транзакции.
         Зависит от self.online. Для онлайна и оффлайна можно ставить свои
         границы попыток.
-        ---------------
-        declined: отклоняется ли текущая транзакция.
+        Количество попыток определяется когда есть только одна отклоненная транзакция
+        на данный момент. Т.к. нужно задать число попыток только один раз.
         """
-        if not declined:
+        declined_txns = self.amt_hand.declined_txns
+
+        if not declined_txns != 1:
             return
         
         online = self.online
@@ -189,17 +191,21 @@ class DistBehaviorHandler:
         self.attempts = np.random.randint(atm_min, atm_max + 1)
 
             
-    def deduct_attempts(self, declined, receive=False):
+    def deduct_attempts(self):
         """
-        Вычитание попытки исходящей операции совершенной при статусе declined
-        ---------------
-        declined - bool. Отклоняется ли текущая транзакция
-        receive - bool. Является ли транзакция входящей
+        Вычитание попытки исходящей транзакции совершенной
+        после первой отклоненной транзакции.
+        В частности зависит от счетчика self.amt_hand.declined_txns.
         """
+        declined_txns = self.amt_hand.declined_txns
+
+        if declined_txns <= 1:
+            return
         if self.attempts == 0:
             return
-        if declined and not receive:
-            self.attempts -= 1
+        
+        # Иначе вычитаем попытку
+        self.attempts -= 1
 
 
     def reset_cache(self, all=False):
@@ -316,14 +322,16 @@ class PurchBehaviorHandler:
             return False
 
             
-    def attempts_after_decline(self, declined):
+    def attempts_after_decline(self):
         """
         Рандомизация количества попыток дропа совершить операцию после первой
         отклоненной транзакции.
-        ---------------
-        declined: отклоняется ли текущая транзакция.
+        Количество попыток определяется когда есть только одна отклоненная транзакция
+        на данный момент. Т.к. нужно задать число попыток только один раз.
         """
-        if not declined:
+        declined_txns = self.amt_hand.declined_txns
+        
+        if not declined_txns != 1:
             return
         
         att_min = self.attempts_cfg["min"]
@@ -331,17 +339,20 @@ class PurchBehaviorHandler:
         self.attempts = np.random.randint(att_min, att_max + 1)
 
             
-    def deduct_attempts(self, declined, receive=False):
+    def deduct_attempts(self):
         """
-        Вычитание попытки исходящей операции совершенной при статусе declined
-        ---------------
-        declined - bool. Отклоняется ли текущая транзакция
-        receive - bool. Является ли транзакция входящей
+        Вычитание попытки исходящей транзакции совершенной
+        после первой отклоненной транзакции.
         """
+        declined_txns = self.amt_hand.declined_txns
+
+        if declined_txns <= 1:
+            return
         if self.attempts == 0:
             return
-        if declined and not receive:
-            self.attempts -= 1
+        
+        # Иначе вычитаем попытку
+        self.attempts -= 1
 
 
     def reset_cache(self, all=False):
