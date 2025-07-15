@@ -5,6 +5,7 @@ from data_generator.fraud.drops.txns import CreateDropTxn
 
 class DropBatchHandler:
     """
+    drop_type: str. 'distributor' или 'purchaser'
     amt_hand: DropAmountHandler. Генератор сумм входящих/исходящих транзакций, сумм снятий.
               Управление балансом текущего дропа.
     behav_hand: DistBehaviorHandler | PurchBehaviorHandler.
@@ -19,14 +20,13 @@ class DropBatchHandler:
         base: DropBaseClasses. Объекты основных классов для дропов.
         create_txn: CreateDropTxn. Создание транзакций.
         """
-        # self.acc_hand = base.acc_hand - наверное это в lifecycle нужно
+        self.drop_type = base.drop_type
         self.amt_hand = base.amt_hand
-        # self.time_hand = base.time_hand - это тут не нужно
         self.behav_hand = base.behav_hand
-        # self.part_data = base.part_data - это тут не нужно
         self.create_txn = create_txn
-        self.declined = False # МБ переписать в метод property как ГПТ советовал
+        self.declined = False
         self.txns_fm_batch = []
+
 
     def should_decline(self):
         """
@@ -37,6 +37,7 @@ class DropBatchHandler:
         self.declined = self.create_txn.limit_reached()
         # print("is_declined", self.declined)
         return self.declined
+
 
     def reset_cache(self, all=False):
         """
@@ -52,8 +53,8 @@ class DropBatchHandler:
         amt_hand = self.amt_hand
 
         self.txns_fm_batch = []
-        behav_hand.reset_cache(all=all)
         amt_hand.reset_cache(all=all)
+        behav_hand.reset_cache(all=all)
 
         if not all:
             return
@@ -123,15 +124,16 @@ class DropBatchHandler:
                 break
 
 
-    def process_batch(self, dist):
+    def process_batch(self):
         """
         Вызов соответствующего типу дропа метода для обработки
         батча денег.
+        Метод выбирается исходя из self.drop_type.
         ---------
-        dist: bool. True - distributor
-              False - purchaser'
         """
-        if dist:
+        drop_type = self.drop_type
+
+        if drop_type == "distributor":
             self.distributor()
-        else:
+        elif drop_type == "purchaser":
             self.purchaser()

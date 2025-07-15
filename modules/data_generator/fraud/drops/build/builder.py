@@ -22,6 +22,7 @@ class DropBaseClasses:
     Можно создать выборочно, можно сразу все
     Объекты пишутся в свои атрибуты.
     --------
+    drop_type: str. 'distributor' или 'purchaser'
     configs: DropDistributorCfg | DropPurchaserCfg.
              Данные для создания транзакций: отсюда берем номера 
              счетов клиентов и внешних счетов.
@@ -36,11 +37,13 @@ class DropBaseClasses:
     part_data: DropTxnPartData.
                Генерация части данных о транзакции дропа.
     """
-    def __init__(self, configs):
+    def __init__(self, drop_type, configs):
         """
+        drop_type: str. 'distributor' или 'purchaser'
         configs: DropDistributorCfg | DropPurchaserCfg.
                  Параметры и конфиги для генерации фрода.
         """
+        self.drop_type = drop_type
         self.configs = configs
         self.acc_hand = None
         self.amt_hand = None
@@ -69,16 +72,15 @@ class DropBaseClasses:
         """
         self.time_hand = DropTimeHandler(self.configs)
 
-    def build_behav_hand(self, drop_type):
+    def build_behav_hand(self):
         """
         Создать объект DistBehaviorHandler или PurchBehaviorHandler.
-        Зависит от типа переданного configs при создании этого класса.
+        Зависит от переданного drop_type при создании этого класса.
         Объект пишется в атрибут behav_hand.
-        ----------
-        drop_type: str. 'distributor' либо 'purchaser'
         """
         self.build_amt_hand()
         amt_hand = self.amt_hand
+        drop_type = self.drop_type
         configs = self.configs
         
         if drop_type == "distributor":
@@ -95,14 +97,12 @@ class DropBaseClasses:
         self.part_data = DropTxnPartData(self.configs)
 
     
-    def build_all(self, drop_type):
+    def build_all(self):
         """
         Создать объекты всех классов и записать их в атрибуты.
-        ----------
-        drop_type: str. 'distributor' либо 'purchaser'
         """
         self.build_acc_hand()
         self.build_amt_hand()
         self.build_time_hand()
-        self.build_behav_hand(drop_type=drop_type)
+        self.build_behav_hand()
         self.build_part_data()

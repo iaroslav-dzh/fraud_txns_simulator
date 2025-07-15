@@ -63,3 +63,17 @@ class DropLifecycleManager:
             
         self.reset_all_caches() # сброс всего кэша после завершения активности дропа
   
+while True:
+    declined = batch_hand.declined
+    receive_txn3 = cr_drop_txn1.trf_or_atm(dist=False, receive=True, to_drop=False, declined=declined)
+    all_txns3.append(receive_txn3)
+    if declined:
+        break
+        
+    behav_hand1.sample_scenario() # выбрать сценарий
+    behav_hand1.in_chunks_val() # транзакции по частям или нет 
+
+    batch_hand.process_batch(dist=False)
+    txns_fm_batch3 = batch_hand.txns_fm_batch
+    all_txns3.extend(txns_fm_batch3)
+    batch_hand.reset_cache(all=False)

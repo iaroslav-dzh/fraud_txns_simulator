@@ -333,7 +333,7 @@ class PurchBehaviorHandler:
         att_min = self.attempts_cfg["min"]
         att_max = self.attempts_cfg["max"]
         self.attempts = np.random.randint(att_min, att_max + 1)
-        print("attempts", self.attempts)
+        # print("attempts", self.attempts)
             
     def deduct_attempts(self):
         """
