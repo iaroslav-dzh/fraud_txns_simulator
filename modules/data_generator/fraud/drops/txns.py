@@ -10,6 +10,7 @@ class CreateDropTxn:
     """
     Создание транзакций дропа распределителя под разное поведение.
     -----------------
+    drop_type: str. 'distributor' или 'purchaser'
     configs: DropDistributorCfg | DropPurchaserCfg.
              Конфиги и данные для создания дроп транзакций.
     txn_part_data: DropTxnPartData. Генератор части данных транзакции - мерчант,
@@ -32,15 +33,9 @@ class CreateDropTxn:
         """
         configs: DropDistributorCfg | DropPurchaserCfg.
                  Конфиги и данные для создания дроп транзакций.
-        txn_part_data: DropTxnPartData. Генератор части данных транзакции - мерчант,
-                       гео, ip, девайс и т.п.
-        amt_hand: DropAmountHandler. Генератор активности дропов: суммы, счета, баланс.
-        acc_hand: DropAccountHandler. Генератор номеров счетов входящих/исходящих транзакций.
-                  Учет использованных счетов.
-        time_hand: DropTimeHandler. Управление временем транзакций дропа
-        behav_hand: DistBehaviorHandler. Управление поведением дропа.
-                 после достижения этого лимита отклоняются.
+        base: DropBaseClasses. Объекты основных классов для дропов.
         """
+        self.drop_type = base.drop_type
         self.configs = configs
         self.txn_part_data = base.part_data
         self.amt_hand = base.amt_hand
@@ -55,23 +50,22 @@ class CreateDropTxn:
             self.categories = configs.categories
         self.last_txn = None
 
-    def category_and_channel(self, dist):
+    def category_and_channel(self):
         """
         Генерация категории и канала транзакции
         ---------------
-        dist: bool. Дроп распределитель или покупатель.
-              True - пополнение баланса на криптобирже.
-              False - покупка в интернете.
         """
+        drop_type = self.drop_type
+        
         # Перевод на криптобиржу
-        if dist:
+        if drop_type == "distributor":
             channel = "crypto_exchange"
             category_name = "balance_top_up"
             return channel, category_name
         
-        assert isinstance(self.configs, DropPurchaserCfg), \
-            f"""'ecom' and sampling categories work only for DropPurchaserCfg object.
-            But {type(self.configs)} was passed"""
+        assert drop_type == "purchaser", \
+            f"""'ecom' and categories sampling work only for self.drop_type as 'purchaser'.
+            But {self.drop_type} was passed"""
         
         # Покупка в интернете
         channel = "ecom"
@@ -79,39 +73,41 @@ class CreateDropTxn:
                                 .sample(1, weights=self.categories.weight).iat[0]
         return channel, category_name
 
-    def status_and_rule(self, declined, dist):
+    def status_and_rule(self, declined):
         """
-        Статус транзакции, флаг is_fraud и правило
+        Статус транзакции, флаг is_fraud и правило.
+        Зависит от типа дропа self.drop_type
         -----------------
         declined: bool. Будет ли текущая транзакция отклонена.
-        dist: bool. Дроп распределитель или покупатель.
         """
-        if declined and dist:
+        drop_type = self.drop_type
+
+        if declined and drop_type == "distributor":
             status = "declined"
             is_fraud = True
             rule = "drop_flow_cashout"
             return status, is_fraud, rule
         
-        if not declined and dist:
+        if not declined and drop_type == "distributor":
             status = "approved"
             is_fraud = False
             rule = "not applicable"
             return status, is_fraud, rule
         
-        if declined and not dist:
+        if declined and drop_type == "purchaser":
             status = "declined"
             is_fraud = True
             rule = "drop_purchaser"
             return status, is_fraud, rule
         
-        if not declined and not dist:
+        if not declined and drop_type == "purchaser":
             status = "approved"
             is_fraud = False
             rule = "not applicable"
             return status, is_fraud, rule
         
 
-    def trf_or_atm(self, dist, declined, to_drop, receive=False):
+    def trf_or_atm(self, declined, to_drop, receive=False):
         """
         Один входящий/исходящий перевод либо одно снятие в банкомате.
         ---------------------
@@ -124,12 +120,6 @@ class CreateDropTxn:
         # Время транзакции. Оно должно быть создано до увеличения счетчика self.in_txns
         txn_time, txn_unix = self.time_hand.get_txn_time(receive=receive, in_txns=self.in_txns)
 
-        
-        # Метод задает атрибут self.behav_hand.online
-        # self.behav_hand.sample_scenario() вызывается вовне. До захода в цикл while balance > 0
-        # Метод задает атрибут self.behav_hand.in_chunks
-        # self.behav_hand.in_chunks_val() вызывается вовне. До захода в цикл while balance > 0
-        # self.behav_hand.guide_scenario() вызывается вовне. В начале while balance > 0
         online = self.behav_hand.online
         in_chunks = self.behav_hand.in_chunks
 
@@ -158,7 +148,7 @@ class CreateDropTxn:
         if not receive:
             amount = self.amt_hand.one_operation(online=online, declined=declined, in_chunks=in_chunks)
 
-        status, is_fraud, rule = self.status_and_rule(declined=declined, dist=dist)
+        status, is_fraud, rule = self.status_and_rule(declined=declined)
 
         # Статичные характеристики
         is_suspicious = False
@@ -173,7 +163,7 @@ class CreateDropTxn:
         return self.last_txn
 
 
-    def purchase(self, declined, dist):
+    def purchase(self, declined):
         """
         Покупка дропом. На данный момент для крипты.
         --------------
@@ -193,6 +183,7 @@ class CreateDropTxn:
         self.out_txns += 1
 
         # Брать ли данные последней транзакции. Для случаев когда это дроп распределитель
+        dist = self.drop_type == "distributor"
         get_cached = self.txn_part_data.check_previous(dist=dist, last_full=self.last_txn)
 
         # Генерация части данных транзакции. Здесь прописывается аргумент online
@@ -202,8 +193,8 @@ class CreateDropTxn:
         
         amount = self.amt_hand.one_operation(online=online, declined=declined, in_chunks=in_chunks)
 
-        channel, category_name = self.category_and_channel(dist=dist)
-        status, is_fraud, rule = self.status_and_rule(declined=declined, dist=dist)
+        channel, category_name = self.category_and_channel()
+        status, is_fraud, rule = self.status_and_rule(declined=declined)
 
         # Статичные характеристики
         is_suspicious = False

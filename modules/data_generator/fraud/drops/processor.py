@@ -5,6 +5,8 @@ from data_generator.fraud.drops.txns import CreateDropTxn
 
 class DropBatchHandler:
     """
+    Обработка полученной дропом партии (батча) денег
+    ---------------------------
     drop_type: str. 'distributor' или 'purchaser'
     amt_hand: DropAmountHandler. Генератор сумм входящих/исходящих транзакций, сумм снятий.
               Управление балансом текущего дропа.
@@ -77,10 +79,10 @@ class DropBatchHandler:
             behav_hand.guide_scenario()
 
             if behav_hand.to_crypto: # перевод на криптобиржу или нет
-                txn_out = create_txn.purchase(declined=declined, dist=True)
+                txn_out = create_txn.purchase(declined=declined)
             else: # Иначе перевод/снятие
                 to_drop = behav_hand.to_drop # Пробовать ли перевести другому дропу.
-                txn_out = create_txn.trf_or_atm(dist=True, receive=False, 
+                txn_out = create_txn.trf_or_atm(receive=False, 
                                     to_drop=to_drop, declined=declined)
             # Добавляем в список транз-ций батча   
             self.txns_fm_batch.append(txn_out)
@@ -109,7 +111,7 @@ class DropBatchHandler:
         while amt_hand.balance > 0:
             declined = self.should_decline() # будет ли отклонена транзакция
 
-            txn_out = create_txn.purchase(declined=declined, dist=False)
+            txn_out = create_txn.purchase(declined=declined)
             self.txns_fm_batch.append(txn_out)
             
             # Сколько попыток будет после первой откл. транз-ции

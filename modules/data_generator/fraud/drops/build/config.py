@@ -1,17 +1,9 @@
 import pandas as pd
 import geopandas as gpd
-import numpy as np
 import pyarrow
 import os
-# from dataclasses import dataclass
-# from typing import Union
 
 from data_generator.configs import DropDistributorCfg, DropPurchaserCfg
-# from data_generator.fraud.drops.base import DropAccountHandler, DropAmountHandler
-# from data_generator.fraud.drops.behavior import DistBehaviorHandler, PurchBehaviorHandler
-# from  data_generator.fraud.txndata import DropTxnPartData
-# from data_generator.fraud.drops.time import DropTimeHandler
-
 
 # 1. Конструктор объектов конфиг датаклассов
 class DropConfigBuilder:
@@ -72,10 +64,12 @@ class DropConfigBuilder:
         # подсчет количества транзакций равных 1% от всех транзакций
         # т.к. не все транзакции еще созданные, то считаем основываясь на количестве легальных транзакций и fraud rate
         one_perc = round(legit_count / ((1 - fraud_rate) * 100))
-        # Один процент транзакций умножаем на долю транзакций дропов нужного типа 
+        # Абсолютное кол-во всего фрода
+        fraud_abs = one_perc * fraud_rate * 100
+        # Абсолютное кол-во фрод транзакций умножаем на долю транзакций дропов нужного типа 
         # и делим на максимальное количество исх. транз-ций которое дроп может сделать до детекта.
         # Так находим сколько примерно дропов будет под такой фрод
-        drops_count = round(one_perc * drop_share / out_lim) 
+        drops_count = round(fraud_abs * drop_share / out_lim) 
         return drops_count
     
 
@@ -84,7 +78,6 @@ class DropConfigBuilder:
         drop_type: str. Тип дропов: 'distributor' или 'purchaser'
         """
         drops_count = self.estimate_drops_count(drop_type=drop_type)
-        # legit_txns = self.read_file(category="generated_data", file_key="legit_txns")
         clients_sample = self.read_file(category="cleaned_data", file_key="clients_sample")
         all_clients = self.read_file(category="cleaned_data", file_key="clients_with_geo")
 
@@ -116,6 +109,28 @@ class DropConfigBuilder:
         return drops_samp
 
 
+    def read_by_precedence(self, category, file_key_01, file_key_02):
+        """
+        Чтение файла по приоритету и наличию.
+        Проверить наличие файла file_key_01, если он есть, то загрузить его.
+        Если его нет то проверить начличие файла file_key_02 и загрузить его если он есть.
+        ------------------
+        category: str. Напр. 'cleaned_data', 'generated_data'.
+        file_key_01: str. Ключ к файлу в yaml конфиге.
+        file_key_02: str. Ключ к файлу в yaml конфиге.
+        """
+        path_01 = self.base_cfg["data_paths"][category][file_key_01]
+        path_02 = self.base_cfg["data_paths"][category][file_key_02]
+
+        if os.path.exists(path_01):
+            return self.read_file(category=category, file_key=file_key_01)
+        elif os.path.exists(path_02):
+            return self.read_file(category=category, file_key=file_key_02)
+        else:
+            raise ValueError(f"""No files found under: {category}.{file_key_01}
+            or {category}.{file_key_02}""")
+
+
     def build_dist_cfg(self):
         """
         Создать конфиг датакласс для дропов распределителей (distributors).
@@ -129,7 +144,7 @@ class DropConfigBuilder:
         
         clients = self.get_clients_for_drops(drop_type="distributor")
         timestamps = self.read_file(category=generated_data, file_key="timestamps")
-        accounts = self.read_file(category=generated_data, file_key="accounts")
+        accounts= self.read_by_precedence(category=generated_data, file_key_01="accounts", file_key_02="accounts_default")
         outer_accounts = self.read_file(category=generated_data, file_key="outer_accounts").iloc[:,0] # нужны в виде серии
         client_devices = self.read_file(category=cleaned_data, file_key="client_devices")
         online_merchant_ids = self.read_file(category=cleaned_data, file_key="online_merchant_ids").iloc[:,0] # нужны в виде серии
@@ -175,7 +190,7 @@ class DropConfigBuilder:
         
         clients = self.get_clients_for_drops(drop_type="purchaser")
         timestamps = self.read_file(category=generated_data, file_key="timestamps")
-        accounts = self.read_file(category=generated_data, file_key="accounts")
+        accounts= self.read_by_precedence(category=generated_data, file_key_01="accounts", file_key_02="accounts_default")
         client_devices = self.read_file(category=cleaned_data, file_key="client_devices")
         online_merchant_ids = self.read_file(category=cleaned_data, \
                                              file_key="online_merchant_ids").iloc[:,0] # нужны в виде серии

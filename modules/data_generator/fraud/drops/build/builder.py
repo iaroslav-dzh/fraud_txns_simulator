@@ -1,13 +1,5 @@
-import pandas as pd
-import geopandas as gpd
-import numpy as np
-import pyarrow
-import os
-from dataclasses import dataclass
-from typing import Union
+# Конструктор основных классов для дропов
 
-from data_generator.configs import DropDistributorCfg, DropPurchaserCfg
-# from data_generator.fraud.drops.build.config import DropConfigBuilder
 from data_generator.fraud.drops.base import DropAccountHandler, DropAmountHandler
 from data_generator.fraud.drops.behavior import DistBehaviorHandler, PurchBehaviorHandler
 from  data_generator.fraud.txndata import DropTxnPartData

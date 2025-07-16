@@ -41,6 +41,7 @@ data_paths:
   generated_data:
     timestamps: "./data/generated_data/timestamps.parquet"
     legit_txns: "./data/generated_data/legit_trans_148K.parquet"
+    accounts_default: "./data/generated_data/accounts_default.csv"
     accounts: "./data/generated_data/accounts.csv"
     outer_accounts: "./data/generated_data/outer_accounts.csv"
     dist_drops: "./data/generated_data/dist_drops.gpkg"

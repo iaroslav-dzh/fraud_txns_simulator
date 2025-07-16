@@ -3,12 +3,34 @@
 from data_generator.fraud.drops.build.builder import DropBaseClasses
 from data_generator.fraud.drops.txns import CreateDropTxn
 from data_generator.fraud.drops.processor import DropBatchHandler
+from data_generator.utils import create_progress_bar
 
 class DropLifecycleManager:
     """
-    Полный жизненный цикл дропа.
+    Управление полным жизненный циклом одного дропа.
+    ------------------
+    drop_type: str. 'distributor' или 'purchaser'
+    acc_hand: DropAccountHandler. Генератор номеров счетов входящих/исходящих транзакций.
+              Учет использованных счетов.
+    amt_hand: DropAmountHandler. Генератор сумм входящих/исходящих транзакций, сумм снятий.
+              Управление балансом текущего дропа.
+    time_hand: DropTimeHandler.
+               Управление временем транзакций дропа.
+    behav_hand: DistBehaviorHandler | PurchBehaviorHandler.
+                Управление поведением дропа: распределителя или покупателя.
+    part_data: DropTxnPartData.
+               Генерация части данных о транзакции дропа.
+    behav_hand: DistBehaviorHandler | PurchBehaviorHandler.
+                Управление поведением дропа: распределителя или покупателя.
+    create_txn: CreateDropTxn. Создание транзакций.
+    batch_hand: DropBatchHandler. Обработка полученной дропом партии (батча) денег
+    drop_txns: list. Созданные транзакции дропа.
     """
     def __init__(self, base: DropBaseClasses, create_txn: CreateDropTxn):
+        """
+        base: DropBaseClasses. Объекты основных классов для дропов.
+        create_txn: CreateDropTxn. Создание транзакций.
+        """
         self.drop_type = base.drop_type
         self.acc_hand = base.acc_hand
         self.amt_hand = base.amt_hand
@@ -26,25 +48,11 @@ class DropLifecycleManager:
         """
         # Сброс всего кэша batch_hand включает в себя полный сброс кэша
         # в behav_hand и amt_hand
-        self.batch_hand.reset_cache(self, all=True)
+        self.batch_hand.reset_cache(all=True)
         self.time_hand.reset_cache()
         self.part_data.reset_cache()
         self.create_txn.reset_cache()
         
-
-    @property 
-    def get_dist(self):
-        """
-        получить булево значение типа дропа
-        distributor - True.
-        purchaser - False.
-        """
-        drop_type = self.drop_type
-
-        if drop_type == "distributor":
-            return True
-        elif drop_type == "purchaser":
-            return False
 
     def run_drop_lifecycle(self):
         # создать счет дропа, записать is_drop = True в таблице acc_hand.accounts
@@ -56,12 +64,12 @@ class DropLifecycleManager:
         behav_hand = self.behav_hand
         batch_hand = self.batch_hand
         create_txn = self.create_txn
-        dist = self.get_dist # флаг явлется ли дроп распределителем
 
         while True:
             declined = batch_hand.declined # статус транзакции. будет ли она отклонена
             # входящая транзакция. Новый батч денег.
-            receive_txn = create_txn.trf_or_atm(dist=dist, to_drop=False, receive=True) 
+            receive_txn = create_txn.trf_or_atm(declined=declined, \
+                                                to_drop=False, receive=True) 
             drop_txns = self.drop_txns
             drop_txns.append(receive_txn)
             # если у дропа достигнут лимит то транзакции отклоняются. 
@@ -72,12 +80,59 @@ class DropLifecycleManager:
             behav_hand.sample_scenario() # выбрать сценарий
             behav_hand.in_chunks_val() # транзакции по частям или нет
 
-            batch_hand.process_batch(dist=dist) # обработка полученного батча
+            batch_hand.process_batch() # обработка полученного батча
 
-            txns_fm_batch = self.txns_fm_batch
+            txns_fm_batch = batch_hand.txns_fm_batch
             drop_txns.extend(txns_fm_batch)
             # сброс кэша после завершения обработки батча
             batch_hand.reset_cache(all=False)
             
-        self.reset_all_caches() # сброс всего кэша после завершения активности дропа
+        # Кэш надо сбрасывать вне метода. После его исполнения. Т.к.
+        # надо же транзакции записать во внешний список
+
+
+# 2. Полная симуляция дропов
   
+class DropSimulator:
+    """
+    Генерация активности множества дропов.
+    ------------------------
+    drop_clients: pd.DataFrame. Клиенты которые будут дропами.
+    part_data: DropTxnPartData.
+            Генерация части данных о транзакции дропа.
+    acc_hand: DropAccountHandler. Генератор номеров счетов входящих/исходящих транзакций.
+            Учет использованных счетов.
+    life_manager: DropLifecycleManager. Управление полным жизненный циклом одного дропа.
+    """
+    def __init__(self, configs, base, create_txn):
+        """
+        configs: DropDistributorCfg | DropPurchaserCfg.
+                 Конфиги и данные для создания дроп транзакций.
+        base: Объекты основных классов для дропов. 
+        create_txn: CreateDropTxn. Создание транзакций.
+        """
+        self.drop_clients = configs.clients
+        self.part_data = base.part_data
+        self.acc_hand = base.acc_hand
+        self.life_manager = DropLifecycleManager(base=base, create_txn=create_txn)
+        self.all_txns = []
+    
+
+    def run(self):
+        drop_clients = self.drop_clients
+        progress_bar = create_progress_bar(drop_clients)
+        part_data = self.part_data
+        acc_hand = self.acc_hand
+        life_manager = self.life_manager
+        all_txns = self.all_txns
+
+        for client in drop_clients.itertuples():
+            part_data.client_info = client
+            acc_hand.client_id = client.client_id
+
+            life_manager.run_drop_lifecycle()
+            drop_txns = life_manager.drop_txns
+            all_txns.extend(drop_txns)
+
+            life_manager.reset_all_caches()
+            progress_bar.update(1)

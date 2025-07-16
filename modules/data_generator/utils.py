@@ -1,8 +1,8 @@
 # Модуль с общими вспомогательными функциями
 import pandas as pd
-import numpy as np
 from scipy.stats import truncnorm
 from pyproj import Geod
+from tqdm import tqdm
 
 # 1. 
 
@@ -133,3 +133,15 @@ def create_txns_df(configs):
         to_df[key] = pd.Series(dtype=data_type)
 
     return pd.DataFrame(to_df)
+
+
+# Создать прогрессбар
+def create_progress_bar(obj):
+    """
+    Создать tqdm прогресс бар.
+    Импортировать tqdm из tqdm
+    -------------
+    obj: Итерируемый объект.
+    """
+    total = len(obj)
+    return tqdm(total=total)
