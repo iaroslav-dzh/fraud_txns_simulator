@@ -123,7 +123,12 @@ class DropSimulator:
     
     def write_to_file(self, data, category, file_key):
         """
-        Запись данных в файл одного из
+        Запись данных в файл по пути из yaml конфига.
+        data: pd.DataFrame | gpd.DataFrame. Данные.
+        category: str. Категория файлов в yaml конфиге например:
+                  'cleaned_data', 'generated_data'. Соответсвует
+                  структуре папок в data/
+        file_key: str. Ключ к полному пути конкретного файла в категории.
         """
         path = self.base_cfg["data_paths"][category][file_key]
         file_type = path.split(".")[-1]
@@ -139,6 +144,9 @@ class DropSimulator:
 
 
     def run(self):
+        """
+        Полная генерация активности дропов соответсвующего типа
+        """
         drop_clients = self.drop_clients
         progress_bar = create_progress_bar(drop_clients)
         part_data = self.part_data
@@ -146,22 +154,33 @@ class DropSimulator:
         life_manager = self.life_manager
         all_txns = self.all_txns
 
+        # Итерируемся через семплированных клиентов под дроп
         for client in drop_clients.itertuples():
+            # Запись данных текущего клиента в атрибуты
+            # некоторых классов
             part_data.client_info = client
             acc_hand.client_id = client.client_id
 
+            # Генерация полного цикла активности одного дропа
             life_manager.run_drop_lifecycle()
+            # Запись транзакций дропа в общий список
             drop_txns = life_manager.drop_txns
             all_txns.extend(drop_txns)
 
+            # Сброс кэша дропа для следующей итерации
             life_manager.reset_all_caches()
             progress_bar.update(1)
         
+        # Запись измененного датафрейма accounts в csv файл
+        # Путь указывается в base.yaml
         accounts = acc_hand.accounts
         self.write_to_file(data=accounts, category="generated_data", \
                            file_key="accounts")
         
+        # Запись всех созданных транзакций дропов в parquet файл
+        # Путь указывается в base.yaml
         all_txns_df = pd.DataFrame(self.all_txns)
+
         if self.drop_type == "distributor":
             self.write_to_file(data=all_txns_df, category="generated_data", \
                            file_key="dist_drop_txns")
