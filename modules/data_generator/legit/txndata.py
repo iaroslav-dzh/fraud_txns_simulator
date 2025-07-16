@@ -1,4 +1,4 @@
-# Функции относящиеся только к генерации легальных транзакций
+# Генерация части данных транзакции
 
 
 # 1.
@@ -18,7 +18,6 @@ def get_txn_location_and_merchant(online, merchants_df, category_name, client_in
     # Комментарий себе на будущее. Если универсализировать это под фрод. То возможно надо только ip через доп. блок if-else определить
     # И соотвественно для фрод оффлайн передавать merchants_df без города клиента.
 
-    
     # Если онлайн покупка
     if online:
         merchant_id = online_merchant_ids.sample(n=1).iloc[0]
@@ -27,7 +26,7 @@ def get_txn_location_and_merchant(online, merchants_df, category_name, client_in
         trans_lon = client_info.lon
         # Также т.к. это не фрод, то просто берется home_ip и город из данных клиента.
         trans_ip = client_info.home_ip
-        trans_city = client_info.area
+        trans_city = client_info.city
         
     # Если оффлайн покупка    
     else:
@@ -38,6 +37,6 @@ def get_txn_location_and_merchant(online, merchants_df, category_name, client_in
         trans_lat = merchant["merchant_lat"].iloc[0]
         trans_lon = merchant["merchant_lon"].iloc[0]
         trans_ip = "not applicable"
-        trans_city = merchant["area"].iloc[0]
+        trans_city = merchant["city"].iloc[0]
 
     return merchant_id, trans_lat, trans_lon, trans_ip, trans_city

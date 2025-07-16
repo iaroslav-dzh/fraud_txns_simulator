@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 # 1. 
 
-def build_transaction(client_id, txn_time, txn_unix, amount, type, channel, category_name, online, merchant_id, \
+def build_transaction(client_id, txn_time, txn_unix, amount, txn_type, channel, category_name, online, merchant_id, \
                       trans_city, trans_lat, trans_lon, trans_ip, device_id, account, is_fraud, is_suspicious, \
                       status, rule):
     """
@@ -14,7 +14,7 @@ def build_transaction(client_id, txn_time, txn_unix, amount, type, channel, cate
     """
 
     txn_dict = {
-                "client_id": client_id, "txn_time": txn_time, "unix_time":txn_unix, "amount": amount, "type": type,
+                "client_id": client_id, "txn_time": txn_time, "unix_time":txn_unix, "amount": amount, "type": txn_type,
                 "channel": channel, "category": category_name, "online": online, "merchant_id": merchant_id,
                 "trans_city":trans_city, "trans_lat": trans_lat, "trans_lon": trans_lon, "trans_ip":trans_ip,
                 "device_id": device_id, "account": account, "is_fraud": is_fraud, "is_suspicious":is_suspicious, "status":status,

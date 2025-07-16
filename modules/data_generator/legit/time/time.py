@@ -3,7 +3,7 @@ import random
 import pandas as pd
 
 from data_generator.legit.time.utils import log_check_min_time
-from data_generator.general_time import pd_timestamp_to_unix
+from data_generator.general_time import pd_timestamp_to_unix, sample_time_for_trans
 
 # 1.
 
@@ -162,4 +162,57 @@ def check_min_interval_from_near_txn(client_txns, timestamp_sample, online, roun
         log_check_min_time(client_id=client_txns.client_id.iloc[0], txn_time=txn_time, txn_unix=txn_unix, online=online, \
                             closest_txn_offline=closest_txn_offline, closest_txn_online=closest_txn_online, last_txn=last_txn, \
                            close_flag=close_flag)
+        return txn_time, txn_unix
+    
+
+# 2.
+
+def get_legit_txn_time(trans_df, time_weights, timestamps, timestamps_1st_month, \
+                       legit_cfg, round_clock, online=None):
+    """
+    Генерация времени для легальной транзакции
+    ------------------------------------------
+    trans_df: pd.DataFrame. Транзакции текущего клиента. Откуда брать информацию по предыдущим транзакциям клиента
+    time_weights: pd.DataFrame. Веса часов в периоде времени
+    timestamps: pd.DataFrame. timestamps для генерации времени.
+    timestamps_1st_month: pd.DataFrame. сабсет timestamps отфильтрованный по первому месяцу и, 
+                          если применимо, году. Чтобы генерировать первые транзакции.
+    legit_cfg: dict. Конфиги легальных транзакция из legit.yaml  
+    round_clock: bool. Круглосуточная или дневная категория.
+    online: bool. Онлайн или оффлайн покупка. True or False
+    -------------------------------------------
+    Возвращает время для генерируемой транзакции в виде pd.Timestamp и в виде unix времени
+    """
+    
+    # Время последней транзакции клиента. pd.Timestamp
+    last_txn_time = trans_df.txn_time.max()
+    
+    # Если нет никакой предыдущей транзакции т.е. нет последнего времени совсем
+    if last_txn_time is pd.NaT:
+        # время транзакции в виде timestamp и unix time.
+        return sample_time_for_trans(timestamps=timestamps_1st_month, time_weights=time_weights)
+
+    # Если есть предыдущая транзакция
+
+    # берем случайный час передав веса часов для соответсвующейго временного паттерна
+    txn_hour = time_weights.hours.sample(n=1, weights=time_weights.proportion, replace=True).iloc[0]
+    
+    # фильтруем по этому часу timestamp-ы и семплируем timestamp уже с равной вероятностью
+    # Дальше будем обрабатывать этот timestamp в некоторых случаях
+    timestamps_subset = timestamps.loc[timestamps.hour == txn_hour]
+    timestamp_sample = timestamps_subset.sample(n=1, replace=True)
+
+    # Если текущая транзакция - оффлайн.
+    if not online:
+        # check_min_interval_from_near_txn проверит ближайшие к timestamp_sample по времени транзакции в соответствии с установленными
+        # интервалами и если время до ближайшей транзакции меньше допустимогшо, то создаст другой timestamp
+        # Если интервал допустимый, то вернет исходный timestamp
+        txn_time, txn_unix = check_min_interval_from_near_txn(client_txns=trans_df, timestamp_sample=timestamp_sample, online=online, \
+                                                                round_clock=round_clock, legit_cfg=legit_cfg)
+        return txn_time, txn_unix
+
+    # То же самое, но если текущая транзакция - онлайн
+    elif online:
+        txn_time, txn_unix = check_min_interval_from_near_txn(client_txns=trans_df, timestamp_sample=timestamp_sample, online=online, \
+                                                                round_clock=round_clock, legit_cfg=legit_cfg)
         return txn_time, txn_unix
