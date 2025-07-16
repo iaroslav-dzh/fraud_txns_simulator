@@ -46,3 +46,5 @@ data_paths:
     outer_accounts: "./data/generated_data/outer_accounts.csv"
     dist_drops: "./data/generated_data/dist_drops.gpkg"
     purchase_drops: "./data/generated_data/purchase_drops.gpkg"
+    dist_drop_txns: "./data/generated_data/dist_drop_txns.parquet"
+    purch_drop_txns: "./data/generated_data/purch_drop_txns.parquet"

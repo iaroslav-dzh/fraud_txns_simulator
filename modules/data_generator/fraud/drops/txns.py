@@ -8,7 +8,7 @@ from data_generator.utils import build_transaction
 
 class CreateDropTxn:
     """
-    Создание транзакций дропа распределителя под разное поведение.
+    Создание транзакций дропа под разное поведение.
     -----------------
     drop_type: str. 'distributor' или 'purchaser'
     configs: DropDistributorCfg | DropPurchaserCfg.

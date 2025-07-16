@@ -1,5 +1,5 @@
 # Полный жизненный цикл дропа
-
+import pandas as pd
 from data_generator.fraud.drops.build.builder import DropBaseClasses
 from data_generator.fraud.drops.txns import CreateDropTxn
 from data_generator.fraud.drops.processor import DropBatchHandler
@@ -52,6 +52,7 @@ class DropLifecycleManager:
         self.time_hand.reset_cache()
         self.part_data.reset_cache()
         self.create_txn.reset_cache()
+        self.drop_txns = []
         
 
     def run_drop_lifecycle(self):
@@ -104,19 +105,38 @@ class DropSimulator:
             Учет использованных счетов.
     life_manager: DropLifecycleManager. Управление полным жизненный циклом одного дропа.
     """
-    def __init__(self, configs, base, create_txn):
+    def __init__(self, base_cfg, configs, base, create_txn):
         """
+        base_cfg: dict. Конфиги из base.yaml
         configs: DropDistributorCfg | DropPurchaserCfg.
                  Конфиги и данные для создания дроп транзакций.
         base: Объекты основных классов для дропов. 
         create_txn: CreateDropTxn. Создание транзакций.
         """
+        self.base_cfg = base_cfg
+        self.drop_type = base.drop_type
         self.drop_clients = configs.clients
         self.part_data = base.part_data
         self.acc_hand = base.acc_hand
         self.life_manager = DropLifecycleManager(base=base, create_txn=create_txn)
         self.all_txns = []
     
+    def write_to_file(self, data, category, file_key):
+        """
+        Запись данных в файл одного из
+        """
+        path = self.base_cfg["data_paths"][category][file_key]
+        file_type = path.split(".")[-1]
+
+        if file_type == "csv":
+            return data.to_csv(path, index=False)
+        
+        if file_type == "gpkg":
+            return data.to_file(path, layer="layer_name", driver="GPKG")
+        
+        if file_type == "parquet":
+            return data.to_parquet(path, engine="pyarrow")
+
 
     def run(self):
         drop_clients = self.drop_clients
@@ -136,3 +156,17 @@ class DropSimulator:
 
             life_manager.reset_all_caches()
             progress_bar.update(1)
+        
+        accounts = acc_hand.accounts
+        self.write_to_file(data=accounts, category="generated_data", \
+                           file_key="accounts")
+        
+        all_txns_df = pd.DataFrame(self.all_txns)
+        if self.drop_type == "distributor":
+            self.write_to_file(data=all_txns_df, category="generated_data", \
+                           file_key="dist_drop_txns")
+            
+        elif self.drop_type == "purchaser":
+            self.write_to_file(data=all_txns_df, category="generated_data", \
+                           file_key="purch_drop_txns")
+        
