@@ -60,7 +60,7 @@ def set_close_flag(online, closest_offline_diff, closest_online_diff, min_inter)
     min_inter: dict. Лимиты минимального времени между транз-циями в зависимости от типа
     """
     offline_time_diff = min_inter["offline_time_diff"] # Мин. время между оффлайн
-    online_time_diff = min_inter["online_time_diff"] #Мин. время между онлайн
+    online_time_diff = min_inter["online_time_diff"] # Мин. время между онлайн
     general_diff = min_inter["general_diff"] # Мин. время между оффлайн и онлайн
     
     # Если, создаваемая транзакция оффлайн

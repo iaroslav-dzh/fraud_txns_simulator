@@ -4,7 +4,8 @@ import geopandas as gpd
 import pyarrow
 import os
 
-from data_generator.general_time import create_timestamps_range_df
+from data_generator.general_time import create_timestamps_range_df, get_all_time_patterns
+from data_generator.utils import create_txns_df
 from data_generator.configs import LegitCfg
 # 1.
 
@@ -77,14 +78,15 @@ class LegitConfigBuilder:
 
         n_clients = total // avg_txn_num # Примерный размер выборки клиентов
 
-        all_clients = self.read_file(category="cleaned_data", file_key="clients_with_geo")
+        all_clients = self.read_file(category="clients", file_key="clients")
 
         # Семплируем клиентов и записываем в файл.
         clients_samp = all_clients.sample(n=n_clients, replace=False).reset_index(drop=True)
-        write_to = self.base_cfg["data_paths"]["generated_data"]["clients_sample"]
-        clients_samp.to_file(write_to, layer="layer_name", driver="GPKG")
-
+        write_to = self.base_cfg["data_paths"]["clients"]["clients_sample"]
+        clients_samp.to_parquet(write_to, engine="pyarrow")
+        
         self.clients = clients_samp
+        return clients_samp
 
 
     def build_cfg(self):
@@ -94,28 +96,27 @@ class LegitConfigBuilder:
         """
         self.assert_time_limits()
 
-        cleaned_data = "cleaned_data"
-        generated_data = "generated_data"
-        drop_cfg = self.drop_cfg
-        dist_cfg = drop_cfg["distributor"]
-        time_cfg = drop_cfg["time"]
         stamps_cfg = self.time_cfg["timestamps"]
-        
-        clients = self.get_clients_for_clients(drop_type="distributor")
-        timestamps = create_timestamps_range_df(stamps_cfg=stamps_cfg)
-        accounts= self.read_by_precedence(category=generated_data, file_key_01="accounts", file_key_02="accounts_default")
-        outer_accounts = self.read_file(category=generated_data, file_key="outer_accounts").iloc[:,0] # нужны в виде серии
-        client_devices = self.read_file(category=cleaned_data, file_key="client_devices")
-        online_merchant_ids = self.read_file(category=cleaned_data, file_key="online_merchant_ids").iloc[:,0] # нужны в виде серии
-        cities = self.read_file(category=cleaned_data, file_key="districts_ru")
-        lag_interval = time_cfg["lag_interval"]
+        base_cfg = self.base_cfg
+        weight_args = self.time_cfg["time_weights_args"]
+        legit_cfg = self.legit_cfg
 
-        return LegitCfg(clients=clients, timestamps=timestamps, accounts=accounts, \
-                                  outer_accounts=outer_accounts, client_devices=client_devices, \
-                                  online_merchant_ids=online_merchant_ids, cities=cities, in_lim=in_lim, 
-                                  out_lim=out_lim, period_in_lim=period_in_lim, period_out_lim=period_out_lim, \
-                                  lag_interval=lag_interval, two_way_delta=two_way_delta, pos_delta=pos_delta, \
-                                  split_rate=split_rate, chunks=chunks, inbound_amt=inbound_amt, round=round, \
-                                  trf_max=trf_max, reduce_share=reduce_share, attempts=attempts, to_clients=to_clients, \
-                                  crypto_rate=crypto_rate
-                                  )
+        clients = self.sample_clients()
+        timestamps = create_timestamps_range_df(stamps_cfg=stamps_cfg)
+        timestamps_1st = timestamps.loc[timestamps.timestamp.dt.month == timestamps.timestamp.dt.month.min()]
+        txns = create_txns_df(base_cfg["txns_df"])
+        client_devices = self.read_file(category="base", file_key="client_devices")
+        offline_merchants = self.read_file(category="base", file_key="offline_merchants")
+        categories = self.read_file(category="base", file_key="cat_stats_full")
+        online_merchant_ids = self.read_file(category="base", \
+                                             file_key="online_merchant_ids").iloc[:,0] # нужны в виде серии
+        all_time_weights = get_all_time_patterns(pattern_args=weight_args)
+        cities = self.read_file(category="base", file_key="cities")
+        min_intervals = legit_cfg["time"]["min_intervals"]
+        txn_num = legit_cfg["txn_num"]
+
+        return LegitCfg(clients=clients, timestamps=timestamps, transactions=txns, \
+                        timestamps_1st=timestamps_1st, client_devices=client_devices, \
+                        offline_merchants=offline_merchants, categories=categories, \
+                        online_merchant_ids=online_merchant_ids, all_time_weights=all_time_weights, \
+                        cities=cities, min_intervals=min_intervals, txn_num=txn_num)

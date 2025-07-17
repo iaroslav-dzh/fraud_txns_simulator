@@ -10,22 +10,22 @@ class LegitCfg:
     """
     Конфиги и данные для генерации легальных транзакций.
     ---------------------
-    clients: pd.DataFrame
+    clients: pd.DataFrame. Выборка клиентов для создания транз-ций.
     timestamps: pd.DataFrame. timestamps для генерации времени.
     timestamps_1st: pd.DataFrame. Сабсет timestamps отфильтрованный по первому месяцу и, 
                     если применимо, году. Чтобы генерировать первые транзакции.
-    transactions: pd.DataFrame
-    client_devices: pd.DataFrame
-    offline_merchants: pd.DataFrame
-    categories: pd.DataFrame
+    transactions: pd.DataFrame. Пустой датафрейм под транзакции.
+    client_devices: pd.DataFrame. id и информация о девайсах клиентов.
+    offline_merchants: pd.DataFrame. Оффлайн мерчанты с их координатами.
+    categories: pd.DataFrame. Названия категорий и их полные характеристики.
+                    Берутся из cat_stats_full.csv.
     online_merchant_ids: pd.Series. id для онлайн мерчантов
     all_time_weights: dict. Все веса времени. Генерить в LegitCfgBuilder
                       Веса для часов времени в виде словаря содержащего датафрейм с весами, 
                       название распределения и цветом для графика.
-    rules: pd.DataFrame
-    cities: pd.DataFrame
+    cities: pd.DataFrame. Все имеющиеся уникальные города.
     min_intervals: dict. Мин. интервалы между транз-ми
-    txn_num: dict
+    txn_num: dict. Конфиги кол-ва транзакция.
     """
     clients: pd.DataFrame
     timestamps: pd.DataFrame
@@ -36,7 +36,6 @@ class LegitCfg:
     categories: pd.DataFrame
     online_merchant_ids: pd.Series
     all_time_weights: dict
-    rules: pd.DataFrame
     cities: pd.DataFrame
     min_intervals: dict
     txn_num: dict

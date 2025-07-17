@@ -293,8 +293,9 @@ def gen_weights_for_time(is_fraud=False, round_clock=False, online=False):
 
 def get_all_time_patterns(pattern_args):
     """
-    pattern_args - словарь с названием паттерна в ключе и словарем из аргументов для функции gen_weights_for_time,
-                   соответствующим паттерну.
+    pattern_args: dict с названием паттерна в ключе и словарем 
+                из аргументов для функции gen_weights_for_time,
+                соответствующим паттерну.
     """
 
     time_weights = defaultdict(dict)

@@ -100,7 +100,7 @@ def gen_multiple_legit_txns(configs, ignore_index=True):
     """
     clients_df = configs.clients
     trans_df = configs.transactions
-    client_devices = configs.transactions
+    client_devices = configs.client_devices
     offline_merchants = configs.offline_merchants
     categories = configs.categories
     avg_txn_num = configs.txn_num["avg_txn_num"]
