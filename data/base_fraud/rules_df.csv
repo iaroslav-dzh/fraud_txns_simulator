@@ -1,0 +1,6 @@
+rule,weight,online
+fast_geo_change,0.125,False
+fast_geo_change_online,0.21875,True
+new_ip_and_device_high_amount,0.25,True
+new_device_and_high_amount,0.1875,True
+trans_freq_increase,0.21875,True

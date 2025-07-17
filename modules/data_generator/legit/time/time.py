@@ -2,12 +2,13 @@
 import random
 import pandas as pd
 
-from data_generator.legit.time.utils import log_check_min_time
+from data_generator.legit.time.utils import log_check_min_time, set_close_flag
 from data_generator.general_time import pd_timestamp_to_unix, sample_time_for_trans
+
 
 # 1.
 
-def check_min_interval_from_near_txn(client_txns, timestamp_sample, online, round_clock, legit_cfg, test=False):
+def check_min_interval_from_near_txn(client_txns, timestamp_sample, online, round_clock, configs, test=False):
     """
     Если для сгенерированного времени есть транзакции, которые по времени ближе заданного минимума, 
     то создать время на основании времени последней транзакции + установленный минимальный интервал.
@@ -23,29 +24,21 @@ def check_min_interval_from_near_txn(client_txns, timestamp_sample, online, roun
     то есть
     оффлайн-оффлайн разница > оффлайн-онлайн разница > онлайн-онлайн разница
     -----------------------------------------------
-
-    client_txns - датафрейм с транзакциями клиента.
-    timestamp_sample - случайно выбранная запись из датафрейма с таймстемпами
-    online - boolean. Онлайн или оффлайн категория
-    round_clock - boolean. Круглосуточная или дневная категория.
-    legit_cfg - dict. Конфиги легальных транзакция из legit.yaml           
-    test - boolean. True - логировать исполнение функции в csv.
+    client_txns: pd.DataFrame. Транзакции клиента.
+    timestamp_sample: pd.DataFrame. Случайно выбранная запись из датафрейма с таймстемпами.
+    online: bool. Онлайн или оффлайн категория
+    round_clock: bool. Круглосуточная или дневная категория.
+    configs: LegitCfg. Конфиги и данные для генерации легальных транзакций.     
+    test: bool. True - логировать исполнение функции в csv
     ------------------------------------------------
     Возвращает pd.Timestamp и int unix время в секундах 
     """
-    min_inter = legit_cfg["time"]["min_intervals"]
+    min_inter = configs["min_intervals"]
     offline_time_diff = min_inter["offline_time_diff"]
     online_time_diff = min_inter["online_time_diff"]
     online_ceil = min_inter["online_ceil"]
     general_diff = min_inter["general_diff"]
     general_ceil = min_inter["general_ceil"]
-
-    assert offline_time_diff > general_diff, f"""offline_time_diff must not be lower than general_diff. 
-                        {offline_time_diff} vs {general_diff} Check passed arguments"""
-    assert offline_time_diff > online_time_diff, f"""offline_time_diff must not be lower than online_time_diff.
-                        {offline_time_diff} vs {online_time_diff} Check passed arguments"""
-    assert general_diff > online_time_diff, f"""general_diff must not be lower than online_time_diff.
-                        {general_diff} vs {online_time_diff} Check passed arguments"""
             
     # перевод аргументов в секунды для работы с unix time
     offline_time_diff= offline_time_diff * 60
@@ -54,7 +47,6 @@ def check_min_interval_from_near_txn(client_txns, timestamp_sample, online, roun
     general_diff = general_diff * 60
     general_ceil = general_ceil * 60
 
-    
     timestamp_unix = timestamp_sample.unix_time.iloc[0]
     # Копия, чтобы не внести изменения в исходный датафрейм
     client_txns = client_txns.copy()
@@ -95,34 +87,20 @@ def check_min_interval_from_near_txn(client_txns, timestamp_sample, online, roun
     last_online_flag = last_txn.online.iloc[0]
     # unix время
     last_txn_unix = last_txn.unix_time.iloc[0]
-    
-    # Если, создаваемая транзакция оффлайн
-    # И разница с ближайшей оффлайн транзакцией меньше допустимой
-    if not online and closest_offline_diff < offline_time_diff:
-        close_flag = "offline_to_offline"
 
-    # Если оффлайн транзакция и разница с ближайшей оффлайн допустима, но не допустима с ближайшей онлайн.
-    elif not online and closest_online_diff < general_diff:
-        close_flag = "offline_to_online"
+    # Отношение в контексте online флага между текущей и ближайшей транзакцией
+    close_flag = set_close_flag(online=online, closest_offline_diff=closest_offline_diff, \
+                                closest_online_diff=closest_online_diff, min_inter=min_inter)
 
-    # Если онлайн транзакция и разница с ближайшей оффлайн меньше допустимой
-    elif online and closest_offline_diff < general_diff:
-        close_flag = "online_to_offline"
-
-    # Если онлайн транзакция и разница с ближайшей оффлайн допустима, но с ближайшей онлайн меньше допустимой
-    elif online and closest_online_diff < online_time_diff:
-        close_flag = "online_to_online"
-        
     # Если нет транзакций ближе установленной разницы
     # Просто берем изначальный timestamp
-    else:
-        close_flag = "No flag"
+    if close_flag == "No flag":
         txn_unix = timestamp_unix
         txn_time = pd.to_datetime(txn_unix, unit="s")
 
     # Если транзакция близка по времени к другой, то согласно типам транзакций
     # создаем другое время на основании времени и типа последней и текущей транзакции
-    if close_flag in ["offline_to_offline", "offline_to_online"]:
+    elif close_flag in ["offline_to_offline", "offline_to_online"]:
         # Если последняя транзакция Онлайн. То добавляем случайную разницу для онлайн и оффлайн транзакций в установленном диапазоне
         if last_online_flag:
             general_random_diff = random.randint(general_diff, general_ceil)
@@ -167,30 +145,28 @@ def check_min_interval_from_near_txn(client_txns, timestamp_sample, online, roun
 
 # 2.
 
-def get_legit_txn_time(trans_df, time_weights, timestamps, timestamps_1st_month, \
-                       legit_cfg, round_clock, online=None):
+def get_legit_txn_time(trans_df, time_weights, configs, round_clock, online=None):
     """
     Генерация времени для легальной транзакции
     ------------------------------------------
     trans_df: pd.DataFrame. Транзакции текущего клиента. Откуда брать информацию по предыдущим транзакциям клиента
     time_weights: pd.DataFrame. Веса часов в периоде времени
-    timestamps: pd.DataFrame. timestamps для генерации времени.
-    timestamps_1st_month: pd.DataFrame. сабсет timestamps отфильтрованный по первому месяцу и, 
-                          если применимо, году. Чтобы генерировать первые транзакции.
-    legit_cfg: dict. Конфиги легальных транзакция из legit.yaml  
+    configs: LegitCfg. Конфиги и данные для генерации легальных транзакций. 
     round_clock: bool. Круглосуточная или дневная категория.
     online: bool. Онлайн или оффлайн покупка. True or False
     -------------------------------------------
     Возвращает время для генерируемой транзакции в виде pd.Timestamp и в виде unix времени
     """
-    
-    # Время последней транзакции клиента. pd.Timestamp
+    timestamps = configs.timestamps
+    timestamps_1st = configs.timestamps_1st
+
+    # Время последней транзакции клиента. pd.Timestamp и unix в секундах
     last_txn_time = trans_df.txn_time.max()
     
     # Если нет никакой предыдущей транзакции т.е. нет последнего времени совсем
     if last_txn_time is pd.NaT:
         # время транзакции в виде timestamp и unix time.
-        return sample_time_for_trans(timestamps=timestamps_1st_month, time_weights=time_weights)
+        return sample_time_for_trans(timestamps=timestamps_1st, time_weights=time_weights)
 
     # Если есть предыдущая транзакция
 
@@ -203,16 +179,16 @@ def get_legit_txn_time(trans_df, time_weights, timestamps, timestamps_1st_month,
     timestamp_sample = timestamps_subset.sample(n=1, replace=True)
 
     # Если текущая транзакция - оффлайн.
-    if not online:
-        # check_min_interval_from_near_txn проверит ближайшие к timestamp_sample по времени транзакции в соответствии с установленными
-        # интервалами и если время до ближайшей транзакции меньше допустимогшо, то создаст другой timestamp
-        # Если интервал допустимый, то вернет исходный timestamp
-        txn_time, txn_unix = check_min_interval_from_near_txn(client_txns=trans_df, timestamp_sample=timestamp_sample, online=online, \
-                                                                round_clock=round_clock, legit_cfg=legit_cfg)
-        return txn_time, txn_unix
+    # if not online:
+    # check_min_interval_from_near_txn проверит ближайшие к timestamp_sample по времени транзакции в соответствии с установленными
+    # интервалами и если время до ближайшей транзакции меньше допустимогшо, то создаст другой timestamp
+    # Если интервал допустимый, то вернет исходный timestamp
+    txn_time, txn_unix = check_min_interval_from_near_txn(client_txns=trans_df, timestamp_sample=timestamp_sample, online=online, \
+                                                            round_clock=round_clock, configs=configs)
+    return txn_time, txn_unix
 
-    # То же самое, но если текущая транзакция - онлайн
-    elif online:
-        txn_time, txn_unix = check_min_interval_from_near_txn(client_txns=trans_df, timestamp_sample=timestamp_sample, online=online, \
-                                                                round_clock=round_clock, legit_cfg=legit_cfg)
-        return txn_time, txn_unix
+    # # То же самое, но если текущая транзакция - онлайн
+    # elif online:
+    #     txn_time, txn_unix = check_min_interval_from_near_txn(client_txns=trans_df, timestamp_sample=timestamp_sample, online=online, \
+    #                                                             round_clock=round_clock, configs=configs)
+    #     return txn_time, txn_unix

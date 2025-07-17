@@ -61,12 +61,12 @@ class FraudTxnPartData:
             
             # Семпл IP которого нет в used_ips и который IP другого города
             fraud_ips = self.fraud_ips.loc[~self.fraud_ips.fraud_ip.isin(self.used_ips)]
-            fraud_ip = fraud_ips.loc[fraud_ips["area"] != client_city].sample(1)
+            fraud_ip = fraud_ips.loc[fraud_ips["city"] != client_city].sample(1)
             # Координаты города и название по IP адресу
             trans_lat = fraud_ip.lat.iloc[0]
             trans_lon = fraud_ip.lon.iloc[0]
             trans_ip = fraud_ip.fraud_ip.iloc[0]
-            trans_city = fraud_ip["area"].iloc[0]
+            trans_city = fraud_ip["city"].iloc[0]
             channel = "ecom"
             
             # Семпл девайса которого нет в used_devices
@@ -79,14 +79,14 @@ class FraudTxnPartData:
 
         else:
             # Семплируется мерчант не из города клиента
-            merchants = self.merchants_df.loc[self.merchants_df["area"] != client_city]
+            merchants = self.merchants_df.loc[self.merchants_df["city"] != client_city]
             merchant = merchants.loc[merchants.category == category_name].sample(1)
             # Берется его id, и координаты, как координаты транзакции
             merchant_id = merchant["merchant_id"].iloc[0]
             trans_lat = merchant["merchant_lat"].iloc[0]
             trans_lon = merchant["merchant_lon"].iloc[0]
             trans_ip = "not applicable"
-            trans_city = merchant["area"].iloc[0]
+            trans_city = merchant["city"].iloc[0]
             device_id = np.nan
             channel = "POS"
 
@@ -112,13 +112,13 @@ class FraudTxnPartData:
             
         # Другой IP адрес, но город клиента - для new_device_and_high_amount
         fraud_ips = self.fraud_ips.loc[~self.fraud_ips.fraud_ip.isin(self.used_ips)]
-        fraud_ip = fraud_ips.loc[fraud_ips["area"] == client_city].sample(1)
+        fraud_ip = fraud_ips.loc[fraud_ips["city"] == client_city].sample(1)
         
         # Координаты города и название по IP адресу
         trans_lat = fraud_ip.lat.iloc[0]
         trans_lon = fraud_ip.lon.iloc[0]
         trans_ip = fraud_ip.fraud_ip.iloc[0]
-        trans_city = fraud_ip["area"].iloc[0]
+        trans_city = fraud_ip["city"].iloc[0]
 
         # Записываем IP как использованный
         self.used_ips.loc[self.used_ips.shape[0]] = trans_ip
@@ -251,7 +251,7 @@ class DropTxnPartData:
             trans_lat = self.client_info.lat
             trans_lon = self.client_info.lon
             trans_ip = self.client_info.home_ip
-            trans_city = self.client_info.area        
+            trans_city = self.client_info.city        
             # Семпл девайса клиента
             devices = self.client_devices.loc[self.client_devices.client_id == self.client_info.client_id]
             device_id = devices.device_id.sample(1).iloc[0]
@@ -312,7 +312,7 @@ class DropTxnPartData:
         # Локация транзакции просто записываем координаты и название города клиента
         trans_lat = client_info.lat
         trans_lon = client_info.lon
-        trans_city = client_info.area
+        trans_city = client_info.city
 
         self.last_txn = merchant_id, trans_lat, trans_lon, trans_ip, trans_city, \
                         device_id, channel, txn_type

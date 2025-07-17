@@ -1,3 +1,15 @@
+# Общие конфиги времени.
+
+
+timestamps: # Генерация timestamp-ов для времени транзакций
+  start: "2025-01-01"
+  end: "2025-01-31"
+  format: "%Y-%m-%d" # Строка формата stftime. Формат передаваемых start и end.
+  freq: "min" # частота генерации timestamp-ов. Минуты, секунды, дни и т.д. 'min', 's', 'D' etc.
+
+
+
+
 time_weights_args:
   Offline_24h_Legit:
     is_fraud: false

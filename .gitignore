@@ -6,26 +6,17 @@ notebooks/00INTEGRATION_DROPS_TEST_01.ipynb
 notebooks/00DROPS_BASE_TEST_01.ipynb
 
 # data
-data/raw_data/fraudTest.csv.zip
-data/cleaned_data/clients_with_geo.csv
-data/cleaned_data/clients_with_geo.gpkg
+data/raw/fraudTest.csv.zip
+data/clients/clients_with_geo.csv
+data/clients/clients_with_geo.gpkg
 data/cleaned_data/offline_merchants_points.csv
-data/cleaned_data/offline_merchants_points.gpkg
 data/cleaned_data/transaction_df_clean.csv 
-data/cleaned_data/clients_sample.gpkg
-data/raw_data/trans.asc
-data/raw_data/geo/
+data/clients/clients_sample.gpkg
+data/raw/trans.asc
+data/raw/geo/
 data/test_data/
 
 # и т.д.
 .ssh/
 sessions/
 scratchpads/
-scratchpad.txt
-scratchpad.py
-scratchpad_fraud.txt
-scratchpad_single_op.txt
-scratchpad_legit.txt
-scratch_pad_legit.py
-scratchpad_time_patterns.txt
-drops_scratch.txt

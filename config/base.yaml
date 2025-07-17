@@ -24,27 +24,37 @@ txns_df:
 
 # Пути к данным
 data_paths:
-  cleaned_data:
-    clients_sample: "./data/cleaned_data/clients_sample.gpkg"
-    offline_merchants: "./data/cleaned_data/offline_merchants_points.gpkg"
-    online_merchant_ids: "./data/cleaned_data/online_merchant_ids.csv"
-    client_devices: "./data/cleaned_data/client_devices.csv"
-    fraud_devices: "./data/cleaned_data/fraud_devices.csv"
-    districts_ru: "./data/cleaned_data/district_ru.gpkg"
-    area_centers: "./data/cleaned_data/area_centers.gpkg"
-    clients_with_geo: "./data/cleaned_data/clients_with_geo.gpkg"
-    fraud_ips: "./data/cleaned_data/fraud_ips.gpkg"
-    cat_stats_full: "./data/cleaned_data/cat_stats_full.csv"
-    cat_fraud_amts: "./data/cleaned_data/cat_fraud_amts.csv"
-    drop_purch_cats: "./data/cleaned_data/drop_purch_cats.csv"
+  base:
+    accounts: "./data/base/accounts.csv"
+    accounts_default: "./data/base/accounts_default.csv"
+    cat_stats_full: "./data/base/cat_stats_full.csv"
+    category_stats: "./data/base/category_stats.csv"
+    city_centers: "./data/base/city_centers.gpkg"
+    client_devices: "./data/base/client_devices.csv"
+    cities: "./data/base/cities.gpkg"
+    offline_merchants: "./data/base/offline_merchants_points.parquet"
+    online_merchant_ids: "./data/base/online_merchant_ids.csv"
+    outer_accounts: "./data/base/outer_accounts.csv"
 
-  generated_data:
-    timestamps: "./data/generated_data/timestamps.parquet"
-    legit_txns: "./data/generated_data/legit_trans_148K.parquet"
-    accounts_default: "./data/generated_data/accounts_default.csv"
-    accounts: "./data/generated_data/accounts.csv"
-    outer_accounts: "./data/generated_data/outer_accounts.csv"
-    dist_drops: "./data/generated_data/dist_drops.gpkg"
-    purchase_drops: "./data/generated_data/purchase_drops.gpkg"
-    dist_drop_txns: "./data/generated_data/dist_drop_txns.parquet"
-    purch_drop_txns: "./data/generated_data/purch_drop_txns.parquet"
+  base_fraud:
+    cat_fraud_amts: "./data/base_fraud/cat_fraud_amts.csv"
+    drop_purch_cats: "./data/base_fraud/drop_purch_cats.csv"
+    fraud_devices: "./data/base_fraud/fraud_devices.csv"
+    fraud_ips: "./data/base_fraud/fraud_ips.parquet"
+    rules: "./data/base_fraud/rules.csv"
+
+  cleaned:
+    clients: "./data/cleaned/client_df_clean.csv"
+    districts: "./data/cleaned/district_df_clean.csv"
+
+  clients:
+    clients: "./data/clients/clients.parquet"
+    clients_sample: "./data/clients/clients_sample.parquet"
+    dist_drops: "./data/clients/dist_drops.parquet"
+    purchase_drops: "./data/clients/purchase_drops.parquet"
+
+  generated:
+    legit_txns: "./data/generated/legit_trans_148K.parquet"
+    compr_purchase: "./data/generated/compr_purchase_fraud.parquet"
+    dist_drop_txns: "./data/generated/dist_drop_txns.parquet"
+    purch_drop_txns: "./data/generated/purch_drop_txns.parquet"

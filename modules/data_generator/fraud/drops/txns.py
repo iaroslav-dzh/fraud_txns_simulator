@@ -139,7 +139,7 @@ class CreateDropTxn:
             self.out_txns += 1
         
         # Генерация части данных транзакции. Здесь прописываются аргументы online и receive
-        merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, type = \
+        merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type = \
                                                 self.txn_part_data.original_data(online=online, receive=receive)
         
         # Генерация суммы если исходящая транзакция
@@ -156,7 +156,7 @@ class CreateDropTxn:
 
         # Сборка всех данных в транзакцию и запись как последней транзакции
         self.last_txn = build_transaction(client_id=client_id, txn_time=txn_time, txn_unix=txn_unix, amount=amount, \
-                                          type=type, channel=channel, category_name=category_name, online=online, \
+                                          txn_type=txn_type, channel=channel, category_name=category_name, online=online, \
                                           merchant_id=merchant_id, trans_city=trans_city, trans_lat=trans_lat, \
                                           trans_lon=trans_lon, trans_ip=trans_ip, device_id=device_id, account=account, \
                                           is_fraud=is_fraud, is_suspicious=is_suspicious, status=status, rule=rule)
@@ -202,7 +202,7 @@ class CreateDropTxn:
 
         # Сборка всех данных в транзакцию и запись как послдней транзакции
         self.last_txn = build_transaction(client_id=client_id, txn_time=txn_time, txn_unix=txn_unix, amount=amount, \
-                                          type=txn_type, channel=channel, category_name=category_name, online=online, \
+                                          txn_type=txn_type, channel=channel, category_name=category_name, online=online, \
                                           merchant_id=merchant_id, trans_city=trans_city, trans_lat=trans_lat, \
                                           trans_lon=trans_lon, trans_ip=trans_ip, device_id=device_id, account=account, \
                                           is_fraud=is_fraud, is_suspicious=is_suspicious, status=status, rule=rule)

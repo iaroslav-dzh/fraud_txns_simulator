@@ -4,6 +4,7 @@ import pyarrow
 import os
 
 from data_generator.configs import DropDistributorCfg, DropPurchaserCfg
+from data_generator.general_time import create_timestamps_range_df
 
 # 1. Конструктор объектов конфиг датаклассов
 class DropConfigBuilder:
@@ -12,26 +13,31 @@ class DropConfigBuilder:
     ---------
     Атрибуты:
     ---------
-    base_cfg: dict. Конфиги из base.yaml
-    fraud_cfg: dict. Конфиги из fraud.yaml
-    drop_cfg: dict. Конфиги из drops.yaml
+    base_cfg: dict. Общие конфиги из base.yaml
+    time_cfg: dict. Общие конфиги времени из time.yaml
+    fraud_cfg: dict. Общие конфиги фрода из fraud.yaml
+    drop_cfg: dict. Конфиги дропов из drops.yaml
     drops: gdp.GeoDataframe. Семплированные клиенты для дроп фрода.
     """
-    def __init__(self, base_cfg: dict, fraud_cfg: dict, drop_cfg: dict):
+    def __init__(self, base_cfg: dict, time_cfg: dict, fraud_cfg: dict, drop_cfg: dict):
         """
-        base_cfg: dict. Конфиги из base.yaml
-        fraud_cfg: dict. Конфиги из fraud.yaml
-        drop_cfg: dict. Конфиги из drops.yaml
+        base_cfg: dict. Общие конфиги из base.yaml
+        time_cfg: dict. Общие конфиги времени из time.yaml
+        fraud_cfg: dict. Общие конфиги фрода из fraud.yaml
+        drop_cfg: dict. Конфиги дропов из drops.yaml
         """
         self.base_cfg = base_cfg
+        self.time_cfg = time_cfg
         self.fraud_cfg = fraud_cfg
         self.drop_cfg = drop_cfg
         self.drops = None
 
+
     def read_file(self, category, file_key):
         """
-        category: str. Напр. 'cleaned_data', 'generated_data'.
-        file_key: str. Ключ к файлу в yaml конфиге.
+        category: str. Ключ внутри yaml конфига. Категория файла.
+                  Напр. 'cleaned_data', 'generated_data'.
+        file_key: str. Ключ к файлу внутри категории в yaml конфиге.
         """
         path = self.base_cfg["data_paths"][category][file_key]
         file_type = path.split(".")[-1]
@@ -59,7 +65,7 @@ class DropConfigBuilder:
         out_lim = drop_cfg[drop_type]["out_lim"]
 
         # отсюда посчитаем количество клиентов для дроп фрода с распределением денег
-        legit_txns = self.read_file(category="generated_data", file_key="legit_txns")
+        legit_txns = self.read_file(category="generated", file_key="legit_txns")
         legit_count = legit_txns.shape[0]
         # подсчет количества транзакций равных 1% от всех транзакций
         # т.к. не все транзакции еще созданные, то считаем основываясь на количестве легальных транзакций и fraud rate
@@ -78,8 +84,8 @@ class DropConfigBuilder:
         drop_type: str. Тип дропов: 'distributor' или 'purchaser'
         """
         drops_count = self.estimate_drops_count(drop_type=drop_type)
-        clients_sample = self.read_file(category="cleaned_data", file_key="clients_sample")
-        all_clients = self.read_file(category="cleaned_data", file_key="clients_with_geo")
+        clients_sample = self.read_file(category="clients", file_key="clients_sample")
+        all_clients = self.read_file(category="clients", file_key="clients")
 
         # Проверка наличия дропов другого типа. Чтобы не семплировать их случайно.
         if drop_type == "distributor":
@@ -90,10 +96,10 @@ class DropConfigBuilder:
             other_type_key = "dist_drops"
             file_key = "purchase_drops"
 
-        path = self.base_cfg["data_paths"]["generated_data"][other_type_key]
+        path = self.base_cfg["data_paths"]["clients"][other_type_key]
 
         if os.path.exists(path):
-            other_drops = self.read_file(category="generated_data", file_key=other_type_key)
+            other_drops = self.read_file(category="clients", file_key=other_type_key)
         else:
             other_drops = pd.DataFrame({"client_id": pd.Series(dtype="int64")}) # заглушка
 
@@ -103,8 +109,8 @@ class DropConfigBuilder:
                                             ~(all_clients.client_id.isin(other_drops.client_id))].copy()
         
         drops_samp = not_used_clients.sample(n=drops_count, replace=False).reset_index(drop=True)
-        write_to = self.base_cfg["data_paths"]["generated_data"][file_key]
-        drops_samp.to_file(write_to, layer="layer_name", driver="GPKG")
+        write_to = self.base_cfg["data_paths"]["clients"][file_key]
+        drops_samp.to_parquet(write_to, engine="pyarrow")
         self.drops = drops_samp
         return drops_samp
 
@@ -136,19 +142,18 @@ class DropConfigBuilder:
         Создать конфиг датакласс для дропов распределителей (distributors).
         Возвращает объект DropDistributorCfg.
         """
-        cleaned_data = "cleaned_data"
-        generated_data = "generated_data"
         drop_cfg = self.drop_cfg
         dist_cfg = drop_cfg["distributor"]
         time_cfg = drop_cfg["time"]
+        stamps_cfg = self.time_cfg["timestamps"]
         
         clients = self.get_clients_for_drops(drop_type="distributor")
-        timestamps = self.read_file(category=generated_data, file_key="timestamps")
-        accounts= self.read_by_precedence(category=generated_data, file_key_01="accounts", file_key_02="accounts_default")
-        outer_accounts = self.read_file(category=generated_data, file_key="outer_accounts").iloc[:,0] # нужны в виде серии
-        client_devices = self.read_file(category=cleaned_data, file_key="client_devices")
-        online_merchant_ids = self.read_file(category=cleaned_data, file_key="online_merchant_ids").iloc[:,0] # нужны в виде серии
-        cities = self.read_file(category=cleaned_data, file_key="districts_ru")
+        timestamps = create_timestamps_range_df(stamps_cfg=stamps_cfg)
+        accounts= self.read_by_precedence(category="base", file_key_01="accounts", file_key_02="accounts_default")
+        outer_accounts = self.read_file(category="base", file_key="outer_accounts").iloc[:,0] # нужны в виде серии
+        client_devices = self.read_file(category="base", file_key="client_devices")
+        online_merchant_ids = self.read_file(category="base", file_key="online_merchant_ids").iloc[:,0] # нужны в виде серии
+        cities = self.read_file(category="base", file_key="cities")
         in_lim = dist_cfg["in_lim"]
         out_lim = dist_cfg["out_lim"]
         period_in_lim = dist_cfg["period_in_lim"]
@@ -182,20 +187,19 @@ class DropConfigBuilder:
         Создать конфиг датакласс для дропов покупателей (purchasers).
         Возвращает объект DropPurchaserCfg.
         """
-        cleaned_data = "cleaned_data"
-        generated_data = "generated_data"
         drop_cfg = self.drop_cfg
         purch_cfg = drop_cfg["purchaser"]
         time_cfg = drop_cfg["time"]
-        
+        stamps_cfg = self.time_cfg["timestamps"]
+
         clients = self.get_clients_for_drops(drop_type="purchaser")
-        timestamps = self.read_file(category=generated_data, file_key="timestamps")
-        accounts= self.read_by_precedence(category=generated_data, file_key_01="accounts", file_key_02="accounts_default")
-        client_devices = self.read_file(category=cleaned_data, file_key="client_devices")
-        online_merchant_ids = self.read_file(category=cleaned_data, \
+        timestamps = create_timestamps_range_df(stamps_cfg=stamps_cfg)
+        accounts= self.read_by_precedence(category="base", file_key_01="accounts", file_key_02="accounts_default")
+        client_devices = self.read_file(category="base", file_key="client_devices")
+        online_merchant_ids = self.read_file(category="base", \
                                              file_key="online_merchant_ids").iloc[:,0] # нужны в виде серии
-        categories = self.read_file(category=cleaned_data, file_key="drop_purch_cats")
-        cities = self.read_file(category=cleaned_data, file_key="districts_ru")
+        categories = self.read_file(category="base_fraud", file_key="drop_purch_cats")
+        cities = self.read_file(category="base", file_key="cities")
         in_lim = purch_cfg["in_lim"]
         out_lim = purch_cfg["out_lim"]
         period_in_lim = purch_cfg["period_in_lim"]

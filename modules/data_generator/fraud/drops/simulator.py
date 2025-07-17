@@ -148,7 +148,8 @@ class DropSimulator:
         Полная генерация активности дропов соответсвующего типа
         """
         drop_clients = self.drop_clients
-        progress_bar = create_progress_bar(drop_clients)
+        drop_type = self.drop_type
+        progress_bar = create_progress_bar(drop_clients, text=f"Creating {drop_type} drops")
         part_data = self.part_data
         acc_hand = self.acc_hand
         life_manager = self.life_manager

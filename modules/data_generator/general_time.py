@@ -374,22 +374,26 @@ def datetime_series_to_unix(series):
 
 # 12. Функция создания датафрейма с диапазоном timestamp-ов
 
-def create_timestamps_range_df(start, end, format="%Y-%m-%d", freq="min"):
+def create_timestamps_range_df(stamps_cfg):
     """
     функция создания датафрейма с диапазоном timestamp-ов.
     Возвращает pd.DataFrame | timestamp | hour | unix_time
     -----------------------------------------------------
-    start - str. начало диапазона. Дата или дата и время формата указанного в format. По умолчанию %Y-%m-%d
-    end - str. конец диапазона. Дата или дата и время формата указанного в format. По умолчанию %Y-%m-%d
-    format - str. Строка формата stftime. Формат передаваемых start и end. 
-    freq - str. частота генерации timestamp-ов. Минуты, секунды, дни и т.д. 'min', 's', 'D' etc.
+    stamps_cfg: dict. Конфиги генерации timestamps из base.yaml
     """
-    timestamps = pd.DataFrame(pd.Series(pd.date_range(pd.to_datetime(start, format=format), \
-                                                  pd.to_datetime(end, format=format), freq=freq), name="timestamp"))
+    start = stamps_cfg["start"] # начало диапазона. Дата или дата и время формата указанного в fmt.
+    end = stamps_cfg["end"] # конец диапазона. Дата или дата и время формата указанного в format.
+    fmt = stamps_cfg["format"] # Строка формата stftime. Формат передаваемых start и end. 
+    freq = stamps_cfg["freq"] # частота генерации timestamp-ов. Минуты, секунды, дни и т.д. 'min', 's', 'D' etc.
+
+
+    timestamps = pd.DataFrame(pd.Series(pd.date_range(pd.to_datetime(start, format=fmt), \
+                                        pd.to_datetime(end, format=fmt), freq=freq), name="timestamp"))
     timestamps["hour"] = timestamps.timestamp.dt.hour
     timestamps["unix_time"] = datetime_series_to_unix(timestamps.timestamp)
 
     return timestamps
+
 
 # 13. Функция перевода pd.Timestamp в unix время
 

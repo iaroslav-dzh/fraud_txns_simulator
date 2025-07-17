@@ -35,7 +35,6 @@ def gen_trans_number_norm(avg_num, num_std, low_bound=1, up_bound=120):
     num_std - стандартное отклонение числа транзакций
     low_bound - минимальное возможное число транзакций
     up_bound - максимальное возможное число транзакций
-    size - размер выборки
     """
     
     # Вернет float в виде np.ndarray
@@ -92,6 +91,8 @@ def calc_distance(lat_01, lon_01, lat_02, lon_02, km=True):
 
 def sample_category(categories, online=None, is_fraud=None, rule=None):
     """
+    На данный момент предназначена только для фрода
+    -----------------------------------
     categories - pd.DataFrame с категориями и их характеристиками
     online - bool. Онлайн или оффлайн категория нужна
     is_fraud - bool. Фрод или не фрод. От этого зависит вероятность категории.
@@ -136,12 +137,13 @@ def create_txns_df(configs):
 
 
 # Создать прогрессбар
-def create_progress_bar(obj):
+def create_progress_bar(obj, text=None):
     """
     Создать tqdm прогресс бар.
     Импортировать tqdm из tqdm
     -------------
     obj: Итерируемый объект.
+    text: str. Текст для прогрессбара.
     """
     total = len(obj)
-    return tqdm(total=total)
+    return tqdm(total=total, desc=text)
