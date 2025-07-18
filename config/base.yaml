@@ -54,7 +54,8 @@ data_paths:
     purchase_drops: "./data/clients/purchase_drops.parquet"
 
   generated:
-    legit_txns: "./data/generated/legit_trans_148K.parquet"
-    compr_purchase: "./data/generated/compr_purchase_fraud.parquet"
-    dist_drop_txns: "./data/generated/dist_drop_txns.parquet"
-    purch_drop_txns: "./data/generated/purch_drop_txns.parquet"
+    legit_txns: "./data/generated/latest/legit_txns.parquet"
+    compr_purchase: "./data/generated/latest/compr_purchase_fraud.parquet"
+    dist_drop_txns: "./data/generated/latest/dist_drop_txns.parquet"
+    purch_drop_txns: "./data/generated/latest/purch_drop_txns.parquet"
+    history: "./data/generated/history"

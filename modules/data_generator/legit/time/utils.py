@@ -38,12 +38,12 @@ def log_check_min_time(client_id, txn_time, txn_unix, online, closest_txn_offlin
                             "last_txn_time":[last_txn_time], "last_txn_unix":[last_txn_unix], \
                            "last_online":[last_online_flag], "condition":[close_flag]})
         
-    file_exists = os.path.exists("./data/generated_data/log_check_min_time.csv")
+    file_exists = os.path.exists("./data/test/log_check_min_time.csv")
     
     if file_exists:
-        log_df.to_csv("./data/generated_data/log_check_min_time.csv", mode="a", header=False)
+        log_df.to_csv("./data/test/log_check_min_time.csv", mode="a", header=False, index=False)
     else:
-        log_df.to_csv("./data/generated_data/log_check_min_time.csv")
+        log_df.to_csv("./data/test/log_check_min_time.csv", index=False)
 
 
 # 2.
@@ -59,9 +59,9 @@ def set_close_flag(online, closest_offline_diff, closest_online_diff, min_inter)
     closest_online_diff: int. Секунды до ближайшей онлайн транзакции если такая имеется.
     min_inter: dict. Лимиты минимального времени между транз-циями в зависимости от типа
     """
-    offline_time_diff = min_inter["offline_time_diff"] # Мин. время между оффлайн
-    online_time_diff = min_inter["online_time_diff"] # Мин. время между онлайн
-    general_diff = min_inter["general_diff"] # Мин. время между оффлайн и онлайн
+    offline_time_diff = min_inter["offline_time_diff"] * 60 # Мин. время между оффлайн
+    online_time_diff = min_inter["online_time_diff"] * 60  # Мин. время между онлайн
+    general_diff = min_inter["general_diff"] * 60  # Мин. время между оффлайн и онлайн
     
     # Если, создаваемая транзакция оффлайн
     # И разница с ближайшей оффлайн транзакцией меньше допустимой

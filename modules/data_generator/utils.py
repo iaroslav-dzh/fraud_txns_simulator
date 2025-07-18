@@ -1,5 +1,6 @@
 # Модуль с общими вспомогательными функциями
 import pandas as pd
+import numpy as np
 from scipy.stats import truncnorm
 from pyproj import Geod
 from tqdm import tqdm
@@ -147,3 +148,34 @@ def create_progress_bar(obj, text=None):
     """
     total = len(obj)
     return tqdm(total=total, desc=text)
+
+# Случайное округление суммы
+
+def amt_rounding(amount, rate=0.6):
+    """
+    Целочисленное округление.
+    До единиц, сотен, тысяч.
+    Либо возвращает исходную сумму.
+    -------------
+    amount: float | int.
+    rate: float. Доля случаев когда сумма не округялется.
+    """
+    if np.random.uniform(0, 1) < rate:
+        return amount
+    
+    dividers = np.array([1, 100, 1000])
+    reduced_divs = dividers[dividers <= amount]
+    divider = np.random.choice(reduced_divs)
+    return amount // divider * divider
+
+
+
+        
+
+
+
+
+
+
+
+

@@ -67,7 +67,7 @@ with open("./config/legit.yaml") as f:
 with open("./config/time.yaml") as f:
     time_cfg = yaml.safe_load(f)
 
-    
+
 offline_merchants = gpd.read_file("./data/cleaned_data/offline_merchants_points.gpkg")
 online_merchant_ids = pd.read_csv("./data/cleaned_data/online_merchant_ids.csv").iloc[:, 0]
 client_devices = pd.read_csv("./data/cleaned_data/client_devices.csv")
@@ -83,3 +83,4 @@ from data_generator.utils import create_txns_df
 from data_generator.legit.time.time import check_min_interval_from_near_txn
 
 transactions = create_txns_df(base_cfg["txns_df"])
+

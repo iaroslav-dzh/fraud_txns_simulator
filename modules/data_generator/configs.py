@@ -26,6 +26,17 @@ class LegitCfg:
     cities: pd.DataFrame. Все имеющиеся уникальные города.
     min_intervals: dict. Мин. интервалы между транз-ми
     txn_num: dict. Конфиги кол-ва транзакция.
+    in_chunks_gen: dict. Параметры генерации транзакций чанками.
+    data_paths: dict. Пути к данным из base.yaml
+    dir_category: str. Ключ к категории директорий в base.yaml.
+                       Ключ это одна из папок в data/
+                       Тут будут храниться сгенерированные данные.
+    dir_prefix: str. Для названия индивидуальной папки внутри dir_category
+                Например 'legit_'
+    key_latest: str. Ключ к полному пути записи файла в папке 
+                data/generated/latest/ в base.yaml
+    key_history: str. Ключ к пути для создания отдельной папки 
+                 генерации в в base.yaml
     """
     clients: pd.DataFrame
     timestamps: pd.DataFrame
@@ -39,6 +50,13 @@ class LegitCfg:
     cities: pd.DataFrame
     min_intervals: dict
     txn_num: dict
+    in_chunks_gen: dict
+    data_paths: dict
+    dir_category: str
+    dir_prefix: str
+    key_latest: str
+    key_history: str
+    
 
 
 # 2. Датакласс под конфиги фрода в покупках, когда аккаунт или карта клиента скомпрометированы

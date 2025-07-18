@@ -114,9 +114,18 @@ class LegitConfigBuilder:
         cities = self.read_file(category="base", file_key="cities")
         min_intervals = legit_cfg["time"]["min_intervals"]
         txn_num = legit_cfg["txn_num"]
+        in_chunks_gen = legit_cfg["in_chunks_gen"]
+        data_paths = base_cfg["data_paths"]
+        dir_category = legit_cfg["data_storage"]["category"]
+        dir_prefix = legit_cfg["data_storage"]["prefix"]
+        key_latest = legit_cfg["data_storage"]["key_latest"]
+        key_history = legit_cfg["data_storage"]["key_history"]
+        
 
         return LegitCfg(clients=clients, timestamps=timestamps, transactions=txns, \
                         timestamps_1st=timestamps_1st, client_devices=client_devices, \
                         offline_merchants=offline_merchants, categories=categories, \
                         online_merchant_ids=online_merchant_ids, all_time_weights=all_time_weights, \
-                        cities=cities, min_intervals=min_intervals, txn_num=txn_num)
+                        cities=cities, min_intervals=min_intervals, txn_num=txn_num, \
+                        in_chunks_gen=in_chunks_gen, data_paths=data_paths, dir_category=dir_category, \
+                        dir_prefix=dir_prefix, key_latest=key_latest, key_history=key_history)

@@ -12,6 +12,7 @@ data/clients/clients_with_geo.gpkg
 data/cleaned_data/offline_merchants_points.csv
 data/cleaned_data/transaction_df_clean.csv 
 data/clients/clients_sample.gpkg
+data/generated/history/
 data/raw/trans.asc
 data/raw/geo/
 data/test_data/

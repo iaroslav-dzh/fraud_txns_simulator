@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 
-from data_generator.utils import build_transaction, gen_trans_number_norm, create_progress_bar
+from data_generator.utils import build_transaction, gen_trans_number_norm, amt_rounding
 from data_generator.legit.txndata import get_txn_location_and_merchant
 from data_generator.legit.time.time import get_legit_txn_time
 
@@ -21,7 +21,7 @@ def generate_one_legit_txn(client_info, client_trans_df, client_device_ids, cate
     category: pd.DataFrame. Одна запись с категорией и её характеристиками.
     merchants_df: pd.DataFrame. Оффлайн мерчанты заранее отфильтрованные по
                   городу клиента т.к. это легальные транзакции.
-    configs: LegitCfg. Конфиги и данные для генерации легальных транзакций.  
+    configs: LegitCfg. Конфиги и данные для генерации легальных транзакций.
     """
     all_time_weights = configs.all_time_weights
 
@@ -36,7 +36,8 @@ def generate_one_legit_txn(client_info, client_trans_df, client_device_ids, cate
     amt_std = category["amt_std"].iloc[0]
     
     # случайно сгенерированная сумма транзакции, но не менее 1
-    amount = max(1, np.random.normal(amt_mean, amt_std))
+    amount = max(1, round(np.random.normal(amt_mean, amt_std), 2))
+    amount = amt_rounding(amount=amount, rate=0.6) # Случайное целочисленное округление
 
     # 1. Offline_24h_Legit - круглосуточные оффлайн покупки
     if not online and round_clock:
@@ -86,7 +87,7 @@ def generate_one_legit_txn(client_info, client_trans_df, client_device_ids, cate
 
 # 2.
 
-def gen_multiple_legit_txns(configs, ignore_index=True):
+def gen_multiple_legit_txns(configs, txn_recorder, ignore_index=True):
     """
     Генерирует несколько транзакций для каждого клиента ориентируясь 
     на существующие транзакции если они есть.
@@ -95,6 +96,7 @@ def gen_multiple_legit_txns(configs, ignore_index=True):
     Ограничение забито в функцию gen_trans_number_norm: от 1 до 120 транзакций.
     ---------------------------------------------------
     configs: LegitCfg. Конфиги и данные для генерации легальных транзакций.
+    txn_recorder: LegitTxnsRecorder. 
     ignore_index: bool. Сбросить ли индекс при конкатенации датафреймов
                   в финальный датафрейм с транзакциями всех клиентов
     """
@@ -108,13 +110,18 @@ def gen_multiple_legit_txns(configs, ignore_index=True):
     low_bound = configs.txn_num["low_bound"]
     up_bound = configs.txn_num["up_bound"]
 
+    # Создать директорию под текущую генерацию
+    txn_recorder.make_dir()
+    
     # Сюда собираются все созданные датафреймы с транзакциями клиентов для объединения в конце через pd.concat
-    all_clients_trans = [trans_df]
+    # all_clients_trans = [trans_df]
+    client_txns = txn_recorder.client_txns
     
     for client_info in clients_df.itertuples():
-    	
-        # случайное кол-во транзакций на клиента взятое из нормального распределения. Но не меньше 1 и не более 120
-        trans_number = gen_trans_number_norm(avg_num=avg_txn_num, num_std=txn_num_std, low_bound=low_bound, \
+        txn_recorder.clients_counter += 1
+
+        # случайное кол-во транзакций на клиента взятое из нормального распределения с мин. и макс. лимитами
+        txns_num = gen_trans_number_norm(avg_num=avg_txn_num, num_std=txn_num_std, low_bound=low_bound, \
                                              up_bound=up_bound)
         merchants_from_city = offline_merchants[offline_merchants["city"] == client_info.city]
         client_transactions = trans_df.loc[trans_df.client_id == client_info.client_id]
@@ -122,26 +129,42 @@ def gen_multiple_legit_txns(configs, ignore_index=True):
         # id девайсов клиента для онлайн транзакций
         client_device_ids = client_devices.loc[client_devices.client_id == client_info.client_id, "device_id"]
         
-        # Сюда будем собирать сгенрированные транзакции в виде словарей.
-        pos_txns = []
+        # Сюда будем собирать сгенрированные транзакции клиента в виде словарей.
+        # client_txns = []
 
-        for _ in range(trans_number):
+        for _ in range(txns_num):
             # семплирование категории для транзакции
             category = categories.sample(1, replace=True, weights=categories.share)
 
             # генерация одной транзакции
-            one_trans = generate_one_legit_txn(client_info=client_info, client_trans_df=client_transactions, \
-                                                 category=category, client_device_ids=client_device_ids, \
-                                                 merchants_df=merchants_from_city, configs=configs)
+            one_txn = generate_one_legit_txn(client_info=client_info, client_trans_df=client_transactions, \
+                                             category=category, client_device_ids=client_device_ids, \
+                                             merchants_df=merchants_from_city, configs=configs)
+            # pos_txns.append(one_txn)
+            # Запись транз-ции в список транз-ций текущего клиента.
+            client_txns.append(one_txn)
+            txn_recorder.txns_counter += 1 # счетчик всех транз-ций
+
+            # Управление записью транзакций чанками в файлы. Работает если enable=True
+            txn_recorder.record_chunk(txn=one_txn, txns_num=txns_num)
             
-            pos_txns.append(one_trans)
-            one_trans_df = pd.DataFrame([one_trans])
-            # Добавляем созданную транзакцию к транзакциям клиента, т.к. иногда при генерации других транзакций
-            # нужно знать уже созданные транзакции
-            client_transactions = pd.concat([client_transactions, one_trans_df], ignore_index=True)
-            
-        client_new_trans = pd.DataFrame(pos_txns)
-        all_clients_trans.append(client_new_trans)
-        
-    trans_df = pd.concat(all_clients_trans, ignore_index=ignore_index)
-    return trans_df
+            # Добавляем созданную транзакцию к транзакциям клиента, т.к. иногда 
+            # при генерации других транзакций нужно знать уже созданные транзакции
+            one_txn_df = pd.DataFrame([one_txn])
+            client_transactions = pd.concat([client_transactions, one_txn_df], ignore_index=ignore_index)
+
+        client_txns.clear() # Конец генерации на клиента. Чистим список для текущего кл-та
+
+        # client_new_trans = pd.DataFrame(pos_txns)
+        # all_clients_trans.append(client_new_trans)
+        client_txns.clear() # Делаем список транз-ций клиента снова пустым
+
+    # Сборка цельного датафрейма из чанков записанных в файлы. Датафрейм сохраняется 
+    # в txn_recorder.all_txns.
+    txn_recorder.build_from_chunks()
+    # Запись собранного датафрейма в два файла в разные директории: data/generated/lastest/
+    # И data/generated/history/<своя_папка_с_датой_временем>
+    txn_recorder.write_built_data()
+
+    # trans_df = pd.concat([trans_df, pd.DataFrame(all_txns)], ignore_index=ignore_index)
+    # return trans_df
