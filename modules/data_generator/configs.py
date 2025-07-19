@@ -25,8 +25,7 @@ class LegitCfg:
                       название распределения и цветом для графика.
     cities: pd.DataFrame. Все имеющиеся уникальные города.
     min_intervals: dict. Мин. интервалы между транз-ми
-    txn_num: dict. Конфиги кол-ва транзакция.
-    in_chunks_gen: dict. Параметры генерации транзакций чанками.
+    txn_num: dict. Конфиги кол-ва транзакций.
     data_paths: dict. Пути к данным из base.yaml
     dir_category: str. Ключ к категории директорий в base.yaml.
                        Ключ это одна из папок в data/
@@ -50,7 +49,6 @@ class LegitCfg:
     cities: pd.DataFrame
     min_intervals: dict
     txn_num: dict
-    in_chunks_gen: dict
     data_paths: dict
     dir_category: str
     dir_prefix: str

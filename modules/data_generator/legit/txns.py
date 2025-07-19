@@ -165,6 +165,3 @@ def gen_multiple_legit_txns(configs, txn_recorder, ignore_index=True):
     # Запись собранного датафрейма в два файла в разные директории: data/generated/lastest/
     # И data/generated/history/<своя_папка_с_датой_временем>
     txn_recorder.write_built_data()
-
-    # trans_df = pd.concat([trans_df, pd.DataFrame(all_txns)], ignore_index=ignore_index)
-    # return trans_df

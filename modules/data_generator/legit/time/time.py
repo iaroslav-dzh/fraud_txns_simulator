@@ -8,7 +8,8 @@ from data_generator.general_time import pd_timestamp_to_unix, sample_time_for_tr
 
 # 1.
 
-def check_min_interval_from_near_txn(client_txns, timestamp_sample, online, round_clock, configs, test=False):
+def check_min_interval_from_near_txn(client_txns, timestamp_sample, online, round_clock, \
+                                     configs, test=False):
     """
     Если для сгенерированного времени есть транзакции, которые по времени ближе заданного минимума, 
     то создать время на основании времени последней транзакции + установленный минимальный интервал.
@@ -178,17 +179,9 @@ def get_legit_txn_time(trans_df, time_weights, configs, round_clock, online=None
     timestamps_subset = timestamps.loc[timestamps.hour == txn_hour]
     timestamp_sample = timestamps_subset.sample(n=1, replace=True)
 
-    # Если текущая транзакция - оффлайн.
-    # if not online:
-    # check_min_interval_from_near_txn проверит ближайшие к timestamp_sample по времени транзакции в соответствии с установленными
-    # интервалами и если время до ближайшей транзакции меньше допустимогшо, то создаст другой timestamp
-    # Если интервал допустимый, то вернет исходный timestamp
+    # check_min_interval_from_near_txn проверит ближайшие к timestamp_sample по времени транзакции
+    # в соответствии с установленными интервалами и если время до ближайшей транзакции меньше 
+    # допустимогшо, то создаст другой timestamp. сли интервал допустимый, то вернет исходный timestamp
     txn_time, txn_unix = check_min_interval_from_near_txn(client_txns=trans_df, timestamp_sample=timestamp_sample, \
                                                           online=online, round_clock=round_clock, configs=configs)
     return txn_time, txn_unix
-
-    # # То же самое, но если текущая транзакция - онлайн
-    # elif online:
-    #     txn_time, txn_unix = check_min_interval_from_near_txn(client_txns=trans_df, timestamp_sample=timestamp_sample, online=online, \
-    #                                                             round_clock=round_clock, configs=configs)
-    #     return txn_time, txn_unix

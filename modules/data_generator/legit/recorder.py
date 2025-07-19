@@ -4,6 +4,15 @@ from datetime import datetime
 
 class LegitTxnsRecorder:
     """
+    Запись легальных транзакций в файл.
+    Предусмотрена запись частями в несколько файлов и затем
+    чтение и запись в единый файл в двух копиях.
+    ------------
+    Атрибуты:
+    ------------
+    chunk_size: int. Кол-во части транз-ций для записи в файл.
+    total_clients: int. Общее кол-во клиентов отобранных для генерации легальных
+                   транзакций.
     category: str. Ключ к категории директорий в base.yaml.
                        Ключ это одна из папок в data/
                        Тут будут храниться сгенерированные данные.
@@ -11,18 +20,26 @@ class LegitTxnsRecorder:
                 data/generated/latest/. Это для записи созданных
                 транз-ций как последних сгенерированных.
     key_history: str. Ключ в base.yaml для пути к директории
+    data_paths: dict.
                     с историей генерации данных data/generated/history/
     prefix: str. Для названия индивидуальной папки внутри dir_category
                 Например 'legit_'
     directory: str. Путь к директории в папке data/generated/history
                куда записывать чанки и собранный из них файл.
     all_txns: pd.DataFrame. Все сгенерированные транзакции. По умолчанию None.
+    client_txns: list. Транз-ции текущего клиента для которого идет генерация.
+    txns_chunk: list. Транз-ции текущего чанка для последующей записи в файл.
+    txns_counter: int. Общее кол-во всех транзакций сгенерированных на данный
+                  момент.
+    clients_counter: int. Общее кол-во клиентов которые были обработаны включая
+                     клиента для которого еще происходит генерация.
+    chunks_counter: int. Общее кол-во чанков.
     """
     def __init__(self, configs):
         """
-        configs:
+        configs: LegitCfg. Конфиги и данные для генерации легальных транзакций. 
         """
-        self.in_chunks_gen = configs.in_chunks_gen
+        self.chunk_size = configs.txn_num["chunk_size"]
         self.total_clients = configs.clients.shape[0]
         self.category = configs.dir_category
         self.key_latest = configs.key_latest
@@ -61,6 +78,8 @@ class LegitTxnsRecorder:
 
     def name_the_chunk(self):
         """
+        Создать название для файла под
+        запись текущего чанка.
         """
         self.chunks_counter += 1
         prefix = self.prefix
@@ -68,17 +87,30 @@ class LegitTxnsRecorder:
         return f"{prefix}{chunks_counter:03d}.parquet"
 
 
-    @property
-    def to_chunk(self):
+    def to_chunk(self, txns_num):
         """
+        txns_num: int. Кол-во созданных транз-ций текущего клиента.
         """
-        chunk_size = self.in_chunks_gen["chunk_size"]
+        chunk_size = self.chunk_size
         txns_counter = self.txns_counter
+        clients_counter = self.clients_counter
+        total_clients = self.total_clients
+        client_txns = self.client_txns 
 
+        # если кол-во всех транзакций кратно размеру чанка
         if txns_counter % chunk_size == 0:
-            return True
-        
-        return False
+            return True 
+        # Условия ниже для проверки является ли транзакция последней
+        # в случае если генерация закончена, но чанк меньше выставленного размера
+        if clients_counter != total_clients:
+            return False
+        if txns_num != len(client_txns):
+            return False
+        # Если чанк не по размеру, но генерация транзакций закончена
+        # т.е. кол-во обработанных клиентов равно общему кол-ву и
+        # кол-во созданных транз. клиента равно заданному кол-ву для него
+        # То возвразаем True
+        return True
 
 
     def record_chunk(self, txn, txns_num):
@@ -87,46 +119,21 @@ class LegitTxnsRecorder:
         от всех запусков генератора.
         --------
         txn: dict. Созданная транзакция.
-        category: str. Ключ к категории директорий в base.yaml. Например 'generated'.
         txns_num: int. Кол-во созданных транз-ций текущего клиента.
         """
-        # data_paths = self.data_paths
         directory = self.directory
-        clients_counter = self.clients_counter
-        total_clients = self.total_clients
-        client_txns = self.client_txns 
 
         self.txns_chunk.append(txn)
 
         # Проверка по кол-ву. Если кол-во транз-ций равно размеру чанка
         # то пишем чанк в файл
-        if self.to_chunk:
+        if self.to_chunk(txns_num=txns_num):
             chunk = pd.DataFrame(self.txns_chunk)
             chunk_name = self.name_the_chunk()
             full_path = os.path.join(directory, chunk_name)
 
             chunk.to_parquet(full_path, engine="pyarrow")
             self.txns_chunk.clear() # сброс чанка записанного в файл
-            return
-        # print(f"""clients_counter: {clients_counter}
-        # total_clients: {total_clients}
-        # txns_num: {txns_num}
-        # client_txns: {len(client_txns)}
-        # """)
-        # Эти два if-а проверяют закончилась ли генерация транз-ций
-        # Т.е. последний ли это клиент и последняя ли это транз-ция для него
-        # Для случаев когда генерация закончена, но чанк не набран до конца.
-        if clients_counter != total_clients:
-            return
-        if txns_num != len(client_txns):
-            return
-        # print("record_chunk #2")
-        chunk = pd.DataFrame(self.txns_chunk)
-        chunk_name = self.name_the_chunk()
-        full_path = os.path.join(directory, chunk_name)
-        chunk.to_parquet(full_path, engine="pyarrow")
-
-        self.txns_chunk.clear() # сброс чанка записанного в файл
 
 
     def build_from_chunks(self):
@@ -169,54 +176,11 @@ class LegitTxnsRecorder:
 
     def reset_counters(self):
         """
+        Сброс счетчиков: txns_counter, clients_counter,
+        chunks_counter
         """
         self.txns_counter = 0
         self.clients_counter = 0
         self.chunks_counter = 0
-
-
-
-    # def handle_client_txns(self, txn, mode):
-    #     """
-    #     txn: list.
-    #     """
-    #     if mode == "append":
-    #         self.client_txns.append(txn)
-    #     elif mode == "clear":
-    #         self.client_txns.clear()
-
-
-    # def record_all(self, category, key_latest, key_history, txns_num):
-    #     """
-    #     Запись всех созданных транзакций в parquet.
-    #     """
-    #     data_paths = self.data_paths
-    #     path_latest = data_paths[category][key_latest]
-    #     path_history = data_paths[category][key_history]
-    #     clients_counter = self.clients_counter
-    #     total_clients = self.total_clients
-    #     client_txns = self.client_txns 
-
-
-    #     # Эти два if-а проверяют закончилась ли генерация транз-ций
-    #     # Т.е. последний ли это клиент и последняя ли это транз-ция для него
-    #     if clients_counter != total_clients:
-    #         return
-    #     if txns_num != len(client_txns):
-    #         return
-        
-    #     all_txns = pd.DataFrame(self.all_txns)
-    #     all_txns.to_parquet(path_latest, engine="pyarrow")
-    #     all_txns.to_parquet(path_history, engine="pyarrow")
-
-
-    # def record_txns(self, category, txns_num):
-    #     """
-    #     """
-    #     key_latest = self.key_latest
-    #     key_history = self.key_history
-
-    #     self.record_all(category=category, key_latest=key_latest,\
-    #                    key_history=key_history, txns_num=txns_num)
         
         
