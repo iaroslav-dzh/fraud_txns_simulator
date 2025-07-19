@@ -1,0 +1,31 @@
+# Конфиги для compromised client fraud
+
+
+rules: # Конфиги для правил
+  # Предел скорости перемещения клиента между транз-циями км/ч, включительно
+  threshold: 800 
+  freq_txn: # Правило trans_freq_increase
+    txn_num: # Кол-во транз-ций для такого правила
+      min: 4
+      max: 8
+    amount:
+      min: 2000
+      max: 10000
+      mean: 4000
+      std: 1500
+    time:
+      # мин. разрыв между транз-циями, минут
+      freq_low: 1
+      # макс. разрыв между транз-циями, минут
+      freq_high: 5
+
+
+data_storage:
+  # Ключ к полному пути записи файла в папке data/generated/latest/ в base.yaml
+  key_latest: "compr_client"
+  # Ключ к директории для создания отдельной папки генерации в в base.yaml
+  key_history: "history"
+  # Ключ к категории директорий в base.yaml. Тут будут храниться данные
+  category: "generated" 
+  # Префикс для названия отдельной индивидуальной папки внутри директории из key_history
+  prefix: "compr_"

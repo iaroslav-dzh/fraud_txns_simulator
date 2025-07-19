@@ -2,7 +2,6 @@
 import pandas as pd
 import geopandas as gpd
 import pyarrow
-import os
 
 from data_generator.general_time import create_timestamps_range_df, get_all_time_patterns
 from data_generator.utils import create_txns_df
@@ -11,14 +10,22 @@ from data_generator.configs import LegitCfg
 
 class LegitConfigBuilder:
     """
+    Создание объекта конфиг класса LegitCfg под легальные
+    транзакции.
+    ---------
+    Атрибуты:
+    ---------
+    base_cfg: dict. Общие конфиги из base.yaml
+    legit_cfg: dict.
+    time_cfg: dict. Общие конфиги времени из time.yaml
+    self.clients: pd.DataFrame. Семпл клиентов для генерации
+                  транзакций.
     """
     def __init__(self, base_cfg: dict, legit_cfg: dict, time_cfg: dict):
         """
         base_cfg: dict. Общие конфиги из base.yaml
         legit_cfg: dict. Конфиги легальныз транз. из legit.yaml
         time_cfg: dict. Общие конфиги времени из time.yaml
-        clients: gdp.GeoDataframe. Семплированные клиенты для
-                 для генерации транз-ций.
         """
         self.base_cfg = base_cfg
         self.legit_cfg = legit_cfg

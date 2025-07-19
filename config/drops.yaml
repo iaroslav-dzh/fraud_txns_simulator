@@ -44,6 +44,15 @@ distributor:
     trf_max: 3
     atm_min: 0 # Снятие
     atm_max: 2
+  data_storage:
+    # Ключ к полному пути записи файла в папке data/generated/latest/ в base.yaml
+    key_latest: "dist_drop_txns"
+    # Ключ к директории для создания отдельной папки генерации в в base.yaml
+    key_history: "history"
+    # Ключ к категории директорий в base.yaml. Тут будут храниться данные
+    category: "generated" 
+    # Префикс для названия отдельной индивидуальной папки внутри директории из key_history
+    prefix: "dist_drop_"
   
 
 # Настройки дроп фрода связанного с отмыванием поступающих денег через покупки
@@ -75,6 +84,15 @@ purchaser:
   attempts: # Лимиты попыток операций после первой отклоненной операции
     min: 0
     max: 3
+  data_storage:
+    # Ключ к полному пути записи файла в папке data/generated/latest/ в base.yaml
+    key_latest: "purch_drop_txns"
+    # Ключ к директории для создания отдельной папки генерации в в base.yaml
+    key_history: "history"
+    # Ключ к категории директорий в base.yaml. Тут будут храниться данные
+    category: "generated" 
+    # Префикс для названия отдельной индивидуальной папки внутри директории из key_history
+    prefix: "purch_drop_"
 
 
 time: 

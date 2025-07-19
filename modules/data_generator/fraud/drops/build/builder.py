@@ -1,7 +1,7 @@
 # Конструктор основных классов для дропов
 from data_generator.fraud.drops.base import DropAccountHandler, DropAmountHandler
 from data_generator.fraud.drops.behavior import DistBehaviorHandler, PurchBehaviorHandler
-from  data_generator.fraud.txndata import DropTxnPartData
+from  data_generator.fraud.drops.txndata import DropTxnPartData
 from data_generator.fraud.drops.time import DropTimeHandler
 
 # 1. Агрегатор базовых классов для дропов

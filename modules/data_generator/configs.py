@@ -62,38 +62,53 @@ class LegitCfg:
 # Это данные на основе которых будут генерироваться транзакции
 
 @dataclass
-class CompPurchFraudCfg:
+class ComprClientFraudCfg:
     """
-    Конфиги и данные для генерации фрод транзакци в
-    категории compromised purchase fraud.
+    Конфиги и данные для генерации фрод транзакций в
+    категории compromised client fraud.
     ---------------------
     clients: pd.DataFrame
     timestamps: pd.DataFrame
     transactions: pd.DataFrame
-    client_devices: pd.DataFrame
     offline_merchants: pd.DataFrame
     categories: pd.DataFrame
     online_merchant_ids: pd.Series
-    time_weights_dict: dict
-    rules: pd.DataFrame
-    cities: pd.DataFrame
-    fraud_devices: pd.DataFrame
-    fraud_ips: pd.DataFrame
-    fraud_amounts: pd.DataFrame 
-    """
-    clients: pd.DataFrame
-    timestamps: pd.DataFrame
-    transactions: pd.DataFrame
-    client_devices: pd.DataFrame
-    offline_merchants: pd.DataFrame
-    categories: pd.DataFrame
-    online_merchant_ids: pd.Series
-    time_weights_dict: dict
+    all_time_weights: dict
     rules: pd.DataFrame
     cities: pd.DataFrame
     fraud_devices: pd.DataFrame
     fraud_ips: pd.DataFrame
     fraud_amounts: pd.DataFrame
+    rules_cfg: dict. Конфиги для правил из compr.yaml.
+    data_paths: dict. Пути к данным из base.yaml
+    dir_category: str. Ключ к категории директорий в base.yaml.
+                       Ключ это одна из папок в data/
+                       Тут будут храниться сгенерированные данные.
+    dir_prefix: str. Для названия индивидуальной папки внутри dir_category
+                Например 'compr_'
+    key_latest: str. Ключ к полному пути записи файла в папке 
+                data/generated/latest/ в base.yaml
+    key_history: str. Ключ к директории для создания отдельной папки 
+                 генерации в в base.yaml
+    """
+    clients: pd.DataFrame
+    timestamps: pd.DataFrame
+    transactions: pd.DataFrame
+    offline_merchants: pd.DataFrame
+    categories: pd.DataFrame
+    online_merchant_ids: pd.Series
+    all_time_weights: dict
+    rules: pd.DataFrame
+    cities: pd.DataFrame
+    fraud_devices: pd.DataFrame
+    fraud_ips: pd.DataFrame
+    fraud_amounts: pd.DataFrame
+    rules_cfg: dict
+    data_paths: dict
+    dir_category: str
+    dir_prefix: str
+    key_latest: str
+    key_history: str
 
 
 # 3. Датакласс для конфигов транзакций дропов-распределителей
@@ -135,7 +150,17 @@ class DropDistributorCfg:
     attempts: dict. Лимиты попыток операций после первой отклоненной операции.
               Ключи: trf_min, trf_max, atm_min, atm_max.
     to_drops: dict. Параметры переводов другим дропам
-    crypto_rate: float. Доля переводов в крипту от переводов дропа
+    crypto_rate: float. Доля переводов в крипту от переводов дропа.
+    data_paths: dict. Пути к данным из base.yaml
+    dir_category: str. Ключ к категории директорий в base.yaml.
+                       Ключ это одна из папок в data/
+                       Тут будут храниться сгенерированные данные.
+    dir_prefix: str. Для названия индивидуальной папки внутри dir_category
+                Например 'drop_dist_'
+    key_latest: str. Ключ к полному пути записи файла в папке 
+                data/generated/latest/ в base.yaml
+    key_history: str. Ключ к директории для создания отдельной папки 
+                 генерации в в base.yaml
     """
     clients: pd.DataFrame
     timestamps: pd.DataFrame
@@ -160,6 +185,11 @@ class DropDistributorCfg:
     attempts: dict
     to_drops: dict
     crypto_rate: float
+    data_paths: dict
+    dir_category: str
+    dir_prefix: str
+    key_latest: str
+    key_history: str
 
 
 # 4. Датакласс для конфигов транзакций дропов-покупателей 
@@ -201,6 +231,16 @@ class DropPurchaserCfg:
            Напр. 500 значит что суммы будут кратны 500 - кончаться на 500 или 000
     attempts: dict. Лимиты попыток операций после первой отклоненной операции.
               Ключи: min, max.
+    data_paths: dict. Пути к данным из base.yaml
+    dir_category: str. Ключ к категории директорий в base.yaml.
+                       Ключ это одна из папок в data/
+                       Тут будут храниться сгенерированные данные.
+    dir_prefix: str. Для названия индивидуальной папки внутри dir_category
+                Например 'drop_purch_'
+    key_latest: str. Ключ к полному пути записи файла в папке 
+                data/generated/latest/ в base.yaml
+    key_history: str. Ключ к директории для создания отдельной папки 
+                 генерации в в base.yaml
     """
     clients: pd.DataFrame
     timestamps: pd.DataFrame
@@ -223,6 +263,11 @@ class DropPurchaserCfg:
     two_way_delta: dict
     pos_delta: dict
     attempts: dict
+    data_paths: dict
+    dir_category: str
+    dir_prefix: str
+    key_latest: str
+    key_history: str
 
 
 

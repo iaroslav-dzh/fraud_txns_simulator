@@ -154,7 +154,7 @@ def create_progress_bar(obj, text=None):
 def amt_rounding(amount, rate=0.6):
     """
     Целочисленное округление.
-    До единиц, сотен, тысяч.
+    До единиц, десятков, сотен, тысяч.
     Либо возвращает исходную сумму.
     -------------
     amount: float | int.
@@ -163,7 +163,7 @@ def amt_rounding(amount, rate=0.6):
     if np.random.uniform(0, 1) < rate:
         return amount
     
-    dividers = np.array([1, 100, 1000])
+    dividers = np.array([1, 10, 100, 1000])
     reduced_divs = dividers[dividers <= amount]
     divider = np.random.choice(reduced_divs)
     return amount // divider * divider

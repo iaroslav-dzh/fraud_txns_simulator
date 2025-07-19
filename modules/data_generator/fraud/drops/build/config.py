@@ -19,7 +19,8 @@ class DropConfigBuilder:
     drop_cfg: dict. Конфиги дропов из drops.yaml
     drops: gdp.GeoDataframe. Семплированные клиенты для дроп фрода.
     """
-    def __init__(self, base_cfg: dict, time_cfg: dict, fraud_cfg: dict, drop_cfg: dict):
+    def __init__(self, base_cfg: dict, time_cfg: dict, \
+                 fraud_cfg: dict, drop_cfg: dict):
         """
         base_cfg: dict. Общие конфиги из base.yaml
         time_cfg: dict. Общие конфиги времени из time.yaml
@@ -142,6 +143,7 @@ class DropConfigBuilder:
         Создать конфиг датакласс для дропов распределителей (distributors).
         Возвращает объект DropDistributorCfg.
         """
+        base_cfg = self.base_cfg
         drop_cfg = self.drop_cfg
         dist_cfg = drop_cfg["distributor"]
         time_cfg = drop_cfg["time"]
@@ -170,6 +172,11 @@ class DropConfigBuilder:
         attempts = dist_cfg["attempts"]
         to_drops = dist_cfg["to_drops"]
         crypto_rate = dist_cfg["crypto_rate"]
+        data_paths = base_cfg["data_paths"]
+        dir_category = drop_cfg["distributor"]["data_storage"]["category"]
+        dir_prefix = drop_cfg["distributor"]["data_storage"]["prefix"]
+        key_latest = drop_cfg["distributor"]["data_storage"]["key_latest"]
+        key_history = drop_cfg["distributor"]["data_storage"]["key_history"]
 
         return DropDistributorCfg(clients=clients, timestamps=timestamps, accounts=accounts, \
                                   outer_accounts=outer_accounts, client_devices=client_devices, \
@@ -178,8 +185,8 @@ class DropConfigBuilder:
                                   lag_interval=lag_interval, two_way_delta=two_way_delta, pos_delta=pos_delta, \
                                   split_rate=split_rate, chunks=chunks, inbound_amt=inbound_amt, round=round, \
                                   trf_max=trf_max, reduce_share=reduce_share, attempts=attempts, to_drops=to_drops, \
-                                  crypto_rate=crypto_rate
-                                  )
+                                  crypto_rate=crypto_rate, data_paths=data_paths, dir_category=dir_category, \
+                                  dir_prefix=dir_prefix, key_latest=key_latest, key_history=key_history)
 
 
     def build_purch_cfg(self):
@@ -187,6 +194,7 @@ class DropConfigBuilder:
         Создать конфиг датакласс для дропов покупателей (purchasers).
         Возвращает объект DropPurchaserCfg.
         """
+        base_cfg = self.base_cfg
         drop_cfg = self.drop_cfg
         purch_cfg = drop_cfg["purchaser"]
         time_cfg = drop_cfg["time"]
@@ -214,6 +222,11 @@ class DropConfigBuilder:
         two_way_delta = time_cfg["two_way_delta"]
         pos_delta = time_cfg["pos_delta"]
         attempts = purch_cfg["attempts"]
+        data_paths = base_cfg["data_paths"]
+        dir_category = drop_cfg["purchaser"]["data_storage"]["category"]
+        dir_prefix = drop_cfg["purchaser"]["data_storage"]["prefix"]
+        key_latest = drop_cfg["purchaser"]["data_storage"]["key_latest"]
+        key_history = drop_cfg["purchaser"]["data_storage"]["key_history"]
 
         return DropPurchaserCfg(clients=clients, timestamps=timestamps, accounts=accounts, \
                                 client_devices=client_devices, \
@@ -222,5 +235,7 @@ class DropConfigBuilder:
                                 period_out_lim=period_out_lim, lag_interval=lag_interval, \
                                 two_way_delta=two_way_delta, pos_delta=pos_delta, split_rate=split_rate, \
                                 chunks=chunks, inbound_amt=inbound_amt, round=round, \
-                                amt_max=amt_max, reduce_share=reduce_share, attempts=attempts
+                                amt_max=amt_max, reduce_share=reduce_share, attempts=attempts, \
+                                data_paths=data_paths, dir_category=dir_category, dir_prefix=dir_prefix, \
+                                key_latest=key_latest, key_history=key_history
                                 )

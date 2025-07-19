@@ -2,11 +2,9 @@
 
 import pandas as pd
 import numpy as np
-from typing import Union
 
-
-from data_generator.utils import get_values_from_truncnorm
-from data_generator.configs import CompPurchFraudCfg, DropDistributorCfg, DropPurchaserCfg
+from data_generator.utils import get_values_from_truncnorm, amt_rounding
+from data_generator.configs import ComprClientFraudCfg
     
 
 # .
@@ -26,12 +24,13 @@ class FraudTxnPartData:
     used_ips - pd.Series. Сюда записывать ip адреса использованные для фрода.
     fraud_devices - pd.DataFrame. девайсы для фрода: платформа, id устройства.
     used_devices - pd.Series. Сюда записывать id девайсов использованные для фрода.
-    client_devices - pd.DataFrame. Девайсы клиентов.
-    last_txn - tuple. Предыдущая транзакция. Записывается при использовании некоторых методов (пока только для freq_trans)
+    last_txn - tuple. Предыдущая транзакция. Записывается при использовании некоторых 
+               методов (пока только для freq_trans)
     """
-    def __init__(self, configs: CompPurchFraudCfg):
+    def __init__(self, configs: ComprClientFraudCfg):
         """
-        configs: CompPurchFraudCfg. Содержит параметры и конфиги для генерации фрода.
+        configs: ComprClientFraudCfg. Содержит параметры и конфиги
+                 для генерации транз-ций.
         """
         self.merchants_df = configs.offline_merchants
         self.client_info = None
@@ -39,22 +38,21 @@ class FraudTxnPartData:
         self.fraud_ips = configs.fraud_ips
         self.used_ips = pd.Series(name="ip_address")
         self.fraud_devices = configs.fraud_devices
-        self.client_devices = configs.client_devices
         self.used_devices = pd.Series(name="device_id")
         self.last_txn = None
     
     
-    def another_city(self, client_city, online, category_name):
+    def another_city(self, online, category_name):
         """
         Генерация merchant_id, координат транзакции, названия города, IP адреса и device_id (если онлайн)
         C городом отличным от города клиента. Для онлайн транзакций также другой device_id и IP адрес в другом городе.
         Нужен для правил: fast_geo_change, fast_geo_change_online, new_ip_and_device_high_amount.
         -----------------------------------------------
         Работает для онлайн и оффлайн транзакций
-        client_city - str.
         online - bool.
         category_name - str.
         """
+        client_city = self.client_info.city
 
         if online:
             merchant_id = self.online_merchant_ids.sample(n=1).iat[0]
@@ -70,7 +68,8 @@ class FraudTxnPartData:
             channel = "ecom"
             
             # Семпл девайса которого нет в used_devices
-            devices = self.fraud_devices.loc[~self.fraud_devices.device_id.isin(self.used_devices), "device_id"]
+            devices = self.fraud_devices.loc[~self.fraud_devices.device_id.isin(self.used_devices), \
+                                             "device_id"]
             device_id = devices.sample(1).iloc[0]
             
             # Записываем IP и device_id как использованные
@@ -96,19 +95,20 @@ class FraudTxnPartData:
         return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type
 
 
-    def new_device_and_ip(self, client_city, category_name, online=True, another_city=True):
+    def new_device_and_ip(self, category_name, online=True, another_city=True):
         """
         Генерация merchant_id, координат транзакции, названия города, IP адреса(если применимо) и device_id
         Для правил: new_ip_and_device_high_amount, new_device_and_high_amount, freq_trans.
         ---------------------------------------------------------------------
         another_city - bool. Должен ли IP быть отличного от клиентского города.
         """
+        client_city = self.client_info.city
 
         merchant_id = self.online_merchant_ids.sample(n=1).iat[0]
 
         # IP адрес другого города и остальная информация
         if another_city:
-            return self.another_city(client_city=client_city, online=online, category_name=category_name)
+            return self.another_city(online=online, category_name=category_name)
             
         # Другой IP адрес, но город клиента - для new_device_and_high_amount
         fraud_ips = self.fraud_ips.loc[~self.fraud_ips.fraud_ip.isin(self.used_ips)]
@@ -136,12 +136,12 @@ class FraudTxnPartData:
         return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type
 
 
-    def freq_trans(self, client_city, category_name, another_city):
+    def freq_trans(self, category_name, another_city):
         """
         another_city - bool. Должен ли IP быть отличного от клиентского города.
         """
 
-        self.last_txn = self.new_device_and_ip(client_city, category_name, online=True, another_city=another_city)
+        self.last_txn = self.new_device_and_ip(category_name, online=True, another_city=another_city)
         
         return self.last_txn
 
@@ -160,18 +160,63 @@ class FraudTxnPartData:
             self.used_devices = pd.Series(name="device_id")
 
 
+    def get_data(self, rule, online, category_name, txn_num):
+        """
+        Получить часть данных о транз-ции:
+        merchant_id, trans_lat, trans_lon, trans_ip, trans_city,
+        device_id, channel, txn_type
+        -------------
+        rule: str. Антифрод правило.
+        online: bool. Онлайн флаг транз-ции.
+        category_name: str. Название категории покупки.
+        txn_num: int. Какая это фрод транз-ция по счету для текущего
+                клиента. 
+        """
+
+        # Данные о мерчанте, геопозиции, IP, девайсе
+        # Правило: быстрая смена гео. Оффлайн/онлайн
+        if rule in ["fast_geo_change", "fast_geo_change_online"]:
+            return self.another_city(online=online, category_name=category_name)
+
+        elif rule in ["new_ip_and_device_high_amount"]:
+            return self.new_device_and_ip(online=online, category_name=category_name, \
+                                               another_city=True)
+
+        elif rule == "new_device_and_high_amount":
+            return self.new_device_and_ip(online=online, category_name=category_name, \
+                                               another_city=False)
+
+        # Если это первая транзакция под правило trans_freq_increase
+        # То вызываем метод freq_trans для генерации части данных транзакции
+        # Они не изменятся в дальнейших транзакциях из серии. И поэтому в следующих транзакциях
+        # Будем брать кэшированный результат записанный в self.last_txn
+        elif rule == "trans_freq_increase" and txn_num == 1:
+            # В данном случае получаем также и статус транзакции кроме остальных данных.
+            # Зависит от того, какая это транзакция по счету из серии частых транзакций
+            return self.freq_trans(category_name=category_name, another_city=True)
+
+        # Транзакция не первая в серии. Берем кэшированные данные созданные для первой транзакции.
+        elif rule == "trans_freq_increase":
+            return self.last_txn
+
+
 # .
 
 class TransAmount: 
     """
-    Генерация суммы транзакции
+    Генерация суммы транзакции для compromised client
+    фрода.
+    ------------------
+    categories: pd.DataFrame с категориями и характеристиками их сумм.
     """
 
-    def __init__(self, categories_stats):
+    def __init__(self, configs):
         """
-        categories_stats - pd.DataFrame с категориями и характеристиками их сумм
+        configs: ComprClientFraudCfg. Конфиги и данные для генерации 
+                 фрод транзакци в категории compromised client fraud.
         """
-        self.categories = categories_stats
+        self.categories = configs.fraud_amounts
+        self.freq_txn = configs.rules_cfg["freq_txn"]
         
 
     def fraud_amount(self, category_name):
@@ -185,164 +230,25 @@ class TransAmount:
         mean = category.fraud_mean
         std = category.fraud_std
 
-        # Генерация числа и округление до десятков
-        return get_values_from_truncnorm(low_bound=low, high_bound=high, mean=mean, std=std)[0] // 10 * 10
+        # Генерация числа и случайное округление
+        amount =  round(get_values_from_truncnorm(low_bound=low, high_bound=high, \
+                                         mean=mean, std=std)[0], 2)
+        return amt_rounding(amount, rate=0.5)
 
-    def freq_trans_amount(self, low=2000, high=10000, mean=4000, std=1500):
+    def freq_trans_amount(self):
         """
         Генерация суммы специально для правила freq_trans_amount
         """
+        low = self.freq_txn["amount"]["min"]
+        high = self.freq_txn["amount"]["max"]
+        mean = self.freq_txn["amount"]["mean"]
+        std = self.freq_txn["amount"]["std"]
         
-        # Генерация числа и округление до десятков
-        return get_values_from_truncnorm(low_bound=low, high_bound=high, mean=mean, std=std)[0] // 10 * 10
+        # Генерация числа и случайное округление
+        amount =  round(get_values_from_truncnorm(low_bound=low, high_bound=high, \
+                                         mean=mean, std=std)[0], 2)
+        return amt_rounding(amount, rate=0.4)
     
-
-# . Создание части данных транзакции для дропов.
-
-class DropTxnPartData:
-    """
-    Класс для генерации части данных о транзакции дропа:
-    канал, тип операции, мерчант, геопозиция, город, IP адрес, иногда статус.
-    ------------------
-    Атрибуты:
-    --------
-    client_info - pd.DataFrame или namedtuple. Запись с информацией о клиенте
-    online_merchant_ids- pd.Series. id онлайн мерчантов
-    client_devices - pd.DataFrame. Девайсы клиентов.
-    last_txn - tuple. Для кэширования данных любой последней транзакции.
-    """
-    def __init__(self, configs: Union[DropDistributorCfg, DropPurchaserCfg]):
-        """
-        configs: Один из датаклассов — DropDistributorCfg или DropPurchaserCfg.
-                 Содержит параметры и конфиги для генерации фрода.
-        """
-        self.client_info = None
-        self.online_merchant_ids = configs.online_merchant_ids
-        self.client_devices = configs.client_devices
-        self.last_txn = None
-
-
-    def assert_client_info(self):
-        """
-        Проверка что self.client_info не пустое
-        """
-        assert self.client_info is not None, \
-            f"self.client_info is {type(self.client_info)}"
-
-
-    def original_purchase(self, online=True, get_cached=False):
-        """
-        Оригинальные данные клиента для операций покупок.
-        На данный момент это для дропов.
-        Для операций на криптобирже и для покупки товаров дропами
-        -------
-        online: bool.
-        get_cached: bool. Пробовать ли вернуть последние кэшированные данные
-                    вместо генерации новых.
-        """
-        self.assert_client_info()
-
-        if get_cached and self.last_txn is not None:
-            return self.last_txn
-
-        if online:
-            merchant_id = self.online_merchant_ids.sample(n=1).iat[0]
-            # Координаты города и название
-            trans_lat = self.client_info.lat
-            trans_lon = self.client_info.lon
-            trans_ip = self.client_info.home_ip
-            trans_city = self.client_info.city        
-            # Семпл девайса клиента
-            devices = self.client_devices.loc[self.client_devices.client_id == self.client_info.client_id]
-            device_id = devices.device_id.sample(1).iloc[0]
-            txn_type = "purchase"
-            # Не генерируем channel. Он должен быть определен вовне
-            channel = None
-
-            self.last_txn = merchant_id, trans_lat, trans_lon, trans_ip, trans_city, \
-                            device_id, channel, txn_type
-            self.last_txn = self.last_txn
-            return self.last_txn
-
-        
-    def original_data(self, online, receive=None):
-        """
-        Получение оригинальных данных клиента для транзакции.
-        Пока этот метод для клиентов дропов и, возможно, для переводов мошенникам
-        ------------------------------------
-        online - bool.
-        received - bool.
-        """
-        self.assert_client_info()
-
-        # Входящий перевод
-        if online and receive:
-            trans_ip = "not applicable"
-            device_id = np.nan
-            channel = "transfer"
-            txn_type = "inbound"
-            merchant_id = np.nan
-            trans_lat = np.nan
-            trans_lon = np.nan
-            trans_city = "not applicable"
-
-            self.last_txn = merchant_id, trans_lat, trans_lon, trans_ip, trans_city, \
-                            device_id, channel, txn_type
-            return self.last_txn
-        
-        client_info = self.client_info
-        client_devices = self.client_devices
-        # Исходящий перевод
-        if online:
-            # Для онлайна просто берется home_ip и device_id из данных клиента.
-            trans_ip = client_info.home_ip
-            devices = client_devices.loc[client_devices.client_id == client_info.client_id]
-            device_id = devices.device_id.sample(1).iloc[0]
-            channel = "transfer"
-            txn_type = "outbound"  
-
-        # Оффлайн. Снятие в банкомате
-        elif not online:
-            trans_ip = "not applicable"
-            device_id = np.nan
-            channel = "ATM"
-            txn_type = "withdrawal"
-            
-        merchant_id = np.nan
-        # Локация транзакции просто записываем координаты и название города клиента
-        trans_lat = client_info.lat
-        trans_lon = client_info.lon
-        trans_city = client_info.city
-
-        self.last_txn = merchant_id, trans_lat, trans_lon, trans_ip, trans_city, \
-                        device_id, channel, txn_type
-        return self.last_txn
-    
-    
-    def check_previous(self, dist, last_full):
-        """
-        Решить можно ли вернуть данные последней транзакции
-        из кэша. True может вернуть только для дропа распределителя.
-        ------
-        dist: bool. Дроп распределитель или нет.
-        last_full: dict. Полные данные последней транзакции.
-                   Нужны, чтобы узнать channel.
-        """
-        if not dist:
-            return False
-        if last_full is None:
-            return False
-        if last_full["channel"] == "crypto_exchange":
-            return True
-        
-        return False
-
-    
-    def reset_cache(self):
-        """
-        Сброс кэша
-        """
-        self.last_txn = None
 
 # .
 
