@@ -60,63 +60,12 @@ def gen_purchase_fraud_txn(rule, client_trans_df, configs: ComprClientFraudCfg, 
                                       txn_num=txn_num)
     # Распаковка кортежа в переменные
     merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type = partial_data
-                                    
-    # # Данные о мерчанте, геопозиции, IP, девайсе
-    # # Правило: быстрая смена гео. Оффлайн/онлайн
-    # if rule in ["fast_geo_change", "fast_geo_change_online"]:
-    #     merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type = \
-    #         part_data.another_city(client_city=client_info.area, online=online, \
-    #                                         category_name=category_name)
-
-    # elif rule in ["new_ip_and_device_high_amount"]:
-    #     merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type = \
-    #         part_data.new_device_and_ip(client_city=client_info.area, online=online, \
-    #                                         category_name=category_name, another_city=True)
-
-    # elif rule == "new_device_and_high_amount":
-    #     merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type = \
-    #         part_data.new_device_and_ip(client_city=client_info.area, online=online, \
-    #                                         category_name=category_name, another_city=False)
-
-    # # Если это первая транзакция под правило trans_freq_increase
-    # # То вызываем метод freq_trans для генерации части данных транзакции
-    # # Они не изменятся в дальнейших транзакциях из серии. И поэтому в следующих транзакциях
-    # # Будем брать кэшированный результат записанный в part_data.last_txn
-    # elif rule == "trans_freq_increase" and txn_num == 1:
-    #     # В данном случае получаем также и статус транзакции кроме остальных данных.
-    #     # Зависит от того, какая это транзакция по счету из серии частых транзакций
-    #     merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type = \
-    #         part_data.freq_trans(client_city=client_info.area, \
-    #                                         category_name=category_name, another_city=True)
-
-    # # Транзакция не первая в серии. Берем кэшированные данные созданные для первой транзакции.
-    # elif rule == "trans_freq_increase":
-    #     merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type = \
-    #         part_data.last_txn
-
-
+    
     # Физическое расстояние между координатами последней транзакции и координатами текущей.
     # geo_distance = calc_distance(client_trans_df=client_trans_df, trans_lat=trans_lat, trans_lon=trans_lon)
     geo_distance = calc_distance(lat_01=last_txn.trans_lat.iat[0], lon_01=last_txn.trans_lon.iat[0], \
                                  lat_02=trans_lat, lon_02=trans_lon)
     
-    # # 1. Offline_24h_Fraud - круглосуточные оффлайн покупки
-    # if not online and round_clock:
-    #     weights_key = "Offline_24h_Fraud"
-        
-    # # 2. Online_Fraud - Онлайн покупки
-    # elif online:
-    #     weights_key = "Online_Fraud"
-        
-    # # 3. Offline_Day_Fraud - Оффлайн покупки. Дневные категории.
-    # elif not online and not round_clock:
-    #     weights_key = "Offline_Day_Fraud"
-    
-    # time_weights = all_time_weights[weights_key]["weights"]
-    
-    # Генерация времени транзакции
-    # get_time_fraud_txn(trans_df, configs, online, round_clock, rule=None, \
-    #                    geo_distance=None, lag=None)
     txn_time, txn_unix = get_time_fraud_txn(trans_df=client_trans_df, configs=configs, online=online, \
                                             round_clock=round_clock, rule=rule, geo_distance=geo_distance, \
                                             lag=lag)
@@ -132,7 +81,7 @@ def gen_purchase_fraud_txn(rule, client_trans_df, configs: ComprClientFraudCfg, 
     elif rule == "trans_freq_increase":
         rule_to_txn = "trans_freq_increase"
         status = "declined"
-        
+
     else:
         rule_to_txn = rule
         status = "declined"
@@ -168,7 +117,6 @@ def trans_freq_wrapper(client_txns_temp, txns_total, configs: ComprClientFraudCf
     """
 
     for txn_num in range(1, txns_total + 1):
-        # print(f"txn_num: {txn_num}")
         if txn_num == 1:
             lag = True
         else:

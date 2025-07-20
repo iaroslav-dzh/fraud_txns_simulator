@@ -138,10 +138,14 @@ class DropConfigBuilder:
             or {category}.{file_key_02}""")
 
 
-    def build_dist_cfg(self):
+    def build_dist_cfg(self, run_dir):
         """
         Создать конфиг датакласс для дропов распределителей (distributors).
         Возвращает объект DropDistributorCfg.
+        -------------
+        run_dir: str. Название общей папки для хранения всех файлов 
+                 этого запуска генерации: легальных, compromised фрода,
+                 дроп фрода.
         """
         base_cfg = self.base_cfg
         drop_cfg = self.drop_cfg
@@ -174,7 +178,7 @@ class DropConfigBuilder:
         crypto_rate = dist_cfg["crypto_rate"]
         data_paths = base_cfg["data_paths"]
         dir_category = drop_cfg["distributor"]["data_storage"]["category"]
-        dir_prefix = drop_cfg["distributor"]["data_storage"]["prefix"]
+        folder_name = drop_cfg["distributor"]["data_storage"]["folder_name"]
         key_latest = drop_cfg["distributor"]["data_storage"]["key_latest"]
         key_history = drop_cfg["distributor"]["data_storage"]["key_history"]
 
@@ -186,13 +190,18 @@ class DropConfigBuilder:
                                   split_rate=split_rate, chunks=chunks, inbound_amt=inbound_amt, round=round, \
                                   trf_max=trf_max, reduce_share=reduce_share, attempts=attempts, to_drops=to_drops, \
                                   crypto_rate=crypto_rate, data_paths=data_paths, dir_category=dir_category, \
-                                  dir_prefix=dir_prefix, key_latest=key_latest, key_history=key_history)
+                                  folder_name=folder_name, key_latest=key_latest, key_history=key_history, \
+                                  run_dir=run_dir)
 
 
-    def build_purch_cfg(self):
+    def build_purch_cfg(self, run_dir):
         """
         Создать конфиг датакласс для дропов покупателей (purchasers).
         Возвращает объект DropPurchaserCfg.
+        --------------------
+        run_dir: str. Название общей папки для хранения всех файлов 
+                 этого запуска генерации: легальных, compromised фрода,
+                 дроп фрода.
         """
         base_cfg = self.base_cfg
         drop_cfg = self.drop_cfg
@@ -224,7 +233,7 @@ class DropConfigBuilder:
         attempts = purch_cfg["attempts"]
         data_paths = base_cfg["data_paths"]
         dir_category = drop_cfg["purchaser"]["data_storage"]["category"]
-        dir_prefix = drop_cfg["purchaser"]["data_storage"]["prefix"]
+        folder_name = drop_cfg["purchaser"]["data_storage"]["folder_name"]
         key_latest = drop_cfg["purchaser"]["data_storage"]["key_latest"]
         key_history = drop_cfg["purchaser"]["data_storage"]["key_history"]
 
@@ -236,6 +245,6 @@ class DropConfigBuilder:
                                 two_way_delta=two_way_delta, pos_delta=pos_delta, split_rate=split_rate, \
                                 chunks=chunks, inbound_amt=inbound_amt, round=round, \
                                 amt_max=amt_max, reduce_share=reduce_share, attempts=attempts, \
-                                data_paths=data_paths, dir_category=dir_category, dir_prefix=dir_prefix, \
-                                key_latest=key_latest, key_history=key_history
+                                data_paths=data_paths, dir_category=dir_category, folder_name=folder_name, \
+                                key_latest=key_latest, key_history=key_history, run_dir=run_dir
                                 )

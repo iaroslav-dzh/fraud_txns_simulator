@@ -22,10 +22,10 @@ rules: # Конфиги для правил
 
 data_storage:
   # Ключ к полному пути записи файла в папке data/generated/latest/ в base.yaml
-  key_latest: "compr_client"
+  key_latest: "compr_client_txns"
   # Ключ к директории для создания отдельной папки генерации в в base.yaml
   key_history: "history"
   # Ключ к категории директорий в base.yaml. Тут будут храниться данные
   category: "generated" 
-  # Префикс для названия отдельной индивидуальной папки внутри директории из key_history
-  prefix: "compr_"
+  # Название индивидуальной папки внутри папки текущего запуска генерации
+  folder_name: "compromised"

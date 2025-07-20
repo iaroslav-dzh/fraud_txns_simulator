@@ -50,7 +50,7 @@ client_id,account_id,is_drop
 51,10048,False
 52,10049,False
 53,10050,False
-55,10051,False
+55,10051,True
 56,10052,False
 57,10053,False
 58,10054,False
@@ -204,7 +204,7 @@ client_id,account_id,is_drop
 215,10202,False
 216,10203,False
 217,10204,False
-218,10205,False
+218,10205,True
 219,10206,False
 221,10207,False
 222,10208,False
@@ -270,7 +270,7 @@ client_id,account_id,is_drop
 285,10268,False
 286,10269,False
 287,10270,False
-288,10271,False
+288,10271,True
 289,10272,False
 290,10273,False
 291,10274,False
@@ -293,7 +293,7 @@ client_id,account_id,is_drop
 311,10291,False
 312,10292,False
 313,10293,False
-314,10294,False
+314,10294,True
 315,10295,False
 316,10296,False
 317,10297,False
@@ -518,7 +518,7 @@ client_id,account_id,is_drop
 541,10516,False
 542,10517,False
 543,10518,False
-544,10519,False
+544,10519,True
 545,10520,False
 546,10521,False
 547,10522,False
@@ -540,7 +540,7 @@ client_id,account_id,is_drop
 564,10538,False
 565,10539,False
 566,10540,False
-567,10541,False
+567,10541,True
 568,10542,False
 569,10543,False
 570,10544,False
@@ -633,7 +633,7 @@ client_id,account_id,is_drop
 663,10631,False
 664,10632,False
 665,10633,False
-666,10634,False
+666,10634,True
 667,10635,False
 668,10636,False
 669,10637,False
@@ -705,7 +705,7 @@ client_id,account_id,is_drop
 736,10703,False
 737,10704,False
 738,10705,False
-739,10706,False
+739,10706,True
 740,10707,False
 741,10708,False
 742,10709,False
@@ -790,7 +790,7 @@ client_id,account_id,is_drop
 831,10788,False
 832,10789,False
 833,10790,False
-834,10791,False
+834,10791,True
 835,10792,False
 836,10793,False
 837,10794,False
@@ -855,7 +855,7 @@ client_id,account_id,is_drop
 900,10853,False
 901,10854,False
 902,10855,False
-903,10856,False
+903,10856,True
 904,10857,False
 905,10858,False
 906,10859,False
@@ -1055,7 +1055,7 @@ client_id,account_id,is_drop
 1108,11053,False
 1109,11054,False
 1110,11055,False
-1111,11056,False
+1111,11056,True
 1112,11057,False
 1113,11058,False
 1114,11059,False
@@ -1154,7 +1154,7 @@ client_id,account_id,is_drop
 1212,11152,False
 1213,11153,False
 1214,11154,False
-1215,11155,False
+1215,11155,True
 1216,11156,False
 1217,11157,False
 1218,11158,False
@@ -1240,7 +1240,7 @@ client_id,account_id,is_drop
 1300,11238,False
 1303,11239,False
 1304,11240,False
-1305,11241,False
+1305,11241,True
 1306,11242,False
 1307,11243,False
 1308,11244,False
@@ -1324,7 +1324,7 @@ client_id,account_id,is_drop
 1393,11322,False
 1394,11323,True
 1395,11324,False
-1396,11325,False
+1396,11325,True
 1397,11326,False
 1401,11327,False
 1402,11328,False
@@ -1469,7 +1469,7 @@ client_id,account_id,is_drop
 1554,11467,False
 1555,11468,False
 1556,11469,False
-1557,11470,False
+1557,11470,True
 1558,11471,False
 1559,11472,False
 1561,11473,False
@@ -1610,7 +1610,7 @@ client_id,account_id,is_drop
 1702,11608,False
 1703,11609,False
 1704,11610,False
-1705,11611,False
+1705,11611,True
 1706,11612,False
 1707,11613,False
 1709,11614,False
@@ -1660,7 +1660,7 @@ client_id,account_id,is_drop
 1758,11658,False
 1759,11659,False
 1760,11660,False
-1761,11661,False
+1761,11661,True
 1762,11662,False
 1763,11663,False
 1764,11664,False
@@ -1812,7 +1812,7 @@ client_id,account_id,is_drop
 1920,11810,False
 1921,11811,False
 1922,11812,False
-1923,11813,False
+1923,11813,True
 1924,11814,False
 1925,11815,False
 1926,11816,False
@@ -1980,7 +1980,7 @@ client_id,account_id,is_drop
 2093,11978,False
 2094,11979,False
 2095,11980,False
-2096,11981,False
+2096,11981,True
 2097,11982,True
 2098,11983,False
 2099,11984,False
@@ -2000,7 +2000,7 @@ client_id,account_id,is_drop
 2113,11998,False
 2114,11999,False
 2115,12000,False
-2116,12001,False
+2116,12001,True
 2117,12002,False
 2118,12003,False
 2119,12004,False
@@ -2068,7 +2068,7 @@ client_id,account_id,is_drop
 2183,12066,False
 2184,12067,False
 2185,12068,False
-2186,12069,False
+2186,12069,True
 2187,12070,False
 2188,12071,False
 2189,12072,True
@@ -2200,7 +2200,7 @@ client_id,account_id,is_drop
 2323,12198,False
 2324,12199,False
 2325,12200,False
-2326,12201,False
+2326,12201,True
 2327,12202,False
 2328,12203,False
 2329,12204,False
@@ -2225,7 +2225,7 @@ client_id,account_id,is_drop
 2349,12223,False
 2350,12224,False
 2351,12225,False
-2352,12226,False
+2352,12226,True
 2353,12227,False
 2354,12228,False
 2355,12229,False
@@ -2398,13 +2398,13 @@ client_id,account_id,is_drop
 2525,12396,False
 2526,12397,False
 2527,12398,False
-2528,12399,False
+2528,12399,True
 2529,12400,False
 2530,12401,False
 2531,12402,False
 2532,12403,False
 2533,12404,False
-2534,12405,False
+2534,12405,True
 2535,12406,False
 2536,12407,False
 2537,12408,False
@@ -2465,7 +2465,7 @@ client_id,account_id,is_drop
 2597,12463,False
 2598,12464,False
 2599,12465,False
-2600,12466,False
+2600,12466,True
 2601,12467,False
 2602,12468,False
 2603,12469,False
@@ -2474,7 +2474,7 @@ client_id,account_id,is_drop
 2606,12472,False
 2607,12473,False
 2608,12474,False
-2609,12475,False
+2609,12475,True
 2610,12476,False
 2611,12477,False
 2612,12478,False
@@ -2501,7 +2501,7 @@ client_id,account_id,is_drop
 2636,12499,False
 2637,12500,True
 2638,12501,False
-2639,12502,False
+2639,12502,True
 2640,12503,False
 2642,12504,False
 2643,12505,False
@@ -3104,7 +3104,7 @@ client_id,account_id,is_drop
 3276,13102,False
 3277,13103,False
 3278,13104,False
-3279,13105,False
+3279,13105,True
 3280,13106,False
 3281,13107,False
 3282,13108,False
@@ -3164,7 +3164,7 @@ client_id,account_id,is_drop
 3338,13162,False
 3339,13163,False
 3340,13164,False
-3341,13165,False
+3341,13165,True
 3342,13166,False
 3344,13167,False
 3345,13168,False
@@ -3214,9 +3214,9 @@ client_id,account_id,is_drop
 3392,13212,False
 3393,13213,False
 3394,13214,False
-3395,13215,False
+3395,13215,True
 3396,13216,False
-3397,13217,False
+3397,13217,True
 3398,13218,False
 3399,13219,False
 3402,13220,False
@@ -3404,7 +3404,7 @@ client_id,account_id,is_drop
 3590,13402,False
 3591,13403,False
 3592,13404,False
-3594,13405,False
+3594,13405,True
 3595,13406,False
 3596,13407,False
 3597,13408,False
@@ -3559,11 +3559,11 @@ client_id,account_id,is_drop
 3758,13557,False
 3759,13558,False
 3760,13559,False
-3761,13560,False
+3761,13560,True
 3762,13561,False
 3763,13562,False
 3764,13563,False
-3765,13564,False
+3765,13564,True
 3766,13565,False
 3767,13566,False
 3768,13567,False
@@ -3593,7 +3593,7 @@ client_id,account_id,is_drop
 3793,13591,False
 3794,13592,False
 3795,13593,False
-3796,13594,False
+3796,13594,True
 3797,13595,False
 3798,13596,False
 3799,13597,False
@@ -3654,7 +3654,7 @@ client_id,account_id,is_drop
 3858,13652,False
 3859,13653,False
 3860,13654,False
-3861,13655,False
+3861,13655,True
 3862,13656,False
 3863,13657,False
 3864,13658,False
@@ -3753,7 +3753,7 @@ client_id,account_id,is_drop
 3963,13751,False
 3964,13752,False
 3965,13753,False
-3966,13754,False
+3966,13754,True
 3967,13755,False
 3968,13756,False
 3969,13757,False
@@ -3819,7 +3819,7 @@ client_id,account_id,is_drop
 4031,13817,False
 4032,13818,False
 4033,13819,False
-4034,13820,False
+4034,13820,True
 4035,13821,False
 4036,13822,False
 4037,13823,False
@@ -3932,7 +3932,7 @@ client_id,account_id,is_drop
 4154,13930,False
 4155,13931,False
 4156,13932,False
-4157,13933,False
+4157,13933,True
 4158,13934,False
 4159,13935,False
 4160,13936,False
@@ -4009,7 +4009,7 @@ client_id,account_id,is_drop
 4238,14007,False
 4239,14008,False
 4240,14009,False
-4241,14010,False
+4241,14010,True
 4242,14011,False
 4243,14012,False
 4244,14013,False
@@ -4085,7 +4085,7 @@ client_id,account_id,is_drop
 4314,14083,False
 4315,14084,False
 4316,14085,False
-4317,14086,False
+4317,14086,True
 4318,14087,False
 4319,14088,False
 4320,14089,False
@@ -4116,7 +4116,7 @@ client_id,account_id,is_drop
 4345,14114,False
 4346,14115,False
 4347,14116,False
-4348,14117,False
+4348,14117,True
 4349,14118,False
 4350,14119,False
 4352,14120,False
@@ -4212,7 +4212,7 @@ client_id,account_id,is_drop
 4453,14210,False
 4454,14211,False
 4455,14212,False
-4456,14213,False
+4456,14213,True
 4457,14214,False
 4458,14215,False
 4459,14216,False
@@ -4273,9 +4273,9 @@ client_id,account_id,is_drop
 4518,14271,False
 4519,14272,False
 4520,14273,False
-4521,14274,False
+4521,14274,True
 4522,14275,False
-4523,14276,False
+4523,14276,True
 4524,14277,False
 4525,14278,False
 4526,14279,False
@@ -4336,7 +4336,7 @@ client_id,account_id,is_drop
 4584,14334,False
 4585,14335,False
 4586,14336,False
-4587,14337,False
+4587,14337,True
 4588,14338,False
 4589,14339,False
 4590,14340,False
@@ -4365,7 +4365,7 @@ client_id,account_id,is_drop
 4615,14363,False
 4617,14364,False
 4618,14365,False
-4619,14366,False
+4619,14366,True
 4620,14367,False
 4621,14368,False
 4622,14369,False
@@ -4542,7 +4542,7 @@ client_id,account_id,is_drop
 4800,14540,False
 4801,14541,False
 4802,14542,False
-4803,14543,False
+4803,14543,True
 4804,14544,False
 4805,14545,False
 4806,14546,False
@@ -4701,7 +4701,7 @@ client_id,account_id,is_drop
 5352,14699,False
 5353,14700,False
 5354,14701,False
-5358,14702,False
+5358,14702,True
 5362,14703,False
 5364,14704,False
 5365,14705,False
@@ -4843,7 +4843,7 @@ client_id,account_id,is_drop
 6604,14841,False
 6610,14842,False
 6616,14843,False
-6619,14844,False
+6619,14844,True
 6644,14845,False
 6691,14846,False
 6698,14847,False
@@ -4868,7 +4868,7 @@ client_id,account_id,is_drop
 6922,14866,False
 6924,14867,False
 6936,14868,False
-6944,14869,False
+6944,14869,True
 6946,14870,False
 6967,14871,False
 6978,14872,False
@@ -4923,7 +4923,7 @@ client_id,account_id,is_drop
 7787,14921,False
 7796,14922,False
 7797,14923,False
-7800,14924,False
+7800,14924,True
 7814,14925,False
 7815,14926,False
 7843,14927,False
@@ -4964,7 +4964,7 @@ client_id,account_id,is_drop
 8463,14962,False
 8489,14963,False
 8502,14964,False
-8506,14965,False
+8506,14965,True
 8510,14966,False
 8548,14967,False
 8568,14968,False
@@ -5011,7 +5011,7 @@ client_id,account_id,is_drop
 9419,15009,False
 9427,15010,False
 9428,15011,False
-9433,15012,False
+9433,15012,True
 9450,15013,False
 9451,15014,False
 9456,15015,False
@@ -5068,7 +5068,7 @@ client_id,account_id,is_drop
 10043,15066,False
 10046,15067,False
 10066,15068,False
-10070,15069,False
+10070,15069,True
 10075,15070,False
 10076,15071,False
 10077,15072,False
@@ -5194,7 +5194,7 @@ client_id,account_id,is_drop
 11676,15192,False
 11683,15193,False
 11685,15194,False
-11686,15195,False
+11686,15195,True
 11687,15196,False
 11701,15197,False
 11709,15198,False

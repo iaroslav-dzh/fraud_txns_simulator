@@ -16,14 +16,20 @@ class FraudTxnsRecorder:
     key_latest: str. Ключ в base.yaml для пути к файлу в директории
                 data/generated/latest/. Это для записи созданных
                 транз-ций как последних сгенерированных.
-    key_history: str. Ключ в base.yaml для пути к директории
-    data_paths: dict.
+    key_history: str. Ключ в base.yaml для пути к директории.
                     с историей генерации данных data/generated/history/
+    folder_name: str. Название индивидуальной папки внутри папки 
+                 текущего запуска генерации.
+    run_dir: str. Название общей папки для всех файлов этой попытки/запуска
+             генерации: легальных, compromised фрода, дроп фрода.
+    data_paths: dict. Конфиги путей из base.yaml.
     prefix: str. Для названия индивидуальной папки внутри dir_category
                 Например 'legit_'
     directory: str. Путь к директории в папке data/generated/history
                куда записывать чанки и собранный из них файл.
-    all_txns: list. Для записи генерируемых транз-ций.
+    all_txns: pd.DataFrame. Для записи генерируемых транз-ций.
+              Получает готовый датафрейм с транзакциями для записии.
+              По умолчанию None.
     """
     def __init__(self, configs):
         """
@@ -33,8 +39,10 @@ class FraudTxnsRecorder:
         self.category = configs.dir_category
         self.key_latest = configs.key_latest
         self.key_history = configs.key_history
+        self.folder_name = configs.folder_name
+        self.run_dir = configs.run_dir
         self.data_paths = configs.data_paths
-        self.prefix = configs.dir_prefix
+        # self.prefix = configs.dir_prefix
         self.directory = None
         self.all_txns = []
 
@@ -48,10 +56,11 @@ class FraudTxnsRecorder:
         data_paths = self.data_paths
         key_history = self.key_history
         directory = data_paths[category][key_history]
-        prefix = self.prefix
-        datetime_suffix = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-        folder_name = prefix + datetime_suffix
-        path = os.path.join(directory, folder_name)
+        run_dir = self.run_dir
+        # prefix = self.prefix
+        # datetime_suffix = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        folder_name = self.folder_name
+        path = os.path.join(directory, run_dir, folder_name)
 
         if os.path.exists(path):
             return

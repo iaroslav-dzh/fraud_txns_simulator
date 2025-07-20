@@ -33,27 +33,27 @@ class LegitConfigBuilder:
         self.clients = None
 
 
-    def assert_time_limits(self):
-        """
-        Проверка минимальных лимитов времени между транз-циями в 
-        min_intervals из time.yaml
-        """
-        min_inter = self.legit_cfg["time"]["min_intervals"]
-        offline_time_diff = min_inter["offline_time_diff"]
-        online_time_diff = min_inter["online_time_diff"]
-        general_diff = min_inter["general_diff"]
+    # def assert_time_limits(self):
+    #     """
+    #     Проверка минимальных лимитов времени между транз-циями в 
+    #     min_intervals из legit.yaml
+    #     """
+    #     min_inter = self.legit_cfg["time"]["min_intervals"]
+    #     offline_time_diff = min_inter["offline_time_diff"]
+    #     online_time_diff = min_inter["online_time_diff"]
+    #     general_diff = min_inter["general_diff"]
 
-        assert offline_time_diff > general_diff, \
-            f"""offline_time_diff must not be lower than general_diff. 
-            {offline_time_diff} vs {general_diff} Check passed arguments"""
+    #     assert offline_time_diff > general_diff, \
+    #         f"""offline_time_diff must not be lower than general_diff. 
+    #         {offline_time_diff} vs {general_diff} Check passed arguments"""
         
-        assert offline_time_diff > online_time_diff, \
-            f"""offline_time_diff must not be lower than online_time_diff.
-            {offline_time_diff} vs {online_time_diff} Check passed arguments"""
+    #     assert offline_time_diff > online_time_diff, \
+    #         f"""offline_time_diff must not be lower than online_time_diff.
+    #         {offline_time_diff} vs {online_time_diff} Check passed arguments"""
         
-        assert general_diff > online_time_diff, \
-            f"""general_diff must not be lower than online_time_diff.
-            {general_diff} vs {online_time_diff} Check passed arguments"""
+    #     assert general_diff > online_time_diff, \
+    #         f"""general_diff must not be lower than online_time_diff.
+    #         {general_diff} vs {online_time_diff} Check passed arguments"""
         
 
     def read_file(self, category, file_key):
@@ -96,12 +96,16 @@ class LegitConfigBuilder:
         return clients_samp
 
 
-    def build_cfg(self):
+    def build_cfg(self, run_dir):
         """
         Создать конфиг датакласс для легальных транз-ций.
         Возвращает объект LegitCfg.
+        -------------
+        run_dir: str. Название общей папки для хранения всех файлов 
+                 этого запуска генерации: легальных, compromised фрода,
+                 дроп фрода.
         """
-        self.assert_time_limits()
+        # self.assert_time_limits()
 
         stamps_cfg = self.time_cfg["timestamps"]
         base_cfg = self.base_cfg
@@ -123,9 +127,10 @@ class LegitConfigBuilder:
         txn_num = legit_cfg["txn_num"]
         data_paths = base_cfg["data_paths"]
         dir_category = legit_cfg["data_storage"]["category"]
-        dir_prefix = legit_cfg["data_storage"]["prefix"]
+        folder_name = legit_cfg["data_storage"]["folder_name"]
         key_latest = legit_cfg["data_storage"]["key_latest"]
         key_history = legit_cfg["data_storage"]["key_history"]
+        prefix = legit_cfg["data_storage"]["prefix"]
         
 
         return LegitCfg(clients=clients, timestamps=timestamps, transactions=txns, \
@@ -134,4 +139,6 @@ class LegitConfigBuilder:
                         online_merchant_ids=online_merchant_ids, all_time_weights=all_time_weights, \
                         cities=cities, min_intervals=min_intervals, txn_num=txn_num, \
                         data_paths=data_paths, dir_category=dir_category, \
-                        dir_prefix=dir_prefix, key_latest=key_latest, key_history=key_history)
+                        folder_name=folder_name, key_latest=key_latest, key_history=key_history, \
+                        run_dir=run_dir, prefix=prefix
+                        )

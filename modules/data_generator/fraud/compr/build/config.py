@@ -91,10 +91,14 @@ class ComprConfigBuilder:
         return compr_samp
     
 
-    def build_cfg(self):
+    def build_cfg(self, run_dir):
         """
         Создать конфиг датакласс для легальных транз-ций.
         Возвращает объект ComprClientFraudCfg.
+        -------------
+        run_dir: str. Название общей папки для хранения всех файлов 
+                 этого запуска генерации: легальных, compromised фрода,
+                 дроп фрода.
         """
 
         stamps_cfg = self.time_cfg["timestamps"]
@@ -118,7 +122,7 @@ class ComprConfigBuilder:
         rules_cfg = compr_cfg["rules"]
         data_paths = base_cfg["data_paths"]
         dir_category = compr_cfg["data_storage"]["category"]
-        dir_prefix = compr_cfg["data_storage"]["prefix"]
+        folder_name = compr_cfg["data_storage"]["folder_name"]
         key_latest = compr_cfg["data_storage"]["key_latest"]
         key_history = compr_cfg["data_storage"]["key_history"]
         
@@ -128,8 +132,8 @@ class ComprConfigBuilder:
                         online_merchant_ids=online_merchant_ids, all_time_weights=all_time_weights, \
                         cities=cities, fraud_devices=fraud_devices, fraud_ips=fraud_ips, \
                         fraud_amounts=fraud_amounts, rules_cfg=rules_cfg, data_paths=data_paths, \
-                        dir_category=dir_category, dir_prefix=dir_prefix, key_latest=key_latest, \
-                        key_history=key_history)
+                        dir_category=dir_category, folder_name=folder_name, key_latest=key_latest, \
+                        key_history=key_history, run_dir=run_dir)
     
 
 

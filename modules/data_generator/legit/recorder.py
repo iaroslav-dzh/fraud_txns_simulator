@@ -20,10 +20,14 @@ class LegitTxnsRecorder:
                 data/generated/latest/. Это для записи созданных
                 транз-ций как последних сгенерированных.
     key_history: str. Ключ в base.yaml для пути к директории
-    data_paths: dict.
                     с историей генерации данных data/generated/history/
-    prefix: str. Для названия индивидуальной папки внутри dir_category
-                Например 'legit_'
+    folder_name: str. Название индивидуальной папки внутри папки 
+                 текущего запуска генерации.
+    run_dir: str. Название общей папки для всех файлов этой попытки/запуска
+             генерации: легальных, compromised фрода, дроп фрода.
+    prefix: str. Префикс для названия файлов с чанками транзакций, например
+            'legit_'
+    data_paths: dict. Конфиги путей из base.yaml.
     directory: str. Путь к директории в папке data/generated/history
                куда записывать чанки и собранный из них файл.
     all_txns: pd.DataFrame. Все сгенерированные транзакции. По умолчанию None.
@@ -45,7 +49,9 @@ class LegitTxnsRecorder:
         self.key_latest = configs.key_latest
         self.key_history = configs.key_history
         self.data_paths = configs.data_paths
-        self.prefix = configs.dir_prefix
+        self.folder_name = configs.folder_name
+        self.run_dir = configs.run_dir
+        self.prefix = configs.prefix
         self.directory = None
         self.all_txns = None
         self.client_txns = []
@@ -64,10 +70,11 @@ class LegitTxnsRecorder:
         data_paths = self.data_paths
         key_history = self.key_history
         directory = data_paths[category][key_history]
-        prefix = self.prefix
-        datetime_suffix = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-        folder_name = prefix + datetime_suffix
-        path = os.path.join(directory, folder_name)
+        run_dir = self.run_dir
+        # prefix = self.prefix
+        # datetime_suffix = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        folder_name = self.folder_name
+        path = os.path.join(directory, run_dir, folder_name)
 
         if os.path.exists(path):
             return

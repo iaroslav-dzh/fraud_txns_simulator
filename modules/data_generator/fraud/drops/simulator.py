@@ -2,6 +2,7 @@
 import pandas as pd
 from data_generator.fraud.drops.build.builder import DropBaseClasses
 from data_generator.fraud.drops.txns import CreateDropTxn
+# from data_generator.fraud.recorder import FraudTxnsRecorder
 from data_generator.fraud.drops.processor import DropBatchHandler
 from data_generator.utils import create_progress_bar
 
@@ -98,14 +99,18 @@ class DropSimulator:
     """
     Генерация активности множества дропов.
     ------------------------
+    base_cfg: dict. Конфиги из base.yaml
+    drop_type: str. 'distributor' или 'purchaser'
     drop_clients: pd.DataFrame. Клиенты которые будут дропами.
-    part_data: DropTxnPartData.
-            Генерация части данных о транзакции дропа.
-    acc_hand: DropAccountHandler. Генератор номеров счетов входящих/исходящих транзакций.
-            Учет использованных счетов.
-    life_manager: DropLifecycleManager. Управление полным жизненный циклом одного дропа.
+    part_data: DropTxnPartData. Генерация части данных транзакции.
+    acc_hand: DropAccountHandler. Генератор номеров счетов входящих/исходящих 
+              транзакций. Учет использованных счетов.
+    txn_recorder: FraudTxnsRecorder. Запись транзакций в файл.
+    life_manager: DropLifecycleManager. Управление полным жизненный циклом
+                  одного дропа.
+    all_txns: list. Список для записи всех созданных транзакций.
     """
-    def __init__(self, base_cfg, configs, base, create_txn):
+    def __init__(self, base_cfg, configs, base, create_txn, txn_recorder):
         """
         base_cfg: dict. Конфиги из base.yaml
         configs: DropDistributorCfg | DropPurchaserCfg.
@@ -118,15 +123,17 @@ class DropSimulator:
         self.drop_clients = configs.clients
         self.part_data = base.part_data
         self.acc_hand = base.acc_hand
+        self.txn_recorder = txn_recorder
         self.life_manager = DropLifecycleManager(base=base, create_txn=create_txn)
         self.all_txns = []
     
+
     def write_to_file(self, data, category, file_key):
         """
         Запись данных в файл по пути из yaml конфига.
         data: pd.DataFrame | gpd.DataFrame. Данные.
         category: str. Категория файлов в yaml конфиге например:
-                  'cleaned_data', 'generated_data'. Соответсвует
+                  'cleaned', 'generated'. Соответсвует
                   структуре папок в data/
         file_key: str. Ключ к полному пути конкретного файла в категории.
         """
@@ -149,11 +156,14 @@ class DropSimulator:
         """
         drop_clients = self.drop_clients
         drop_type = self.drop_type
-        progress_bar = create_progress_bar(drop_clients, text=f"Creating {drop_type} drops")
+        progress_bar = create_progress_bar(drop_clients, text=f"Generating {drop_type} drops")
         part_data = self.part_data
         acc_hand = self.acc_hand
         life_manager = self.life_manager
         all_txns = self.all_txns
+        txn_recorder = self.txn_recorder
+
+        txn_recorder.make_dir()
 
         # Итерируемся через семплированных клиентов под дроп
         for client in drop_clients.itertuples():
@@ -175,18 +185,10 @@ class DropSimulator:
         # Запись измененного датафрейма accounts в csv файл
         # Путь указывается в base.yaml
         accounts = acc_hand.accounts
-        self.write_to_file(data=accounts, category="generated_data", \
+        self.write_to_file(data=accounts, category="base", \
                            file_key="accounts")
         
         # Запись всех созданных транзакций дропов в parquet файл
-        # Путь указывается в base.yaml
-        all_txns_df = pd.DataFrame(self.all_txns)
+        txn_recorder.all_txns = pd.DataFrame(self.all_txns)
 
-        if self.drop_type == "distributor":
-            self.write_to_file(data=all_txns_df, category="generated_data", \
-                           file_key="dist_drop_txns")
-            
-        elif self.drop_type == "purchaser":
-            self.write_to_file(data=all_txns_df, category="generated_data", \
-                           file_key="purch_drop_txns")
-        
+        txn_recorder.write_to_file() # Это уже метод FraudTxnsRecorder

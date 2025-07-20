@@ -42,9 +42,9 @@ def check_min_interval_from_near_txn(client_txns, timestamp_sample, online, roun
     general_ceil = min_inter["general_ceil"]
             
     # перевод аргументов в секунды для работы с unix time
-    offline_time_diff= offline_time_diff * 60
-    online_time_diff= online_time_diff * 60
-    online_ceil= online_ceil * 60
+    offline_time_diff = offline_time_diff * 60
+    online_time_diff = online_time_diff * 60
+    online_ceil = online_ceil * 60
     general_diff = general_diff * 60
     general_ceil = general_ceil * 60
 
