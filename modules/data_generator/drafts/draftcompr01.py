@@ -10,6 +10,8 @@ import os
 import yaml
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 os.chdir("..")
 
@@ -29,6 +31,7 @@ with open("./config/time.yaml") as f:
 transactions = create_txns_df(base_cfg["txns_df"])
 clients = pd.read_parquet("./data/clients/clients.parquet")
 clients_sample = pd.read_parquet("./data/clients/clients_sample.parquet")
+cat_fraud_amts = pd.read_csv("./data/base_fraud/cat_fraud_amts.csv")
 
 from data_generator.fraud.compr.build.config import ComprConfigBuilder
 from data_generator.fraud.compr.time import generate_time_fast_geo_jump

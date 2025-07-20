@@ -55,7 +55,7 @@ data_paths:
 
   generated:
     legit_txns: "./data/generated/latest/legit_txns.parquet"
-    compr_client: "./data/generated/latest/compr_client_txns.parquet"
+    compr_client_txns: "./data/generated/latest/compr_client_txns.parquet"
     dist_drop_txns: "./data/generated/latest/dist_drop_txns.parquet"
     purch_drop_txns: "./data/generated/latest/purch_drop_txns.parquet"
     history: "./data/generated/history"

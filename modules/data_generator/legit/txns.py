@@ -113,8 +113,7 @@ def gen_multiple_legit_txns(configs, txn_recorder, ignore_index=True):
     # Создать директорию под текущую генерацию
     txn_recorder.make_dir()
     
-    # Сюда собираются все созданные датафреймы с транзакциями клиентов для объединения в конце через pd.concat
-    # all_clients_trans = [trans_df]
+    # Сюда будем собирать сгенрированные транзакции клиента в виде словарей.
     client_txns = txn_recorder.client_txns
     
     for client_info in clients_df.itertuples():
@@ -129,9 +128,6 @@ def gen_multiple_legit_txns(configs, txn_recorder, ignore_index=True):
         # id девайсов клиента для онлайн транзакций
         client_device_ids = client_devices.loc[client_devices.client_id == client_info.client_id, "device_id"]
         
-        # Сюда будем собирать сгенрированные транзакции клиента в виде словарей.
-        # client_txns = []
-
         for _ in range(txns_num):
             # семплирование категории для транзакции
             category = categories.sample(1, replace=True, weights=categories.share)
@@ -140,12 +136,11 @@ def gen_multiple_legit_txns(configs, txn_recorder, ignore_index=True):
             one_txn = generate_one_legit_txn(client_info=client_info, client_trans_df=client_transactions, \
                                              category=category, client_device_ids=client_device_ids, \
                                              merchants_df=merchants_from_city, configs=configs)
-            # pos_txns.append(one_txn)
             # Запись транз-ции в список транз-ций текущего клиента.
             client_txns.append(one_txn)
             txn_recorder.txns_counter += 1 # счетчик всех транз-ций
 
-            # Управление записью транзакций чанками в файлы. Работает если enable=True
+            # Управление записью транзакций чанками в файлы.
             txn_recorder.record_chunk(txn=one_txn, txns_num=txns_num)
             
             # Добавляем созданную транзакцию к транзакциям клиента, т.к. иногда 
@@ -155,13 +150,10 @@ def gen_multiple_legit_txns(configs, txn_recorder, ignore_index=True):
 
         client_txns.clear() # Конец генерации на клиента. Чистим список для текущего кл-та
 
-        # client_new_trans = pd.DataFrame(pos_txns)
-        # all_clients_trans.append(client_new_trans)
-        client_txns.clear() # Делаем список транз-ций клиента снова пустым
-
     # Сборка цельного датафрейма из чанков записанных в файлы. Датафрейм сохраняется 
     # в txn_recorder.all_txns.
     txn_recorder.build_from_chunks()
+
     # Запись собранного датафрейма в два файла в разные директории: data/generated/lastest/
     # И data/generated/history/<своя_папка_с_датой_временем>
     txn_recorder.write_built_data()
