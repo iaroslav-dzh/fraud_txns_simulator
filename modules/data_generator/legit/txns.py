@@ -109,9 +109,6 @@ def gen_multiple_legit_txns(configs, txn_recorder, ignore_index=True):
     txn_num_std = configs.txn_num["txn_num_std"]
     low_bound = configs.txn_num["low_bound"]
     up_bound = configs.txn_num["up_bound"]
-
-    # Создать директорию под текущую генерацию
-    txn_recorder.make_dir()
     
     # Сюда будем собирать сгенрированные транзакции клиента в виде словарей.
     client_txns = txn_recorder.client_txns

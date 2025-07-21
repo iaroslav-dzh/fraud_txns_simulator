@@ -36,10 +36,11 @@ class LegitCfg:
                 data/generated/latest/ в base.yaml
     key_history: str. Ключ к пути для создания отдельной папки 
                  генерации в в base.yaml
-    run_dir: str. Название общей папки для хранениявсех файлов текущего
-             запуска генерации: легальных, compromised фрода, дроп фрода.
+    run_dir: str. Путь к директории под текущую генерацию.
     prefix: str. Префикс для названия файлов с чанками транзакций, например
             'legit_'
+    directory: str. Путь к отдельной папке под конкретно текущую генерацию.
+    txns_file_name: str. Название файла с транзакциями который будет создан.
     """
     clients: pd.DataFrame
     timestamps: pd.DataFrame
@@ -60,6 +61,8 @@ class LegitCfg:
     key_history: str
     run_dir: str
     prefix: str
+    directory: str
+    txns_file_name: str
 
 
 # 2. Датакласс под конфиги фрода в покупках, когда аккаунт или карта клиента скомпрометированы
@@ -95,8 +98,9 @@ class ComprClientFraudCfg:
                 data/generated/latest/ в base.yaml
     key_history: str. Ключ к директории для создания отдельной папки 
                  генерации в в base.yaml
-    run_dir: str. Название общей папки для хранениявсех файлов текущего
-             запуска генерации: легальных, compromised фрода, дроп фрода.
+    run_dir: str. Путь к директории под текущую генерацию.
+    directory: str. Путь к отдельной папке под конкретно текущую генерацию.
+    txns_file_name: str. Название файла с транзакциями который будет создан.
     """
     clients: pd.DataFrame
     timestamps: pd.DataFrame
@@ -117,6 +121,8 @@ class ComprClientFraudCfg:
     key_latest: str
     key_history: str
     run_dir: str
+    directory: str
+    txns_file_name: str
 
 
 # 3. Датакласс для конфигов транзакций дропов-распределителей
@@ -128,6 +134,7 @@ class DropDistributorCfg:
     ---------------------
     clients: pd.DataFrame
     timestamps: pd.DataFrame
+    transactions: pd.DataFrame. Пустой датафрейм под транзакции.
     accounts: pd.DataFrame. Номера счетов клиентов.
     outer_accounts: pd.Series. Номера внешних счетов для транзакций вне банка.
     client_devices: pd.DataFrame
@@ -171,9 +178,11 @@ class DropDistributorCfg:
                  генерации в в base.yaml
     run_dir: str. Название общей папки для хранениявсех файлов текущего
              запуска генерации: легальных, compromised фрода, дроп фрода.
+    txns_file_name: str. Название файла с транзакциями который будет создан.
     """
     clients: pd.DataFrame
     timestamps: pd.DataFrame
+    transactions: pd.DataFrame
     accounts: pd.DataFrame
     outer_accounts: pd.Series
     client_devices: pd.DataFrame
@@ -201,6 +210,8 @@ class DropDistributorCfg:
     key_latest: str
     key_history: str
     run_dir: str
+    directory: str
+    txns_file_name: str
 
 
 # 4. Датакласс для конфигов транзакций дропов-покупателей 
@@ -212,6 +223,7 @@ class DropPurchaserCfg:
     ---------------------
     clients: pd.DataFrame
     timestamps: pd.DataFrame
+    transactions: pd.DataFrame. Пустой датафрейм под транзакции.
     accounts: pd.DataFrame. Номера счетов клиентов.
     outer_accounts: pd.Series. Номера внешних счетов для транзакций вне банка.
     client_devices: pd.DataFrame
@@ -254,9 +266,11 @@ class DropPurchaserCfg:
                  генерации в в base.yaml
     run_dir: str. Название общей папки для хранениявсех файлов текущего
              запуска генерации: легальных, compromised фрода, дроп фрода.
+    txns_file_name: str. Название файла с транзакциями который будет создан.
     """
     clients: pd.DataFrame
     timestamps: pd.DataFrame
+    transactions: pd.DataFrame
     accounts: pd.DataFrame
     client_devices: pd.DataFrame
     online_merchant_ids: pd.Series
@@ -282,6 +296,8 @@ class DropPurchaserCfg:
     key_latest: str
     key_history: str
     run_dir: str
+    directory: str
+    txns_file_name: str
 
 
 

@@ -35,3 +35,6 @@ data_storage:
   folder_name: "legit"
   # Префикс для названия файлов с чанками транзакций
   prefix: "legit_"
+  files:
+    txns: "legit_txns.parquet"
+    clients: "legit_clients.parquet"

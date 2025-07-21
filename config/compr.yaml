@@ -29,3 +29,5 @@ data_storage:
   category: "generated" 
   # Название индивидуальной папки внутри папки текущего запуска генерации
   folder_name: "compromised"
+  files:
+    txns: "compr_client_txns.parquet"

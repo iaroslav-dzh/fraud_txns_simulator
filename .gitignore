@@ -21,3 +21,5 @@ data/test_data/
 .ssh/
 sessions/
 scratchpads/
+temp/
+test01.py

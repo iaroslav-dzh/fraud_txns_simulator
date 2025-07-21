@@ -8,8 +8,8 @@ class ConfigsValidator:
     ---------------
     Атрибуты:
     ---------
-    legit_cfg: dict. Конфиги из legit.yaml
     base_cfg: dict. Конфиги из base.yaml
+    legit_cfg: dict. Конфиги из legit.yaml
     fraud_cfg: dict. Конфиги из fraud.yaml
     drop_cfg: dict. Конфиги из drops.yaml
     total_clients: int. Общее кол-во имеющихся клиентов.
@@ -17,8 +17,8 @@ class ConfigsValidator:
     """
     def __init__(self, base_cfg, legit_cfg, fraud_cfg, drop_cfg):
         """
-        legit_cfg: dict. Конфиги из legit.yaml
         base_cfg: dict. Конфиги из base.yaml
+        legit_cfg: dict. Конфиги из legit.yaml
         fraud_cfg: dict. Конфиги из fraud.yaml
         drop_cfg: dict. Конфиги из drops.yaml
         """

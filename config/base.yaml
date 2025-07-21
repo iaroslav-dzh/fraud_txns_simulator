@@ -6,6 +6,10 @@ validator: # Параметры валидации конфигов
     # Вероятность, что транз-ций сгенерируется больше расчитанного макс. возможного числа
     overflow_prob: 0.001 
 
+# Префикс для названия папок хранение данных каждого запуска генератора
+run_prefix: "generation_run_" 
+
+
 # Колонки датафрейма транзакций
 txns_df:
   client_id: int64
@@ -55,7 +59,7 @@ data_paths:
 
   clients:
     clients: "./data/clients/clients.parquet"
-    clients_sample: "./data/clients/clients_sample.parquet"
+    legit_clients: "./data/clients/legit_clients.parquet"
     dist_drops: "./data/clients/dist_drops.parquet"
     purchase_drops: "./data/clients/purchase_drops.parquet"
 
@@ -65,3 +69,8 @@ data_paths:
     dist_drop_txns: "./data/generated/latest/dist_drop_txns.parquet"
     purch_drop_txns: "./data/generated/latest/purch_drop_txns.parquet"
     history: "./data/generated/history"
+
+# названия папок и файлов
+data_storage: 
+  folder_names:
+    clients: "clients"

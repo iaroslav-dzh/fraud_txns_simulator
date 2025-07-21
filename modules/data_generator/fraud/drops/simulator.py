@@ -109,6 +109,7 @@ class DropSimulator:
     life_manager: DropLifecycleManager. Управление полным жизненный циклом
                   одного дропа.
     all_txns: list. Список для записи всех созданных транзакций.
+    txns_df: pd.DataFrame. Пустой датафрейм с колонками и проставленными типами
     """
     def __init__(self, base_cfg, configs, base, create_txn, txn_recorder):
         """
@@ -124,6 +125,7 @@ class DropSimulator:
         self.part_data = base.part_data
         self.acc_hand = base.acc_hand
         self.txn_recorder = txn_recorder
+        self.txns_df = configs.transactions
         self.life_manager = DropLifecycleManager(base=base, create_txn=create_txn)
         self.all_txns = []
     
@@ -163,8 +165,6 @@ class DropSimulator:
         all_txns = self.all_txns
         txn_recorder = self.txn_recorder
 
-        txn_recorder.make_dir()
-
         # Итерируемся через семплированных клиентов под дроп
         for client in drop_clients.itertuples():
             # Запись данных текущего клиента в атрибуты
@@ -190,5 +190,5 @@ class DropSimulator:
         
         # Запись всех созданных транзакций дропов в parquet файл
         txn_recorder.all_txns = pd.DataFrame(self.all_txns)
-
+        
         txn_recorder.write_to_file() # Это уже метод FraudTxnsRecorder

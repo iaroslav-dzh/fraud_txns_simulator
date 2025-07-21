@@ -39,48 +39,26 @@ class FraudTxnsRecorder:
         self.category = configs.dir_category
         self.key_latest = configs.key_latest
         self.key_history = configs.key_history
-        self.folder_name = configs.folder_name
-        self.run_dir = configs.run_dir
         self.data_paths = configs.data_paths
-        # self.prefix = configs.dir_prefix
-        self.directory = None
+        self.directory = configs.directory
+        self.txns_file_name = configs.txns_file_name
         self.all_txns = []
 
-
-    def make_dir(self):
-        """
-        Создать индивидуальную директорию под текущую генерацию
-        транзакций.
-        """
-        category = self.category
-        data_paths = self.data_paths
-        key_history = self.key_history
-        directory = data_paths[category][key_history]
-        run_dir = self.run_dir
-        # prefix = self.prefix
-        # datetime_suffix = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-        folder_name = self.folder_name
-        path = os.path.join(directory, run_dir, folder_name)
-
-        if os.path.exists(path):
-            return
-        
-        os.mkdir(path)
-        self.directory = path
 
     def write_to_file(self):
         """
         Запись в файл.
-        Пишем в две директории: history/<своя_папка> и latest/ 
+        Пишем в две директории:
+        history/<папка_текущей_генерации>/<своя_папка>/ и latest/ 
         """
         # Создаем полный путь для записи в папку текущей генерации
-        file_name = self.key_latest
-        path_history = os.path.join(self.directory, f"{file_name}.parquet")
+        file_name = self.txns_file_name
+        path_history = os.path.join(self.directory, f"{file_name}")
         all_txns = self.all_txns
         all_txns.to_parquet(path_history, engine="pyarrow")
-
+        
         # Берем полный путь из категории "generated" и по ключу latest
-        # Это путь для последних созданных легальных транзакций
+        # Это путь для последних созданных транзакций
         category = self.category
         key_latest = self.key_latest
         data_paths = self.data_paths

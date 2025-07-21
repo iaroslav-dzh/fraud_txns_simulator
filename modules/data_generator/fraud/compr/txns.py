@@ -149,7 +149,7 @@ def gen_multi_fraud_txns(configs: ComprClientFraudCfg, part_data: FraudTxnPartDa
     freq_cfg = configs.rules_cfg["freq_txn"]["txn_num"]
     
     # Создать директорию под текущую генерацию
-    txn_recorder.make_dir()
+    # txn_recorder.make_dir()
 
     for client in configs.clients.itertuples():
         rule = sample_rule(configs.rules)

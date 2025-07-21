@@ -4,6 +4,7 @@ import numpy as np
 from scipy.stats import truncnorm
 from pyproj import Geod
 from tqdm import tqdm
+import yaml
 
 # 1. 
 
@@ -167,6 +168,17 @@ def amt_rounding(amount, rate=0.6):
     reduced_divs = dividers[dividers <= amount]
     divider = np.random.choice(reduced_divs)
     return amount // divider * divider
+
+
+def load_configs(path):
+    """
+    Загрузить конфиги из yaml файла.
+    --------
+    path: str. Путь к файлу.
+    """
+    with open(path) as f:
+        return yaml.safe_load(f)
+
 
 
 

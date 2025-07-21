@@ -28,7 +28,7 @@ class LegitTxnsRecorder:
     prefix: str. Префикс для названия файлов с чанками транзакций, например
             'legit_'
     data_paths: dict. Конфиги путей из base.yaml.
-    directory: str. Путь к директории в папке data/generated/history
+    directory: str. Путь к директории формата data/generated/history/generated_run_<дата время>
                куда записывать чанки и собранный из них файл.
     all_txns: pd.DataFrame. Все сгенерированные транзакции. По умолчанию None.
     client_txns: list. Транз-ции текущего клиента для которого идет генерация.
@@ -50,9 +50,9 @@ class LegitTxnsRecorder:
         self.key_history = configs.key_history
         self.data_paths = configs.data_paths
         self.folder_name = configs.folder_name
-        self.run_dir = configs.run_dir
+        self.directory = configs.directory
         self.prefix = configs.prefix
-        self.directory = None
+        # self.directory = None
         self.all_txns = None
         self.client_txns = []
         self.txns_chunk = []
@@ -60,27 +60,39 @@ class LegitTxnsRecorder:
         self.clients_counter = 0
         self.chunks_counter = 0
 
-
-    def make_dir(self):
+    def make_dir(self, *args):
         """
-        Создать индивидуальную директорию под текущую генерацию
-        транзакций.
+        Создать путь если он не существует.
+        Вернуть созданный или сущесвующий путь.
         """
-        category = self.category
-        data_paths = self.data_paths
-        key_history = self.key_history
-        directory = data_paths[category][key_history]
-        run_dir = self.run_dir
-        # prefix = self.prefix
-        # datetime_suffix = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-        folder_name = self.folder_name
-        path = os.path.join(directory, run_dir, folder_name)
-
+        path = os.path.join(*args)
         if os.path.exists(path):
-            return
+            return path
         
         os.mkdir(path)
-        self.directory = path
+        return path
+
+
+    # def make_dir(self):
+    #     """
+    #     Создать индивидуальную директорию под текущую генерацию
+    #     транзакций.
+    #     """
+    #     category = self.category
+    #     data_paths = self.data_paths
+    #     key_history = self.key_history
+    #     directory = data_paths[category][key_history]
+    #     run_dir = self.run_dir
+    #     # prefix = self.prefix
+    #     # datetime_suffix = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    #     folder_name = self.folder_name
+    #     path = os.path.join(directory, run_dir, folder_name)
+
+    #     if os.path.exists(path):
+    #         return
+        
+    #     os.mkdir(path)
+    #     self.directory = path
 
 
     def name_the_chunk(self):
@@ -128,6 +140,7 @@ class LegitTxnsRecorder:
         txn: dict. Созданная транзакция.
         txns_num: int. Кол-во созданных транз-ций текущего клиента.
         """
+        # Папка всей текущей генерации
         directory = self.directory
 
         self.txns_chunk.append(txn)
@@ -137,7 +150,8 @@ class LegitTxnsRecorder:
         if self.to_chunk(txns_num=txns_num):
             chunk = pd.DataFrame(self.txns_chunk)
             chunk_name = self.name_the_chunk()
-            full_path = os.path.join(directory, chunk_name)
+            chunks_dir = self.make_dir(directory, "chunks")
+            full_path = os.path.join(chunks_dir, chunk_name)
 
             chunk.to_parquet(full_path, engine="pyarrow")
             self.txns_chunk.clear() # сброс чанка записанного в файл
@@ -149,12 +163,13 @@ class LegitTxnsRecorder:
         файлы. Датафрейм сохраняется в атрибут all_txns.
         """
         directory = self.directory
-        chunks = os.listdir(directory)
+        chunks_dir = self.make_dir(directory, "chunks")
+        chunks = os.listdir(chunks_dir)
 
         all_chunks = []
 
         for file in chunks:
-            path_to_chunk = os.path.join(directory, file)
+            path_to_chunk = os.path.join(chunks_dir, file)
             chunks_df = pd.read_parquet(path_to_chunk, engine="pyarrow")
             all_chunks.append(chunks_df)
 

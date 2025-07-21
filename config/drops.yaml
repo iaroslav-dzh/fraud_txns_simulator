@@ -52,7 +52,10 @@ distributor:
     # Ключ к категории директорий в base.yaml. Тут будут храниться данные
     category: "generated" 
     # Название индивидуальной папки внутри папки текущего запуска генерации
-    folder_name: "dist_drops"
+    folder_name: "dist_drops" 
+    files:
+      txns: "dist_drop_txns.parquet"
+      clients: "dist_drops.parquet"
   
 
 # Настройки дроп фрода связанного с отмыванием поступающих денег через покупки
@@ -93,6 +96,9 @@ purchaser:
     category: "generated"  
     # Название индивидуальной папки внутри папки текущего запуска генерации
     folder_name: "purch_drops"
+    files:
+      txns: "purch_drop_txns.parquet"
+      clients: "purchase_drops.parquet"
 
 
 time: 
