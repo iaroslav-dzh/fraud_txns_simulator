@@ -18,3 +18,15 @@ def make_dir_for_run(base_cfg):
         os.mkdir(run_dir_path)
 
     return run_dir_path
+
+
+def notifier(text):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            print(f"{text} started")
+            result = func(*args, **kwargs)
+            print(f"{text} finished")
+            return result
+        return wrapper
+    return decorator
+
