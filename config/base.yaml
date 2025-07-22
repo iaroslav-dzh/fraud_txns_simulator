@@ -70,6 +70,7 @@ data_paths:
     purch_drop_txns: "./data/generated/latest/purch_drop_txns.parquet"
     all_txns: "./data/generated/latest/all_txns.parquet"
     history: "./data/generated/history"
+    latest: "./data/generated/latest/"
 
 # названия папок и файлов
 data_storage:

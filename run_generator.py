@@ -1,4 +1,5 @@
 # Запуск генерации транзакций всех типов: легальные, compromised fraud, дроп фрод
+from pathlib import Path
 
 from data_generator.utils import load_configs
 from data_generator.validator import ConfigsValidator 
@@ -64,6 +65,13 @@ recorder = AllTxnsRecorder(base_cfg=base_cfg, legit_cfg=legit_cfg, compr_cfg=com
                            drops_cfg=drop_cfg, run_dir=run_dir)
 
 recorder.build_and_write()
+
+latest_path = Path(base_cfg["data_paths"]["generated"]["latest"])
+print(f"""\n
+Generated files are located in {run_dir} - individual folder for this run.
+And in {latest_path} - contains files of the last run only
+\n""")
+input("\nPress Enter to exit...")
 
 
 

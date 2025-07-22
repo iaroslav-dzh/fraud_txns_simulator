@@ -1,0 +1,33 @@
+[project]
+name = "antifraud-simulator"
+version = "0.1.0"
+description = "Synthetic transaction generator for anti-fraud analysis"
+authors = [
+    {name = "Shantor Chervitz"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = "^3.12"
+dependencies = [
+    "pandas >=2.2.3",
+    "numpy >=2.2.6",
+    "pyarrow >=20.0.0",
+    "geopandas >=1.0.1",
+    "matplotlib >=3.10.3",
+    "pyproj >=3.7.1",
+    "pyogrio >=0.11.0",
+    "shapely >=2.1.1",
+    "seaborn >=0.13.2",
+    "scipy >=1.15.2",
+    "tqdm >=4.67.1",
+    "PyYAML >=6.0.2"
+]
+
+[tool.poetry]
+packages = [
+    { include = "data_generator" },
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
