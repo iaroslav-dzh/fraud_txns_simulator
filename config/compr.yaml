@@ -20,7 +20,7 @@ rules: # Конфиги для правил
       freq_high: 5
 
 
-data_storage:
+data_storage:  # ключи к путям из base.yaml и названия папок и файлов
   # Ключ к полному пути записи файла в папке data/generated/latest/ в base.yaml
   key_latest: "compr_client_txns"
   # Ключ к директории для создания отдельной папки генерации в в base.yaml

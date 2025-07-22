@@ -1,4 +1,4 @@
-import os
+# Запуск генерации транзакций всех типов: легальные, compromised fraud, дроп фрод
 
 from data_generator.utils import load_configs
 from data_generator.validator import ConfigsValidator 
@@ -6,6 +6,7 @@ from data_generator.runner.utils import make_dir_for_run
 from data_generator.runner.legit import LegitRunner
 from data_generator.runner.compr import ComprRunner
 from data_generator.runner.drops import DropsRunner
+from data_generator.recorder import AllTxnsRecorder
 
 # Общие настройки
 base_cfg = load_configs("./config/base.yaml")
@@ -20,8 +21,11 @@ time_cfg = load_configs("./config/time.yaml")
 # Настройки дроп фрода
 drop_cfg = load_configs("./config/drops.yaml")
 
+
+# Валидация основных конфигов перед началом генерации
 cfg_validator = ConfigsValidator(base_cfg=base_cfg, legit_cfg=legit_cfg, \
                                  fraud_cfg=fraud_cfg, drop_cfg=drop_cfg)
+cfg_validator.validate_all()
 
 # Создаем папку под файлы текущей генерации
 run_dir = make_dir_for_run(base_cfg=base_cfg)
@@ -55,6 +59,11 @@ purch_drops_runner = DropsRunner(base_cfg=base_cfg, legit_cfg=legit_cfg, \
 purch_drops_runner.run()
 
 
+# Сборка созданных транзакций в один датафрейм и запись в один файл в двух директориях
+recorder = AllTxnsRecorder(base_cfg=base_cfg, legit_cfg=legit_cfg, compr_cfg=compr_cfg, \
+                           drops_cfg=drop_cfg, run_dir=run_dir)
+
+recorder.build_and_write()
 
 
 

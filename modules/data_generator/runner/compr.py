@@ -3,7 +3,7 @@
 from data_generator.fraud.compr.build.config import ComprConfigBuilder
 from data_generator.fraud.recorder import FraudTxnsRecorder
 from data_generator.fraud.compr.txndata import FraudTxnPartData, TransAmount
-from data_generator.fraud.drops.simulator import gen_multi_fraud_txns
+from data_generator.fraud.compr.txns import gen_multi_fraud_txns
 from data_generator.runner.utils import spinner_decorator
 
 

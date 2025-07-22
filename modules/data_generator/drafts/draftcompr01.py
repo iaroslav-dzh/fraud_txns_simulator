@@ -54,3 +54,8 @@ client_id = client_info.client_id
 client_txns_df = configs.transactions.query("client_id == @client_id")
 part_data.client_info = client_info
 client_info
+
+
+
+hist_dir = "./data/generated/history/"
+

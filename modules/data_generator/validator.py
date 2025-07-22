@@ -147,11 +147,11 @@ class ConfigsValidator:
         clients_count = self.estimate_compr_clients()
 
         if clients_count > est_clients:
-            raise ValueError(f"""Estimated maximum possible number of clients that might be needed to generate
-            'compromised client' fraud transactions: {clients_count}.
+            raise ValueError(f"""Estimated maximum possible number of clients that might be needed to 
+            generate 'compromised client' fraud transactions: {clients_count}.
             Estimated number of clients required for generating legitimate transactions: {est_clients}.
 
-            The number of compromised fraud clients cannot be less than the number required
+            The number of compromised fraud clients cannot be higher than the number required
             for legitimate transaction generation.
 
             Please either:
@@ -233,6 +233,7 @@ class ConfigsValidator:
         Валидация всех конфигов, которые могут быть валидированы
         в этом классе.
         """
+        print(f"Main configs validation started")
         self.validate_legit_txn_num()
         self.validate_comp_rate()
         self.validate_drops_rate()

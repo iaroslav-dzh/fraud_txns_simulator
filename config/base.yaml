@@ -68,9 +68,10 @@ data_paths:
     compr_client_txns: "./data/generated/latest/compr_client_txns.parquet"
     dist_drop_txns: "./data/generated/latest/dist_drop_txns.parquet"
     purch_drop_txns: "./data/generated/latest/purch_drop_txns.parquet"
+    all_txns: "./data/generated/latest/all_txns.parquet"
     history: "./data/generated/history"
 
 # названия папок и файлов
-data_storage: 
-  folder_names:
-    clients: "clients"
+data_storage:
+  files:
+    all_txns: "all_txns.parquet"

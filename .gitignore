@@ -23,3 +23,4 @@ sessions/
 scratchpads/
 temp/
 test01.py
+__pycache__/

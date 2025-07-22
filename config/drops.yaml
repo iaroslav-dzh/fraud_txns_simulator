@@ -44,7 +44,7 @@ distributor:
     trf_max: 3
     atm_min: 0 # Снятие
     atm_max: 2
-  data_storage:
+  data_storage: # ключи к путям из base.yaml и названия папок и файлов
     # Ключ к полному пути записи файла в папке data/generated/latest/ в base.yaml
     key_latest: "dist_drop_txns"
     # Ключ к директории для создания отдельной папки генерации в в base.yaml
@@ -87,7 +87,7 @@ purchaser:
   attempts: # Лимиты попыток операций после первой отклоненной операции
     min: 0
     max: 3
-  data_storage:
+  data_storage: # ключи к путям из base.yaml и названия папок и файлов
     # Ключ к полному пути записи файла в папке data/generated/latest/ в base.yaml
     key_latest: "purch_drop_txns"
     # Ключ к директории для создания отдельной папки генерации в в base.yaml

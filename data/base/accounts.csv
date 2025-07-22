@@ -1564,7 +1564,7 @@ client_id,account_id,is_drop
 1654,11562,False
 1655,11563,False
 1656,11564,False
-1657,11565,False
+1657,11565,True
 1658,11566,False
 1659,11567,False
 1660,11568,False
@@ -1575,7 +1575,7 @@ client_id,account_id,is_drop
 1665,11573,True
 1666,11574,False
 1667,11575,False
-1668,11576,False
+1668,11576,True
 1669,11577,False
 1670,11578,False
 1671,11579,False
@@ -1687,7 +1687,7 @@ client_id,account_id,is_drop
 1788,11685,False
 1789,11686,False
 1790,11687,False
-1791,11688,False
+1791,11688,True
 1792,11689,False
 1793,11690,False
 1794,11691,False
@@ -1836,7 +1836,7 @@ client_id,account_id,is_drop
 1945,11834,False
 1946,11835,False
 1947,11836,False
-1948,11837,False
+1948,11837,True
 1949,11838,False
 1950,11839,False
 1951,11840,False
@@ -2151,7 +2151,7 @@ client_id,account_id,is_drop
 2270,12149,False
 2271,12150,False
 2274,12151,False
-2275,12152,False
+2275,12152,True
 2276,12153,False
 2277,12154,False
 2278,12155,False
@@ -2477,7 +2477,7 @@ client_id,account_id,is_drop
 2609,12475,True
 2610,12476,False
 2611,12477,False
-2612,12478,False
+2612,12478,True
 2613,12479,False
 2614,12480,False
 2615,12481,False
@@ -4017,7 +4017,7 @@ client_id,account_id,is_drop
 4246,14015,False
 4247,14016,False
 4248,14017,False
-4249,14018,False
+4249,14018,True
 4250,14019,False
 4251,14020,False
 4252,14021,False
@@ -4102,7 +4102,7 @@ client_id,account_id,is_drop
 4331,14100,False
 4332,14101,False
 4333,14102,False
-4334,14103,False
+4334,14103,True
 4335,14104,False
 4336,14105,False
 4337,14106,False
@@ -4393,7 +4393,7 @@ client_id,account_id,is_drop
 4644,14391,False
 4647,14392,False
 4648,14393,False
-4649,14394,False
+4649,14394,True
 4650,14395,False
 4651,14396,False
 4652,14397,False
@@ -4647,7 +4647,7 @@ client_id,account_id,is_drop
 5163,14645,True
 5164,14646,False
 5171,14647,False
-5175,14648,False
+5175,14648,True
 5180,14649,False
 5189,14650,False
 5200,14651,False
@@ -4737,7 +4737,7 @@ client_id,account_id,is_drop
 5473,14735,False
 5478,14736,False
 5487,14737,False
-5517,14738,False
+5517,14738,True
 5521,14739,False
 5526,14740,False
 5527,14741,False
