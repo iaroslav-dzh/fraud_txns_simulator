@@ -170,13 +170,14 @@ def amt_rounding(amount, rate=0.6):
     return amount // divider * divider
 
 
-def load_configs(path):
+def load_configs(path, encoding="utf8"):
     """
     Загрузить конфиги из yaml файла.
     --------
     path: str. Путь к файлу.
+    encoding: str. Кодировка для считывания файла через open().
     """
-    with open(path) as f:
+    with open(path, encoding=encoding) as f:
         return yaml.safe_load(f)
 
 

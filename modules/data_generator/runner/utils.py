@@ -1,5 +1,9 @@
 import os
 from datetime import datetime
+import threading
+import sys
+import time
+import itertools
 
 
 
@@ -29,4 +33,41 @@ def notifier(text):
             return result
         return wrapper
     return decorator
+
+
+def notifier_dynamic(func):
+    def wrapper(self, *args, **kwargs):
+        text = f"{self.drop_type} drops generation"
+        print(f"{text} started")
+        result = func(self, *args, **kwargs)
+        print(f"{text} finished")
+        return result
+    return wrapper
+
+
+def spinner_decorator(func):
+    def wrapper(self, *args, **kwargs):
+        done = False
+        text = self.text
+
+        def spinner():
+            wheel =  itertools.cycle(['|', '\\', '-', '|', '-', '/'])
+            while not done:
+                ch = next(wheel)
+                sys.stdout.write(f"\r{text} in progress... {ch}")
+                sys.stdout.flush()
+                time.sleep(0.1)
+
+        thread = threading.Thread(target=spinner)
+        thread.start()
+        try:
+            result = func(self, *args, **kwargs)
+        finally:
+            done = True
+            thread.join()
+            sys.stdout.write(f"\r{text}... completed.\n")
+            sys.stdout.flush()
+        return result
+    return wrapper
+
 

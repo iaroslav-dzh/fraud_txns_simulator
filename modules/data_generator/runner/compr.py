@@ -3,8 +3,9 @@
 from data_generator.fraud.compr.build.config import ComprConfigBuilder
 from data_generator.fraud.recorder import FraudTxnsRecorder
 from data_generator.fraud.compr.txndata import FraudTxnPartData, TransAmount
-from data_generator.fraud.compr.txns import gen_multi_fraud_txns
-from data_generator.runner.utils import notifier
+from data_generator.fraud.drops.simulator import gen_multi_fraud_txns
+from data_generator.runner.utils import spinner_decorator
+
 
 class ComprRunner:
     """
@@ -12,12 +13,13 @@ class ComprRunner:
     ---------
     Атрибуты:
     ---------
-    cfg_builder: LegitConfigBuilder.
-    configs: LegitCfg. Конфиги и данные для генерации легальных транзакций.
+    cfg_builder: ComprConfigBuilder.
+    configs: ComprClientFraudCfg. Конфиги и данные для генерации транзакций.
     part_data: FraudTxnPartData. Генерация части данных транзакции:
                мерчант, геопозиция, город, IP адрес и др.
     fraud_amts: TransAmount. Генерация суммы транзакций.
-    txn_recorder: LegitTxnsRecorder. Запись легальных транзакций в файл.
+    txn_recorder: FraudTxnsRecorder. Запись транзакций в файл.
+    text: str. Текст для вставки в спиннер.
     """
     def __init__(self, base_cfg, legit_cfg, time_cfg, fraud_cfg, compr_cfg, run_dir):
         """
@@ -36,9 +38,10 @@ class ComprRunner:
         self.part_data = FraudTxnPartData(configs=self.configs)
         self.fraud_amts = TransAmount(configs=self.configs)
         self.txn_recorder = FraudTxnsRecorder(configs=self.configs)
+        self.text = "Compromised clients fraud txns generation"
 
 
-    @notifier(text="Compromised client fraud generation")
+    @spinner_decorator
     def run(self):
         """
         Запуск генератора.

@@ -158,7 +158,7 @@ class DropSimulator:
         """
         drop_clients = self.drop_clients
         drop_type = self.drop_type
-        progress_bar = create_progress_bar(drop_clients, text=f"Generating {drop_type} drops")
+        # progress_bar = create_progress_bar(drop_clients, text=f"Generating {drop_type} drops")
         part_data = self.part_data
         acc_hand = self.acc_hand
         life_manager = self.life_manager
@@ -180,7 +180,7 @@ class DropSimulator:
 
             # Сброс кэша дропа для следующей итерации
             life_manager.reset_all_caches()
-            progress_bar.update(1)
+            # progress_bar.update(1)
         
         # Запись измененного датафрейма accounts в csv файл
         # Путь указывается в base.yaml
