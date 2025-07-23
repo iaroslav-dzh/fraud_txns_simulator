@@ -67,8 +67,7 @@ def spinner_decorator(func):
         finally:
             done = True
             thread.join()
-            sys.stdout.flush() # добавил протестить. Чтоб вернуть все, удалить
-            sys.stdout.write(f"\r{text}... completed.\n")
+            sys.stdout.write(f"\r{text}... completed.{' ' * 10}\n")
             sys.stdout.flush()
         return result
     return wrapper
