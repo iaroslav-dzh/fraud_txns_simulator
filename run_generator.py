@@ -69,7 +69,8 @@ recorder.build_and_write()
 latest_path = Path(base_cfg["data_paths"]["generated"]["latest"])
 print(f"""\n
 Generated files are located in {run_dir} - individual folder for this run.
-And in {latest_path} - contains files of the last run only.""")
+And in {latest_path} - contains files of the last run only
+\n""")
 input("\nPress Enter to exit...")
 
 

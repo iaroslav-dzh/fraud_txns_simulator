@@ -1,0 +1,19 @@
+# This file may be used to create an environment using:
+# $ conda create --name <env> --file <this file>
+# platform: win-64
+# created-by: conda 24.11.3
+geopandas=1.0.1=pyhd8ed1ab_3
+matplotlib=3.10.3=py313hfa70ccb_0
+numpy=2.2.6=py313hefb8edb_0
+pandas=2.2.3=py313hf91d08e_3
+pyarrow=20.0.0=py313hfa70ccb_0
+pyproj=3.7.1=py313hc3e4018_1
+pyyaml=6.0.2=py313hb4c8b1a_2
+scipy=1.15.2=py313h2eca4b9_0
+seaborn=0.13.2=hd8ed1ab_3
+setuptools=80.8.0=pyhff2d567_0
+shapely=2.1.1=py313h410098b_0
+terminado=0.18.1=pyh5737063_0
+tqdm=4.67.1=pyhd8ed1ab_1
+
+
