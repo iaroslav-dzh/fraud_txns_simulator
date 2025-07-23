@@ -1451,7 +1451,7 @@ client_id,account_id,is_drop
 1530,11449,False
 1531,11450,False
 1532,11451,False
-1533,11452,False
+1533,11452,True
 1534,11453,False
 1535,11454,False
 1536,11455,False
@@ -1638,7 +1638,7 @@ client_id,account_id,is_drop
 1734,11636,False
 1735,11637,False
 1736,11638,False
-1737,11639,False
+1737,11639,True
 1738,11640,False
 1741,11641,True
 1742,11642,False
