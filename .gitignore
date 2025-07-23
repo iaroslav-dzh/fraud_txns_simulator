@@ -25,3 +25,4 @@ temp/
 test01.py
 __pycache__/
 workspaces/
+requirements-conda.txt

@@ -372,7 +372,7 @@ client_id,account_id,is_drop
 391,10370,False
 392,10371,False
 393,10372,False
-394,10373,False
+394,10373,True
 395,10374,False
 396,10375,False
 397,10376,False
@@ -1739,7 +1739,7 @@ client_id,account_id,is_drop
 1842,11737,False
 1843,11738,False
 1844,11739,False
-1845,11740,False
+1845,11740,True
 1846,11741,False
 1847,11742,False
 1848,11743,False
