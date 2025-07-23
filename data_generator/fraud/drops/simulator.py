@@ -1,10 +1,10 @@
 # Полный жизненный цикл дропа
 import pandas as pd
+import os
 from data_generator.fraud.drops.build.builder import DropBaseClasses
 from data_generator.fraud.drops.txns import CreateDropTxn
-# from data_generator.fraud.recorder import FraudTxnsRecorder
 from data_generator.fraud.drops.processor import DropBatchHandler
-from data_generator.utils import create_progress_bar
+from pathlib import Path
 
 class DropLifecycleManager:
     """
@@ -127,38 +127,15 @@ class DropSimulator:
         self.txn_recorder = txn_recorder
         self.txns_df = configs.transactions
         self.life_manager = DropLifecycleManager(base=base, create_txn=create_txn)
+        self.run_dir = configs.run_dir
         self.all_txns = []
     
-
-    def write_to_file(self, data, category, file_key):
-        """
-        Запись данных в файл по пути из yaml конфига.
-        data: pd.DataFrame | gpd.DataFrame. Данные.
-        category: str. Категория файлов в yaml конфиге например:
-                  'cleaned', 'generated'. Соответсвует
-                  структуре папок в data/
-        file_key: str. Ключ к полному пути конкретного файла в категории.
-        """
-        path = self.base_cfg["data_paths"][category][file_key]
-        file_type = path.split(".")[-1]
-
-        if file_type == "csv":
-            return data.to_csv(path, index=False)
-        
-        if file_type == "gpkg":
-            return data.to_file(path, layer="layer_name", driver="GPKG")
-        
-        if file_type == "parquet":
-            return data.to_parquet(path, engine="pyarrow")
-
 
     def run(self):
         """
         Полная генерация активности дропов соответсвующего типа
         """
         drop_clients = self.drop_clients
-        drop_type = self.drop_type
-        # progress_bar = create_progress_bar(drop_clients, text=f"Generating {drop_type} drops")
         part_data = self.part_data
         acc_hand = self.acc_hand
         life_manager = self.life_manager
@@ -180,13 +157,15 @@ class DropSimulator:
 
             # Сброс кэша дропа для следующей итерации
             life_manager.reset_all_caches()
-            # progress_bar.update(1)
         
-        # Запись измененного датафрейма accounts в csv файл
-        # Путь указывается в base.yaml
+        # Запись измененного датафрейма accounts в csv файл в двух экземплярах
+        # В папку data/generated/latest и в папку текущей генерации 
         accounts = acc_hand.accounts
-        self.write_to_file(data=accounts, category="base", \
-                           file_key="accounts")
+        gen_files = self.base_cfg["data_paths"]["generated"]
+        acc_path_01 = Path(self.run_dir) / "accounts.csv"
+        acc_path_02 = gen_files["accounts"]
+        accounts.to_csv(acc_path_01, index=False)
+        accounts.to_csv(acc_path_02, index=False)
         
         # Запись всех созданных транзакций дропов в parquet файл
         txn_recorder.all_txns = pd.DataFrame(self.all_txns)

@@ -35,7 +35,6 @@ txns_df:
 # Пути к данным
 data_paths:
   base:
-    accounts: "./data/base/accounts.csv"
     accounts_default: "./data/base/accounts_default.csv"
     cat_stats_full: "./data/base/cat_stats_full.csv"
     category_stats: "./data/base/category_stats.csv"
@@ -68,6 +67,7 @@ data_paths:
     compr_client_txns: "./data/generated/latest/compr_client_txns.parquet"
     dist_drop_txns: "./data/generated/latest/dist_drop_txns.parquet"
     purch_drop_txns: "./data/generated/latest/purch_drop_txns.parquet"
+    accounts: "./data/generated/latest/accounts.csv"
     all_txns: "./data/generated/latest/all_txns.parquet"
     history: "./data/generated/history"
     latest: "./data/generated/latest/"

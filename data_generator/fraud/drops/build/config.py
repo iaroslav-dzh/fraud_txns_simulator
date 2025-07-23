@@ -2,6 +2,7 @@ import pandas as pd
 import geopandas as gpd
 import pyarrow
 import os
+from pathlib import Path
 
 from data_generator.utils import create_txns_df
 from data_generator.configs import DropDistributorCfg, DropPurchaserCfg
@@ -164,26 +165,30 @@ class DropConfigBuilder:
         return drops_samp
 
 
-    def read_by_precedence(self, category, file_key_01, file_key_02):
+    def read_by_precedence(self, path_01, path_02, file_type):
         """
         Чтение файла по приоритету и наличию.
-        Проверить наличие файла file_key_01, если он есть, то загрузить его.
-        Если его нет то проверить начличие файла file_key_02 и загрузить его если он есть.
+        Проверить наличие файла по пути path_01, если он есть, то загрузить его.
+        Если его нет то проверить начличие файла по пути path_02 и загрузить его 
+        если он есть.
         ------------------
-        category: str. Напр. 'cleaned_data', 'generated_data'.
-        file_key_01: str. Ключ к файлу в yaml конфиге.
-        file_key_02: str. Ключ к файлу в yaml конфиге.
+        path_01: str. Путь к файлу у которого приоритет.
+        path_02: str. Путь к альтернативному файлу.
+        file_type: str. Тип файла: 'csv' или 'parquet'.
         """
-        path_01 = self.base_cfg["data_paths"][category][file_key_01]
-        path_02 = self.base_cfg["data_paths"][category][file_key_02]
 
-        if os.path.exists(path_01):
-            return self.read_file(path=path_01)
-        elif os.path.exists(path_02):
-            return self.read_file(path=path_02)
-        else:
-            raise ValueError(f"""No files found under: {category}.{file_key_01}
-            or {category}.{file_key_02}""")
+        if os.path.exists(path_01) and file_type == "csv":
+            return pd.read_csv(path_01)
+        elif os.path.exists(path_01) and file_type == "parquet":
+            return pd.read_parquet(path_01, engine="pyarrow")
+        
+        elif os.path.exists(path_02) and file_type == "csv":
+            return pd.read_csv(path_02)
+        elif os.path.exists(path_02) and file_type == "parquet":
+            return pd.read_parquet(path_02, engine="pyarrow")
+        
+        raise ValueError(f"""No files in paths: {path_01}
+            or {path_02}""")
 
 
     def build_dist_cfg(self):
@@ -197,11 +202,13 @@ class DropConfigBuilder:
         time_cfg = drop_cfg["time"]
         stamps_cfg = self.time_cfg["timestamps"]
         base_files = base_cfg["data_paths"]["base"]
+        acc_path_01 = Path(self.run_dir) / "accounts.csv"
+        acc_path_02 = base_files["accounts_default"]
         
         clients = self.get_clients_for_drops(drop_type="distributor")
         timestamps = create_timestamps_range_df(stamps_cfg=stamps_cfg)
         txns = create_txns_df(base_cfg["txns_df"])
-        accounts= self.read_by_precedence(category="base", file_key_01="accounts", file_key_02="accounts_default")
+        accounts = self.read_by_precedence(path_01=acc_path_01, path_02=acc_path_02, file_type="csv")
         outer_accounts = self.read_file(path=base_files["outer_accounts"]).iloc[:,0] # нужны в виде серии
         client_devices = self.read_file(path=base_files["client_devices"])
         online_merchant_ids = self.read_file(path=base_files["online_merchant_ids"]) \
@@ -257,12 +264,13 @@ class DropConfigBuilder:
         stamps_cfg = self.time_cfg["timestamps"]
         base_files = base_cfg["data_paths"]["base"]
         base_fraud_files = base_cfg["data_paths"]["base_fraud"]
+        acc_path_01 = Path(self.run_dir) / "accounts.csv"
+        acc_path_02 = base_files["accounts_default"]
 
         clients = self.get_clients_for_drops(drop_type="purchaser")
         timestamps = create_timestamps_range_df(stamps_cfg=stamps_cfg)
         txns = create_txns_df(base_cfg["txns_df"])
-        accounts= self.read_by_precedence(category="base", file_key_01="accounts", \
-                                          file_key_02="accounts_default")
+        accounts = self.read_by_precedence(path_01=acc_path_01, path_02=acc_path_02, file_type="csv")
         client_devices = self.read_file(path=base_files["client_devices"])
         online_merchant_ids = self.read_file(path=base_files["online_merchant_ids"]) \
                                   .iloc[:,0] # нужны в виде серии

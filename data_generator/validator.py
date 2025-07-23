@@ -200,6 +200,13 @@ class ConfigsValidator:
             1. Reduce legit txns number.
             2. Reduce total fraud rate.""")
         
+        if total_drops <= 0:
+            raise ValueError(f"""\nTotal drops number cannot be 0 or lower.
+            Total estimated drops: {total_drops}
+            Please do one of below or combine:
+            1. Increase drop fraud rates
+            2. Increase total fraud rate
+            3. Increase legit txns number""")
         print("Drop fraud rate config is OK")
 
 
