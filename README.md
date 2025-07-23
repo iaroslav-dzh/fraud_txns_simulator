@@ -1,1 +1,1 @@
-# Fraud detection project 01
+# Fraud transactions simulation project
