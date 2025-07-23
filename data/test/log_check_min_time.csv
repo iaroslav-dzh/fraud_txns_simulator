@@ -1,5 +1,0 @@
-,client_id,txn_time,txn_unix,online,closest_offline_time,closest_offline_unix,closest_online_time,closest_online_unix,last_txn_time,last_txn_unix,last_online,condition
-0,28.0,2025-01-31 08:19:00,1738311540,True,,,2025-01-31 08:14:00,1738311240.0,2025-01-31 09:16:00,1738314960.0,True,No flag
-0,28.0,2025-01-31 09:44:27,1738316667.0,True,,,2025-01-31 08:19:00,1738311540.0,2025-01-31 09:16:00,1738314960.0,True,online_to_online
-0,28.0,2025-01-31 08:19:00,1738311540,True,,,2025-01-31 08:14:00,1738311240.0,2025-01-31 09:44:27,1738316667.0,True,No flag
-28.0,2025-01-31 10:08:39,1738318119.0,True,,,2025-01-31 08:14:00,1738311240.0,2025-01-31 09:16:00,1738314960.0,True,online_to_online

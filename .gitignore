@@ -16,7 +16,7 @@ data/clients/clients_sample.gpkg
 data/generated/history/
 data/raw/trans.asc
 data/raw/geo/
-data/test_data/
+data/test/
 
 # и т.д.
 .ssh/

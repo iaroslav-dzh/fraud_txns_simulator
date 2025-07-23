@@ -17,34 +17,12 @@ def make_dir_for_run(base_cfg):
     datetime_suffix = datetime.now().strftime("%Y-%m-%d_%H%M%S")
     run_dir = run_prefix + datetime_suffix
     history_dir = base_cfg["data_paths"]["generated"]["history"]
-    # run_dir_path = os.path.join(history_dir, run_dir)
     run_dir_path = Path(history_dir) / run_dir
 
     if not os.path.exists(run_dir_path):
-        os.mkdir(run_dir_path)
+        os.makedirs(run_dir_path)
 
     return run_dir_path
-
-
-def notifier(text):
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            print(f"{text} started")
-            result = func(*args, **kwargs)
-            print(f"{text} finished")
-            return result
-        return wrapper
-    return decorator
-
-
-def notifier_dynamic(func):
-    def wrapper(self, *args, **kwargs):
-        text = f"{self.drop_type} drops generation"
-        print(f"{text} started")
-        result = func(self, *args, **kwargs)
-        print(f"{text} finished")
-        return result
-    return wrapper
 
 
 def spinner_decorator(func):
@@ -71,5 +49,29 @@ def spinner_decorator(func):
             sys.stdout.flush()
         return result
     return wrapper
+
+
+def notifier(text):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            print(f"{text} started")
+            result = func(*args, **kwargs)
+            print(f"{text} finished")
+            return result
+        return wrapper
+    return decorator
+
+
+def notifier_dynamic(func):
+    def wrapper(self, *args, **kwargs):
+        text = f"{self.drop_type} drops generation"
+        print(f"{text} started")
+        result = func(self, *args, **kwargs)
+        print(f"{text} finished")
+        return result
+    return wrapper
+
+
+
 
 
