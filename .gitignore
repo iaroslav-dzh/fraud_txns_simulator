@@ -4,7 +4,7 @@ notebooks_dev/03_data_generation_v1_moscow_area.ipynb
 notebooks_dev/05DUPLICATE.ipynb
 notebooks_dev/00INTEGRATION_DROPS_TEST_01.ipynb
 notebooks_dev/00DROPS_BASE_TEST_01.ipynb
-notebooks_cleaned/.ipynb_checkpoints/
+notebooks_clean/.ipynb_checkpoints/
 
 # data
 data/raw/fraudTest.csv.zip
