@@ -1,5 +1,7 @@
 # Модуль с общими вспомогательными функциями
 import pandas as pd
+import geopandas as gpd
+from shapely.geometry import Point
 import numpy as np
 from scipy.stats import truncnorm
 from pyproj import Geod
@@ -7,6 +9,37 @@ from tqdm import tqdm
 import yaml
 
 # 1. 
+# функция генерации случайных точек в указанной зоне
+# это не сам полигон города, а четырехугольник из крайних точек полигона города
+
+def Random_Points_in_Bounds(polygon, number):   
+    minx, miny, maxx, maxy = polygon.bounds
+    x = np.random.uniform( minx, maxx, number )
+    y = np.random.uniform( miny, maxy, number )
+    return x, y
+
+#.
+
+def gen_trans_coordinates(polygon, number):
+    """
+    Функция генерации координат внутри города(полигона)
+    """
+    x,y = Random_Points_in_Bounds(polygon, number)
+    df = pd.DataFrame()
+    df['points'] = list(zip(x,y))
+    df['points'] = df['points'].apply(Point)
+    gdf_points = gpd.GeoDataFrame(df, geometry='points')
+
+    gdf_poly = gpd.GeoDataFrame(index=["myPoly"], geometry=[polygon])
+    
+    Sjoin = gpd.tools.sjoin(gdf_points, gdf_poly, predicate="within", how='left')
+
+    # Оставить точки внутри "myPoly"
+    pnts_in_poly = gdf_points[Sjoin.index_right=='myPoly']
+
+    return pnts_in_poly, gdf_poly
+
+# .
 
 def build_transaction(client_id, txn_time, txn_unix, amount, txn_type, channel, category_name, online, merchant_id, \
                       trans_city, trans_lat, trans_lon, trans_ip, device_id, account, is_fraud, is_suspicious, \

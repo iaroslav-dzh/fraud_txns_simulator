@@ -1,10 +1,11 @@
-from sqlalchemy import create_engine, text, MetaData, Table, Column, Integer, Float, \
+import pandas as pd
+from sqlalchemy import text, MetaData, Table, Column, Integer, Float, \
                        BigInteger, String, Date, Boolean, DateTime
 
 
 # 1.
 
-def add_table_to_metadata(table_name: str, metadata, df_types: pd.Series):
+def add_table_to_metadata(table_name: str, metadata: MetaData, df_types: pd.Series):
     """
     Добавление объекта sqlalchemy.Table в объект sqlalchemy.MetaData.
     ------------------------
