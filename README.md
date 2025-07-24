@@ -12,7 +12,7 @@ curl -sSL https://install.python-poetry.org | python3 -
 (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
 ```
 
-При установке через powershell добавить путь ниже в System path
+При установке через powershell добавить путь ниже в path **для пользователя**
 ```
 C:\Users\<ИМЯ ПОЛЬЗОВАТЕЛЯ>\AppData\Roaming\Python\Scripts
 ```

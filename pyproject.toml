@@ -29,6 +29,7 @@ dependencies = [
 [tool.poetry]
 packages = [
     { include = "data_generator" },
+    { include = "data_to_db" }
 ]
 
 [build-system]
