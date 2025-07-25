@@ -7,7 +7,7 @@ from data_generator.legit.txndata import get_txn_location_and_merchant
 from data_generator.legit.time.time import get_legit_txn_time
 
 
-# 1.
+# 1. Генерация одной легальной транзакции покупки для клиента.
 
 def generate_one_legit_txn(client_info, client_trans_df, client_device_ids, category, \
                            merchants_df, configs):
@@ -85,7 +85,7 @@ def generate_one_legit_txn(client_info, client_trans_df, client_device_ids, cate
                              status=status, rule=rule)
 
 
-# 2.
+# 2. Функция генерации множества легальных транзакций для нескольких клиентов
 
 def gen_multiple_legit_txns(configs, txn_recorder, ignore_index=True):
     """
@@ -144,9 +144,15 @@ def gen_multiple_legit_txns(configs, txn_recorder, ignore_index=True):
             # при генерации других транзакций нужно знать уже созданные транзакции
             one_txn_df = pd.DataFrame([one_txn])
             client_transactions = pd.concat([client_transactions, one_txn_df], ignore_index=ignore_index)
-
+        
+        cl_txn_num = len(client_txns) # DEBUG
         client_txns.clear() # Конец генерации на клиента. Чистим список для текущего кл-та
-
+    # print(f"""DEBUG:
+    # txns_counter: {txn_recorder.txns_counter}
+    # clients_counter: {txn_recorder.clients_counter}
+    # total_clients: {txn_recorder.total_clients}
+    # client_txns: {cl_txn_num}
+    # txns_num: {txns_num}""")
     # Сборка цельного датафрейма из чанков записанных в файлы. Датафрейм сохраняется 
     # в txn_recorder.all_txns.
     txn_recorder.build_from_chunks()

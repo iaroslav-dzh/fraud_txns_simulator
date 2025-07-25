@@ -4,7 +4,6 @@ from data_generator.legit.txns import gen_multiple_legit_txns
 from data_generator.legit.build.config import LegitConfigBuilder
 from data_generator.legit.recorder import LegitTxnsRecorder
 from data_generator.runner.utils import spinner_decorator
-from pathlib import Path
 
 
 class LegitRunner:

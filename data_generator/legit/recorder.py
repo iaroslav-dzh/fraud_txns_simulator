@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-from datetime import datetime
 
 class LegitTxnsRecorder:
     """
@@ -52,13 +51,13 @@ class LegitTxnsRecorder:
         self.folder_name = configs.folder_name
         self.directory = configs.directory
         self.prefix = configs.prefix
-        # self.directory = None
         self.all_txns = None
         self.client_txns = []
         self.txns_chunk = []
         self.txns_counter = 0
         self.clients_counter = 0
         self.chunks_counter = 0
+
 
     def make_dir(self, *args):
         """
@@ -71,28 +70,6 @@ class LegitTxnsRecorder:
         
         os.mkdir(path)
         return path
-
-
-    # def make_dir(self):
-    #     """
-    #     Создать индивидуальную директорию под текущую генерацию
-    #     транзакций.
-    #     """
-    #     category = self.category
-    #     data_paths = self.data_paths
-    #     key_history = self.key_history
-    #     directory = data_paths[category][key_history]
-    #     run_dir = self.run_dir
-    #     # prefix = self.prefix
-    #     # datetime_suffix = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-    #     folder_name = self.folder_name
-    #     path = os.path.join(directory, run_dir, folder_name)
-
-    #     if os.path.exists(path):
-    #         return
-        
-    #     os.mkdir(path)
-    #     self.directory = path
 
 
     def name_the_chunk(self):
@@ -115,7 +92,7 @@ class LegitTxnsRecorder:
         clients_counter = self.clients_counter
         total_clients = self.total_clients
         client_txns = self.client_txns 
-
+        
         # если кол-во всех транзакций кратно размеру чанка
         if txns_counter % chunk_size == 0:
             return True 
@@ -173,8 +150,9 @@ class LegitTxnsRecorder:
             chunks_df = pd.read_parquet(path_to_chunk, engine="pyarrow")
             all_chunks.append(chunks_df)
 
-        self.all_txns = pd.concat(all_chunks, ignore_index=True).sort_values("unix_time") \
-                                .reset_index(drop=True)
+        self.all_txns = pd.concat(all_chunks, ignore_index=True) \
+                          .sort_values("unix_time") \
+                          .reset_index(drop=True)
 
 
     def write_built_data(self):
