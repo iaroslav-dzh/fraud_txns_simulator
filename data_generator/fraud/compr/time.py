@@ -2,7 +2,6 @@
 
 import pandas as pd
 import numpy as np
-import random
 
 from data_generator.general_time import pd_timestamp_to_unix
 from data_generator.fraud.time import derive_from_last_time
@@ -75,8 +74,10 @@ def gen_time_for_frequent_trans(last_txn_unix, configs, test=False):
     # макс. разрыв между транз-циями, минут
     freq_high = configs.rules_cfg["freq_txn"]["time"]["freq_high"]
 
-    # частота фрод транзакций. от 1 до 5 минут. Выразим в секундах для удобства расчетов
+    # Случайная разница во времени в пределах взятой частоты транзакций. 
+    # Выразим в секундах для удобства расчетов
     freq = np.random.randint(freq_low, freq_high + 1) * 60
+    # Прибавляем ко времени предыдущей транзакции
     txn_unix = last_txn_unix + freq
     txn_time = pd.to_datetime(txn_unix, unit="s")
 

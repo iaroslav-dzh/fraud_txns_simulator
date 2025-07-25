@@ -6,9 +6,10 @@ import numpy as np
 from data_generator.utils import get_values_from_truncnorm
 
 
-# . Подфункция генерации времени c прибавлением к времени последней транзакции derive_from_last_time
+# 1. Подфункция генерации времени c прибавлением к времени последней транзакции derive_from_last_time
 
-def derive_from_last_time(last_txn_unix, lag_interval, min=0, max=0, random_lag=False, geo_distance=0, threshold=800):
+def derive_from_last_time(last_txn_unix, lag_interval=0, min=0, max=0, random_lag=False, \
+                          geo_distance=0, threshold=800):
     """
     Создать время основываясь на времени последней транзакции.
     Либо на основании гео дистанции между транзакциями либо на основании заданного лага по времени.
@@ -40,14 +41,16 @@ def derive_from_last_time(last_txn_unix, lag_interval, min=0, max=0, random_lag=
     if geo_distance <= 500:
         mean = 90
         std = 20
-        speed = get_values_from_truncnorm(low_bound=50, high_bound=120, mean=mean, std=std).astype("int")[0]
+        speed = get_values_from_truncnorm(low_bound=50, high_bound=120, \
+                                          mean=mean, std=std).astype("int")[0]
         # Расчет добавления времени и перевод в секунды
         lag_interval = round((geo_distance / speed) * 3600)
 
     elif geo_distance > 500:
         mean = 300
         std = 200
-        speed = get_values_from_truncnorm(low_bound=50, high_bound=threshold, mean=mean, std=std).astype("int")[0]
+        speed = get_values_from_truncnorm(low_bound=50, high_bound=threshold, \
+                                          mean=mean, std=std).astype("int")[0]
         # Расчет добавления времени и перевод в секунды
         lag_interval = round((geo_distance / speed) * 3600)
 
