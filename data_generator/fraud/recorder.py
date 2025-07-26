@@ -1,7 +1,6 @@
-# 
+# Запись фрод транзакций в файл
+
 import os
-import pandas as pd
-from datetime import datetime
 
 class FraudTxnsRecorder:
     """
@@ -11,22 +10,19 @@ class FraudTxnsRecorder:
     Атрибуты:
     ------------
     category: str. Ключ к категории директорий в base.yaml.
-                       Ключ это одна из папок в data/
-                       Тут будут храниться сгенерированные данные.
+                   Ключ это одна из папок в data/
+                   Тут будут храниться сгенерированные данные.
     key_latest: str. Ключ в base.yaml для пути к файлу в директории
                 data/generated/latest/. Это для записи созданных
                 транз-ций как последних сгенерированных.
     key_history: str. Ключ в base.yaml для пути к директории.
-                    с историей генерации данных data/generated/history/
+                 с историей генерации данных, содержащей папки каждого
+                 запуска генератора.
     folder_name: str. Название индивидуальной папки внутри папки 
                  текущего запуска генерации.
-    run_dir: str. Название общей папки для всех файлов этой попытки/запуска
-             генерации: легальных, compromised фрода, дроп фрода.
     data_paths: dict. Конфиги путей из base.yaml.
-    prefix: str. Для названия индивидуальной папки внутри dir_category
-                Например 'legit_'
-    directory: str. Путь к директории в папке data/generated/history
-               куда записывать чанки и собранный из них файл.
+    directory: str. Путь к директории в папке data/generated/history/<текущий_запуск>/<тип_фрода>
+               куда записывать файл с транзакциями.
     all_txns: pd.DataFrame. Для записи генерируемых транз-ций.
               Получает готовый датафрейм с транзакциями для записии.
               По умолчанию None.
@@ -42,14 +38,15 @@ class FraudTxnsRecorder:
         self.data_paths = configs.data_paths
         self.directory = configs.directory
         self.txns_file_name = configs.txns_file_name
-        self.all_txns = []
+        self.all_txns = None
 
 
     def write_to_file(self):
         """
         Запись в файл.
         Пишем в две директории:
-        history/<папка_текущей_генерации>/<своя_папка>/ и latest/ 
+        data/generated/history/<текущий_запуск>/<тип_фрода>
+        и data/generated/latest/ 
         """
         # Создаем полный путь для записи в папку текущей генерации
         file_name = self.txns_file_name

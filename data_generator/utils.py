@@ -183,8 +183,8 @@ def create_progress_bar(obj, text=None):
     total = len(obj)
     return tqdm(total=total, desc=text)
 
-# Случайное округление суммы
 
+# Случайное округление суммы
 def amt_rounding(amount, rate=0.6):
     """
     Целочисленное округление.

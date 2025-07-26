@@ -7,13 +7,13 @@ from data_generator.utils import get_values_from_truncnorm, amt_rounding
 from data_generator.configs import ComprClientFraudCfg
     
 
-# .
+# 1.
 
 class FraudTxnPartData:
     """
     Класс для генерации данных о транзакции для фрода в покупках
     когда данные/аккаунт клиента скомпрометированы: 
-    канал, тип операции, мерчант, геопозиция, город, IP адрес, иногда статус.
+    канал, тип операции, мерчант, геопозиция, город, IP адрес.
     ------------------
     Атрибуты:
     --------
@@ -89,7 +89,6 @@ class FraudTxnPartData:
             device_id = np.nan
             channel = "POS"
 
-        
         txn_type = "purchase"
             
         return merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type
@@ -140,7 +139,6 @@ class FraudTxnPartData:
         """
         another_city - bool. Должен ли IP быть отличного от клиентского города.
         """
-
         self.last_txn = self.new_device_and_ip(category_name, online=True, another_city=another_city)
         
         return self.last_txn
@@ -200,7 +198,7 @@ class FraudTxnPartData:
             return self.last_txn
 
 
-# .
+# 2.
 
 class TransAmount: 
     """
@@ -223,7 +221,6 @@ class TransAmount:
         """
         Фрод транзакции. Генерация суммы с выставленными минимумом, максимумом, средним и отклонением
         """
-        
         category = self.categories[self.categories.category == category_name]
         low = category.fraud_low
         high = category.fraud_high
@@ -234,6 +231,7 @@ class TransAmount:
         amount =  round(get_values_from_truncnorm(low_bound=low, high_bound=high, \
                                          mean=mean, std=std)[0], 2)
         return amt_rounding(amount, rate=0.5)
+
 
     def freq_trans_amount(self):
         """
@@ -250,7 +248,7 @@ class TransAmount:
         return amt_rounding(amount, rate=0.4)
     
 
-# .
+# 3.
 
 def sample_category(categories, online=None, is_fraud=None, rule=None):
     """
@@ -269,7 +267,6 @@ def sample_category(categories, online=None, is_fraud=None, rule=None):
         cat_sample = chosen_categories.sample(1, weights=chosen_categories.fraud_share)
         return cat_sample
 
-        
     elif is_fraud and not online:
         offline_categories = categories.loc[categories.online == False]
         cat_sample = offline_categories.sample(1, weights=offline_categories.fraud_share)

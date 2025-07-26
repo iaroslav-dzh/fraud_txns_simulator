@@ -145,16 +145,8 @@ def gen_multiple_legit_txns(configs, txn_recorder, ignore_index=True):
             one_txn_df = pd.DataFrame([one_txn])
             client_transactions = pd.concat([client_transactions, one_txn_df], ignore_index=ignore_index)
         
-        cl_txn_num = len(client_txns) # DEBUG
         client_txns.clear() # Конец генерации на клиента. Чистим список для текущего кл-та
-    # print(f"""DEBUG:
-    # txns_counter: {txn_recorder.txns_counter}
-    # clients_counter: {txn_recorder.clients_counter}
-    # total_clients: {txn_recorder.total_clients}
-    # client_txns: {cl_txn_num}
-    # txns_num: {txns_num}""")
-    # Сборка цельного датафрейма из чанков записанных в файлы. Датафрейм сохраняется 
-    # в txn_recorder.all_txns.
+
     txn_recorder.build_from_chunks()
 
     # Запись собранного датафрейма в два файла в разные директории: data/generated/lastest/

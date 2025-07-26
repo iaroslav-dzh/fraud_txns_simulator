@@ -1,4 +1,6 @@
-# Основные функции генераторы фрода: одиночные транзакции, множественные транзакции
+# Основные функции генераторы compromised client фрода: одиночные транзакции, множественные транзакции
+
+
 import pandas as pd
 import numpy as np
 
@@ -10,13 +12,13 @@ from data_generator.fraud.compr.time import get_time_fraud_txn
 from data_generator.fraud.recorder import FraudTxnsRecorder
 
 
-# Функция генерации одной фрод транзакции с типом "purchase"
+# 1. Функция генерации одной фрод транзакции с типом "purchase"
 
 def gen_purchase_fraud_txn(rule, client_trans_df, configs: ComprClientFraudCfg, \
                            part_data: FraudTxnPartData, fraud_amts: TransAmount, \
                            txn_num=0, lag=False):
     """
-    Генерация одной фрод транзакции для клиента
+    Генерация одной compromised client фрод транзакции для клиента.
     ------------------------------------------------
     rule - str.
     client_trans_df - датафрейм с транзакциями клиента.
@@ -32,7 +34,6 @@ def gen_purchase_fraud_txn(rule, client_trans_df, configs: ComprClientFraudCfg, 
     """
     client_info = part_data.client_info
     rules_cfg = configs.rules_cfg
-    is_fraud = True
     
     # Запись о последней транзакции клиента
     last_txn = client_trans_df.loc[client_trans_df.unix_time == client_trans_df.unix_time.max()]
@@ -44,7 +45,7 @@ def gen_purchase_fraud_txn(rule, client_trans_df, configs: ComprClientFraudCfg, 
     online = configs.rules.loc[configs.rules.rule == rule, "online"].iat[0]
     
     # Семплирование категории. У категорий свой вес в разрезе вероятности быть фродом
-    category = sample_category(configs.categories, online=online, is_fraud=is_fraud)
+    category = sample_category(configs.categories, online=online, is_fraud=True)
     
     category_name = category["category"].iat[0]
     round_clock = category["round_clock"].iat[0]
@@ -62,29 +63,30 @@ def gen_purchase_fraud_txn(rule, client_trans_df, configs: ComprClientFraudCfg, 
     merchant_id, trans_lat, trans_lon, trans_ip, trans_city, device_id, channel, txn_type = partial_data
     
     # Физическое расстояние между координатами последней транзакции и координатами текущей.
-    # geo_distance = calc_distance(client_trans_df=client_trans_df, trans_lat=trans_lat, trans_lon=trans_lon)
     geo_distance = calc_distance(lat_01=last_txn.trans_lat.iat[0], lon_01=last_txn.trans_lon.iat[0], \
                                  lat_02=trans_lat, lon_02=trans_lon)
     
     txn_time, txn_unix = get_time_fraud_txn(trans_df=client_trans_df, configs=configs, online=online, \
                                             round_clock=round_clock, rule=rule, geo_distance=geo_distance, \
                                             lag=lag)
-    
-    # Только для freq_trans статус может отличаться от declined.
-    # При кол-ве до freq_min - approved. Условно, детект по этому правилу начинается
+    # Только для freq_trans статус может отличаться от declined и is_fraud быть False для части транз-ций
+    # При кол-ве до freq_min - approved и False. Условно, детект по этому правилу начинается
     # с freq_min транз-ций
     freq_min = rules_cfg["freq_txn"]["txn_num"]["min"]
     if rule == "trans_freq_increase" and (txn_num > 0 and txn_num < freq_min):
         rule_to_txn = "not applicable"
         status = "approved"
+        is_fraud = False
 
     elif rule == "trans_freq_increase":
         rule_to_txn = "trans_freq_increase"
         status = "declined"
+        is_fraud = True
 
     else:
         rule_to_txn = rule
         status = "declined"
+        is_fraud = True
         
     # Статичные значения для данной функции
     is_suspicious = False
@@ -98,7 +100,7 @@ def gen_purchase_fraud_txn(rule, client_trans_df, configs: ComprClientFraudCfg, 
                              is_fraud=is_fraud, is_suspicious=is_suspicious, status=status, rule=rule_to_txn)
 
 
-# . Обертка для gen_purchase_fraud_txn под правило trans_freq_increase
+# 2. Обертка для gen_purchase_fraud_txn под правило trans_freq_increase
 
 def trans_freq_wrapper(client_txns_temp, txns_total, configs: ComprClientFraudCfg, \
                        part_data: FraudTxnPartData, fraud_amts: TransAmount):
@@ -107,15 +109,15 @@ def trans_freq_wrapper(client_txns_temp, txns_total, configs: ComprClientFraudCf
     -----------------------------
     Возвращает pd.DataFrame с фрод транзакциями
     -----------------------------
-    client_info - namedtuple. Запись из датафрейма с информацией о клиенте, полученная при итерировании через .itertuples()
+    client_info - namedtuple. Запись из датафрейма с информацией о клиенте, полученная при 
+                  итерировании при помощи .itertuples()
     client_txns_temp - pd.DataFrame. Запись о последней транзакции клиента.
-    txns_total - int. Сколько транзакции должно быть сгенерировано.
+    txns_total - int. Сколько транзакций должно быть сгенерировано.
     configs - ComprClientFraudCfg. Конфиги для транзакций.
     part_data: FraudTxnPartData. Генератор части данных транзакций.
     fraud_amts: TransAmount. Генератор сумм транзакций.
     all_time_weights - dict. Датафреймы с весами времени для всех временных паттернов.
     """
-
     for txn_num in range(1, txns_total + 1):
         if txn_num == 1:
             lag = True
@@ -132,14 +134,14 @@ def trans_freq_wrapper(client_txns_temp, txns_total, configs: ComprClientFraudCf
     return client_txns_temp.loc[client_txns_temp.unix_time != client_txns_temp.unix_time.min()]
 
 
-# Функция генерации нескольких фрод транзакций
+# 3. Функция генерации нескольких фрод транзакций
 
 def gen_multi_fraud_txns(configs: ComprClientFraudCfg, part_data: FraudTxnPartData, \
                          fraud_amts: TransAmount, txn_recorder: FraudTxnsRecorder):
     """
-    clients_subset - pd.DataFrame. Клиенты у которых будут фрод транзакции. Сабсет клиентов для кого нагенерили
+    clients_subset: pd.DataFrame. Клиенты у которых будут фрод транзакции. Сабсет клиентов для кого нагенерили
                      легальных транзакций ранее.
-    configs - ComprClientFraudCfg. Конфиги для транзакций.
+    configs: ComprClientFraudCfg. Конфиги для транзакций.
     part_data: FraudTxnPartData. Генератор части данных транзакций.
     fraud_amts: TransAmount. Генератор сумм транзакций.
     txn_recorder: FraudTxnsRecorder. 
@@ -147,9 +149,6 @@ def gen_multi_fraud_txns(configs: ComprClientFraudCfg, part_data: FraudTxnPartDa
     all_fraud_txns = []
     # Конфиги кол-ва транз. для правила trans_freq_increase
     freq_cfg = configs.rules_cfg["freq_txn"]["txn_num"]
-    
-    # Создать директорию под текущую генерацию
-    # txn_recorder.make_dir()
 
     for client in configs.clients.itertuples():
         rule = sample_rule(configs.rules)
@@ -180,9 +179,10 @@ def gen_multi_fraud_txns(configs: ComprClientFraudCfg, part_data: FraudTxnPartDa
             one_txn = gen_purchase_fraud_txn(rule=rule, client_trans_df=client_txns, \
                                              configs=configs, part_data=part_data, \
                                              fraud_amts=fraud_amts)
-               
+            
             all_fraud_txns.append(pd.DataFrame([one_txn]))
-        
+
+    # Запись транзакций в файл  
     txn_recorder.all_txns = pd.concat(all_fraud_txns, ignore_index=True)
     txn_recorder.write_to_file()
 
