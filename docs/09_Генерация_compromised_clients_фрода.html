@@ -7508,7 +7508,33 @@ a.anchor-link {
     white-space: normal;
   }
 </style>
-<!-- End of mermaid configuration --></head>
+<!-- End of mermaid configuration -->
+<style>
+body {
+    max-width: 960px;
+    margin: 2em auto;
+    padding: 0 1em;
+    font-family: sans-serif;
+    line-height: 1.6;
+    background-color: white;
+    color: black;
+}
+table, .output_subarea {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+.output_area {
+    overflow-x: auto;
+    margin-bottom: 1em;
+}
+.output_subarea {
+    background-color: #f8f8f8;
+    padding: 8px;
+    border-radius: 6px;
+}
+</style>
+</head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7d2f9ac1-f258-44d8-9ef9-2a7d132584bb">
@@ -8586,8 +8612,8 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><strong>Основная логика функции</strong><br>
-Use-case #1 - контроль времени, чтобы не попадать под антифрод правила резкой смены гео</br></p>
+<p><strong>Основная логика функции</strong><br/>
+Use-case #1 - контроль времени, чтобы не попадать под антифрод правила резкой смены гео</p>
 <ol>
 <li>Берется время последней легальной транзакции и гео дистанция между этой транзакцией и текущей</li>
 <li>Берется порог скорости перемещения между совершением транзакций - из конфиг файла <code>compr.yaml</code></li>
@@ -10113,8 +10139,8 @@ Name: unix_time, dtype: timedelta64[ns]</pre>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><strong>Разница во времени с предыдущей транзакцией</strong><br>
-Можно заметить что сперва большая разница между первой фрод транзакцией и последней легальной(т.е. которая самая первая), а дальше идут разницы меньше 5 минут, так и задумано.</br></p>
+<p><strong>Разница во времени с предыдущей транзакцией</strong><br/>
+Можно заметить что сперва большая разница между первой фрод транзакцией и последней легальной(т.е. которая самая первая), а дальше идут разницы меньше 5 минут, так и задумано.</p>
 </div>
 </div>
 </div>
