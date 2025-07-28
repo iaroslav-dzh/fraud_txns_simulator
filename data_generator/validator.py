@@ -232,7 +232,69 @@ class ConfigsValidator:
             f"""\ngeneral_diff must not be lower than online_time_diff.
             {general_diff} vs {online_time_diff} Check configs in legit.yaml"""    
 
-        print("Legit min time intervals config is OK\n")
+        print("Legit min time intervals config is OK")
+
+
+    def validate_drops_time(self):
+        """
+        """
+        # Лимиты исх. транз. на период активности для обоих типов дропов
+        dist_out_lim = self.drop_cfg["distributor"]["period_out_lim"]
+        purch_out_lim = self.drop_cfg["purchaser"]["period_out_lim"]
+
+        drops_time = self.drop_cfg["time"]
+        # Лаг по времени от первой транзакции в периоде для отсчета нового периода
+        lag_interval = drops_time["lag_interval"]
+        # Макс. дельта между транз-циями внутри одного периода активности
+        max_pos_delta = drops_time["pos_delta"]["max"]
+        # Мин. возможная двухсторонняя дельта. Эта дельта случайная и прибавляется к лагу
+        # времени для получения случайного времени, а не ровного, как если просто прибавить фикс. лаг
+        min_two_way_del = drops_time["two_way_delta"]["min"]
+
+        # Максимально возможная длительность одного периода активности у дропа
+        dist_max_period = max_pos_delta * dist_out_lim
+        purch_max_period = max_pos_delta * purch_out_lim
+
+        # Мин. допустимое время между периодами активности дропа.
+        buffer = drops_time["buffer"]
+
+        # Мин. возможная разница между временем начала одного периода и периода идущего после него - лаг
+        min_lag_len = lag_interval + min_two_way_del - buffer
+
+
+        # Если длина макс. возможного периода активности больше или равна длине мин. возможного 
+        # лага то будет ошибка. Проверка для каждого типа дропа
+        if dist_max_period >= min_lag_len:
+            raise ValueError(f"""Max possible activity period's length for distributor drops is greater than
+            min possible time lag length between beginning of one period and beginning of next period. 
+            Given that new period starts at: previous period start time + time lag;
+            It may lead to time inconsistency.
+                             
+            Distributor drop max possible period length: {dist_max_period} minutes
+            Min possible time lag: {min_lag_len} minutes
+            
+            Please in drops.yaml config file in time configs do one or combine:
+            1. Increase lag interval
+            2. Reduce max pos time delta
+            3. Increase min two way time delta
+            4. Reduce period_out_lim for distributor drops""")
+        
+        if purch_max_period >= min_lag_len:
+            raise ValueError(f"""Max possible activity period's length for purchaser drops is greater than
+            min possible time lag length between the beginning of one period and the beginning of next period. 
+            Given that new period starts at: previous period start time + time lag;
+            It may lead to time inconsistency.
+                             
+            Purchaser drop max possible period length: {purch_max_period} minutes
+            Min possible time lag: {min_lag_len} minutes
+            
+            Please in drops.yaml config file in time configs do one or combine:
+            1. Increase lag interval
+            2. Reduce max pos time delta
+            3. Increase min two way time delta
+            4. Reduce period_out_lim for purchaser drops""")
+        
+        print("Drops time configs are OK\n")
 
 
     def validate_all(self):
@@ -245,6 +307,7 @@ class ConfigsValidator:
         self.validate_comp_rate()
         self.validate_drops_rate()
         self.assert_legit_time_limits()
+        self.validate_drops_time()
 
 
 

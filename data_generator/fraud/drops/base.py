@@ -202,6 +202,7 @@ class DropAmountHandler:
         
         return amount
 
+
     @property
     def get_atm_share(self):
         """
@@ -211,6 +212,7 @@ class DropAmountHandler:
         low = self.chunks["atm_share"]["min"]
         high = self.chunks["atm_share"]["max"]
         return np.random.uniform(low, high)
+
 
     def handle_atm(self):
         """
