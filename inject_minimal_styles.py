@@ -1,3 +1,5 @@
+# Скрипт добавления стилей в html версии Jupyter ноутбуков
+
 from bs4 import BeautifulSoup
 from pathlib import Path
 import sys
@@ -58,7 +60,8 @@ def main():
     else:
         base_path = Path.cwd()
 
-    html_files = list(base_path.rglob("*.html"))
+    exclude = ["index.html"]
+    html_files = [file for file in list(base_path.rglob("*.html")) if file not in exclude]
 
     if not html_files:
         print("ℹ️  No HTML files found.")
