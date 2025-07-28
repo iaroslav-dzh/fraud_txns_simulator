@@ -181,13 +181,12 @@ class DistBehaviorHandler:
             trf_min = self.attempts_cfg["trf_min"]
             trf_max = self.attempts_cfg["trf_max"]
             self.attempts = np.random.randint(trf_min, trf_max + 1)
-            # print("attempts", self.attempts)
             return
+        
         # Для снятий.
         atm_min = self.attempts_cfg["atm_min"]
         atm_max = self.attempts_cfg["atm_max"]
         self.attempts = np.random.randint(atm_min, atm_max + 1)
-        # print("attempts", self.attempts)
             
 
     def deduct_attempts(self):
