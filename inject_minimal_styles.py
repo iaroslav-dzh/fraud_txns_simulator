@@ -61,7 +61,7 @@ def main():
         base_path = Path.cwd()
 
     exclude = ["index.html"]
-    html_files = [file for file in list(base_path.rglob("*.html")) if file not in exclude]
+    html_files = [file for file in list(base_path.rglob("*.html")) if file.name not in exclude]
 
     if not html_files:
         print("ℹ️  No HTML files found.")
