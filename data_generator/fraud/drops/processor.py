@@ -72,7 +72,6 @@ class DropBatchHandler:
         amt_hand = self.amt_hand
         create_txn = self.create_txn
         
-    
         while amt_hand.balance > 0:
             declined = self.should_decline() # будет ли отклонена транзакция
             behav_hand.guide_scenario()

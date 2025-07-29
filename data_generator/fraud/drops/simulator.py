@@ -1,10 +1,14 @@
-# Полный жизненный цикл дропа
+# Классы создания полного жизненного цикла дропа и полной симуляции активности множества дропов
+
 import pandas as pd
 import os
 from data_generator.fraud.drops.build.builder import DropBaseClasses
 from data_generator.fraud.drops.txns import CreateDropTxn
 from data_generator.fraud.drops.processor import DropBatchHandler
 from pathlib import Path
+
+
+# 1. Полный жизненный цикл одного дропа
 
 class DropLifecycleManager:
     """
