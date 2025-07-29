@@ -6,6 +6,7 @@ from data_generator.configs import DropDistributorCfg, DropPurchaserCfg
 from data_generator.fraud.drops.build.builder import DropBaseClasses
 from data_generator.utils import build_transaction
 
+
 class CreateDropTxn:
     """
     Создание транзакций дропа под разное поведение.
@@ -50,6 +51,7 @@ class CreateDropTxn:
             self.categories = configs.categories
         self.last_txn = None
 
+
     def category_and_channel(self):
         """
         Генерация категории и канала транзакции
@@ -64,14 +66,15 @@ class CreateDropTxn:
             return channel, category_name
         
         assert drop_type == "purchaser", \
-            f"""'ecom' and categories sampling work only for self.drop_type as 'purchaser'.
+            f"""'ecom' channel and categories sampling work only for self.drop_type as 'purchaser'.
             But {self.drop_type} was passed"""
         
         # Покупка в интернете
         channel = "ecom"
         category_name = self.categories.category \
-                                .sample(1, weights=self.categories.weight).iat[0]
+                            .sample(1, replace=True, weights=self.categories.weight).iat[0]
         return channel, category_name
+
 
     def status_and_rule(self, declined):
         """
@@ -113,7 +116,7 @@ class CreateDropTxn:
         ---------------------
         dist: bool. Тип дропа. True - distributor. False - purchaser.
         declined: bool. Будет ли текущая транзакция отклонена.
-        receive: входящий перевод или нет.
+        receive: bool. Входящий перевод или нет.
         """
         client_id = self.txn_part_data.client_info.client_id # берем из namedtuple
         
@@ -183,6 +186,8 @@ class CreateDropTxn:
         self.out_txns += 1
 
         # Брать ли данные последней транзакции. Для случаев когда это дроп распределитель
+        # Если это распределитель и предыдущая транз. была channel "crypto_exchange" то будут взяты
+        # кэшированные данные предыдущей транзакции, чтобы повторить мерчанта и device_id
         dist = self.drop_type == "distributor"
         get_cached = self.txn_part_data.check_previous(dist=dist, last_full=self.last_txn)
 

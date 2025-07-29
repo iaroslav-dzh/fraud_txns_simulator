@@ -1,11 +1,12 @@
 # Конструктор основных классов для дропов
+
 from data_generator.fraud.drops.base import DropAccountHandler, DropAmountHandler
 from data_generator.fraud.drops.behavior import DistBehaviorHandler, PurchBehaviorHandler
 from  data_generator.fraud.drops.txndata import DropTxnPartData
 from data_generator.fraud.drops.time import DropTimeHandler
 
-# 1. Агрегатор базовых классов для дропов
 
+# 1. Агрегатор базовых классов для дропов
 
 class DropBaseClasses:
     """
@@ -42,12 +43,14 @@ class DropBaseClasses:
         self.behav_hand = None
         self.part_data = None
 
+
     def build_acc_hand(self):
         """
         Создать объект DropAccountHandler.
         Объект пишется в атрибут acc_hand.
         """
         self.acc_hand = DropAccountHandler(self.configs)
+
 
     def build_amt_hand(self):
         """
@@ -56,12 +59,14 @@ class DropBaseClasses:
         """
         self.amt_hand = DropAmountHandler(self.configs)
 
+
     def build_time_hand(self):
         """
         Создать объект DropTimeHandler
         Объект пишется в атрибут time_hand.
         """
         self.time_hand = DropTimeHandler(self.configs)
+
 
     def build_behav_hand(self):
         """
@@ -79,6 +84,7 @@ class DropBaseClasses:
             
         elif drop_type == "purchaser":
             self.behav_hand = PurchBehaviorHandler(configs=configs, amt_hand=amt_hand)
+            
             
     def build_part_data(self):
         """

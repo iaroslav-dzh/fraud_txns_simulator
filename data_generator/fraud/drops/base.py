@@ -9,7 +9,7 @@ from data_generator.utils import get_values_from_truncnorm
 from data_generator.configs import DropDistributorCfg, DropPurchaserCfg
 
     
-# . Управление счетами для переводов.
+# 1. Управление счетами для переводов.
 
 class DropAccountHandler:
     """
@@ -106,7 +106,7 @@ class DropAccountHandler:
         self.used_accounts = pd.Series(name="account_id")
 
 
-# . Управление балансом и суммами транзакций дропа
+# 2. Управление балансом и суммами транзакций дропа
 
 class DropAmountHandler: 
     """

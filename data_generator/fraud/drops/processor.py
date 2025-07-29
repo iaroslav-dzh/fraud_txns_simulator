@@ -37,7 +37,6 @@ class DropBatchHandler:
         Также записывает это значение в self.declined
         """
         self.declined = self.create_txn.limit_reached()
-        # print("is_declined", self.declined)
         return self.declined
 
 
