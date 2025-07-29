@@ -1,13 +1,12 @@
-# Инструменты создания дропов распределителей (distributors)
+# Управление поведением дропов
 
-
-import pandas as pd
 import numpy as np
 
 from data_generator.configs import DropDistributorCfg, DropPurchaserCfg
 from data_generator.fraud.drops.base import DropAmountHandler
 
-# .1
+
+# 1. Управление поведением дропа распределителя
 
 class DistBehaviorHandler:
     """
@@ -332,7 +331,7 @@ class PurchBehaviorHandler:
         att_min = self.attempts_cfg["min"]
         att_max = self.attempts_cfg["max"]
         self.attempts = np.random.randint(att_min, att_max + 1)
-        # print("attempts", self.attempts)
+            
             
     def deduct_attempts(self):
         """
