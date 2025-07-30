@@ -40,6 +40,8 @@ class AllTxnsRecorder:
 
     def read_legit(self):
         """
+        Прочитать файл с легальными транзакциями.
+        Файл в директории текущего запуска генератора.
         """
         run_dir = self.run_dir
         data_storage = self.legit_cfg["data_storage"]
@@ -51,6 +53,8 @@ class AllTxnsRecorder:
 
     def read_compromised(self):
         """
+        Прочитать файл с compromised fraud транзакциями.
+        Файл в директории текущего запуска генератора.
         """
         run_dir = self.run_dir
         data_storage = self.compr_cfg["data_storage"]
@@ -62,6 +66,8 @@ class AllTxnsRecorder:
 
     def read_dist_drops(self):
         """
+        Прочитать файл с транзакциями дропов распределителей.
+        Файл в директории текущего запуска генератора.
         """
         run_dir = self.run_dir
         data_storage = self.drops_cfg["distributor"]["data_storage"]
@@ -73,6 +79,8 @@ class AllTxnsRecorder:
 
     def read_purch_drops(self):
         """
+        Прочитать файл с транзакциями дропов покупателей.
+        Файл в директории текущего запуска генератора.
         """
         run_dir = self.run_dir
         data_storage = self.drops_cfg["purchaser"]["data_storage"]
@@ -81,11 +89,13 @@ class AllTxnsRecorder:
         path = os.path.join(run_dir, folder, file)
         return pd.read_parquet(path, engine="pyarrow")
 
+
     @spinner_decorator
     def build_and_write(self):
         """
-        Собрать из всех датафреймов с транзакциями один датафрейм и записать его
+        Собрать из всех файлов с транзакциями один датафрейм и записать его
         в две директории.
+        Файлы берутся из директории текущего запуска генератора.
         """
         run_dir = self.run_dir
         file = self.base_cfg["data_storage"]["files"]["all_txns"]

@@ -5,7 +5,7 @@ import sys
 import time
 import itertools
 from pathlib import Path
-
+import traceback
 
 
 def make_dir_for_run(base_cfg):
@@ -24,7 +24,6 @@ def make_dir_for_run(base_cfg):
 
     return run_dir_path
 
-
 def spinner_decorator(func):
     def wrapper(self, *args, **kwargs):
         done = False
@@ -42,13 +41,43 @@ def spinner_decorator(func):
         thread.start()
         try:
             result = func(self, *args, **kwargs)
-        finally:
+        except Exception:
             done = True
             thread.join()
-            sys.stdout.write(f"\r{text}... completed.{' ' * 10}\n")
+            sys.stdout.write(f"\r{text}... failed.{' ' * 10}\n")
             sys.stdout.flush()
+            traceback.print_exc()
+            return
+        done = True
+        thread.join()
+        sys.stdout.write(f"\r{text}... completed.{' ' * 10}\n")
+        sys.stdout.flush()
         return result
     return wrapper
+# def spinner_decorator(func):
+#     def wrapper(self, *args, **kwargs):
+#         done = False
+#         text = self.text
+
+#         def spinner():
+#             wheel =  itertools.cycle(['|', '\\', '-', '|', '-', '/'])
+#             while not done:
+#                 ch = next(wheel)
+#                 sys.stdout.write(f"\r{text} in progress... {ch}")
+#                 sys.stdout.flush()
+#                 time.sleep(0.1)
+
+#         thread = threading.Thread(target=spinner)
+#         thread.start()
+#         try:
+#             result = func(self, *args, **kwargs)
+#         finally:
+#             done = True
+#             thread.join()
+#             sys.stdout.write(f"\r{text}... completed.{' ' * 10}\n")
+#             sys.stdout.flush()
+#         return result
+#     return wrapper
 
 
 def notifier(text):

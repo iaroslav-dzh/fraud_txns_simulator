@@ -62,6 +62,10 @@ class ConfigsValidator:
         Смоделировать распределение общего кол-ва легальных
         транз-ций на основании обрезанного нормального распределения
         кол-ва транзакций на одного клиента.
+        Необходимо для оценки возможного максимального числа легальных
+        транзакций. Т.к. число транзакций это случайная величина взятая из
+        нормального распределения. Мы никогда не знаем точное число легальных
+        транзакций которое может быть сгенерировано.
         """
         leg_txn_num = self.legit_cfg["txn_num"]
         avg_num_per_client = leg_txn_num["avg_txn_num"]
@@ -147,7 +151,8 @@ class ConfigsValidator:
         clients_count = self.estimate_compr_clients()
 
         if clients_count > est_clients:
-            raise ValueError(f"""\nEstimated maximum possible number of clients that might be needed to 
+            print("\n")
+            raise ValueError(f"""Estimated maximum possible number of clients that might be needed to 
             generate 'compromised client' fraud transactions: {clients_count}.
             Estimated number of clients required for generating legitimate transactions: {est_clients}.
 
@@ -164,6 +169,7 @@ class ConfigsValidator:
 
     def validate_drops_rate(self):
         """
+        Валидация общего процента дроп фрода
         """
         drop_cfg = self.drop_cfg
         fraud_rate = self.fraud_cfg["fraud_rates"]["total"]
@@ -190,7 +196,7 @@ class ConfigsValidator:
         remainder = max(0, total_clients - (legit_clients + compr_clients))
 
         if remainder < total_drops:
-            raise ValueError(f"""\nTotal clients number needed for drop fraud generation
+            raise ValueError(f"""Total clients number needed for drop fraud generation
             exceeds the available clients number.
             Clients number needed for drops: {total_drops}
             Available clients: {remainder}
@@ -201,7 +207,7 @@ class ConfigsValidator:
             2. Reduce total fraud rate.""")
         
         if total_drops <= 0:
-            raise ValueError(f"""\nTotal drops number cannot be 0 or lower.
+            raise ValueError(f"""Total drops number cannot be 0 or lower.
             Total estimated drops: {total_drops}
             Please do one of below or combine:
             1. Increase drop fraud rates
@@ -221,15 +227,15 @@ class ConfigsValidator:
         general_diff = min_inter["general_diff"]
 
         assert offline_time_diff > general_diff, \
-            f"""\noffline_time_diff must not be lower than general_diff. 
+            f"""offline_time_diff must not be lower than general_diff. 
             {offline_time_diff} vs {general_diff} Check configs in legit.yaml"""
         
         assert offline_time_diff > online_time_diff, \
-            f"""\noffline_time_diff must not be lower than online_time_diff.
+            f"""offline_time_diff must not be lower than online_time_diff.
             {offline_time_diff} vs {online_time_diff} Check configs in legit.yaml"""
         
         assert general_diff > online_time_diff, \
-            f"""\ngeneral_diff must not be lower than online_time_diff.
+            f"""general_diff must not be lower than online_time_diff.
             {general_diff} vs {online_time_diff} Check configs in legit.yaml"""    
 
         print("Legit min time intervals config is OK")
