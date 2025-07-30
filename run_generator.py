@@ -66,6 +66,7 @@ recorder = AllTxnsRecorder(base_cfg=base_cfg, legit_cfg=legit_cfg, compr_cfg=com
 
 recorder.build_and_write()
 
+# Вывод сообщения о том куда сохранены сгенерированные транзакции
 latest_path = Path(base_cfg["data_paths"]["generated"]["latest"])
 print(f"""\n
 Generated files are located in {run_dir} - individual folder for this run.

@@ -72,7 +72,7 @@ class DropLifecycleManager:
         create_txn = self.create_txn
 
         while True:
-            declined = batch_hand.declined # статус транзакции. будет ли она отклонена
+            declined = batch_hand.should_decline() # статус транзакции. будет ли она отклонена
             # входящая транзакция. Новый батч денег.
             receive_txn = create_txn.trf_or_atm(declined=declined, \
                                                 to_drop=False, receive=True) 
@@ -115,6 +115,7 @@ class DropSimulator:
     all_txns: list. Список для записи всех созданных транзакций.
     txns_df: pd.DataFrame. Пустой датафрейм с колонками и проставленными типами
     """
+
     def __init__(self, base_cfg, configs, base, create_txn, txn_recorder):
         """
         base_cfg: dict. Конфиги из base.yaml
@@ -166,8 +167,8 @@ class DropSimulator:
         # В папку data/generated/latest и в папку текущей генерации 
         accounts = acc_hand.accounts
         gen_files = self.base_cfg["data_paths"]["generated"]
-        acc_path_01 = Path(self.run_dir) / "accounts.csv"
-        acc_path_02 = gen_files["accounts"]
+        acc_path_01 = Path(self.run_dir) / "accounts.csv" # путь в директории текущей генерации
+        acc_path_02 = gen_files["accounts"]  # путь в директории data/generated/latest
         accounts.to_csv(acc_path_01, index=False)
         accounts.to_csv(acc_path_02, index=False)
         

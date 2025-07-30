@@ -49,7 +49,6 @@ class DropsRunner:
         self.drop_sim = None
         
 
-
     def build_sim(self):
         """
         Создать объект DropSimulator.
@@ -67,9 +66,9 @@ class DropsRunner:
         self.txn_recorder = FraudTxnsRecorder(configs=self.configs)
         create_txn = CreateDropTxn(configs=self.configs, base=self.base)
 
-
         self.drop_sim = DropSimulator(base_cfg=base_cfg, configs=self.configs, base=self.base, \
                                       create_txn=create_txn, txn_recorder=self.txn_recorder)
+        
         
     @spinner_decorator
     def run(self):
