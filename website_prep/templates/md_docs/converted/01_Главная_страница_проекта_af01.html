@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title></title>
+
+<style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      color: #111827; /* darker text for better contrast */
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+    }
+    pre {
+      background-color: #f3f4f6; /* gray-100 */
+      border-radius: 6px;
+      padding: 16px;
+      overflow: auto;
+      border: 1px solid #e5e7eb; /* gray-200 */
+    }
+    code {
+      font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      background-color: #f3f4f6; /* gray-100 */
+      color: #111827; /* gray-900 */
+      border-radius: 4px;
+      padding: 0.2em 0.4em;
+      font-weight: 500;
+    }
+    table {
+      border-collapse: collapse;
+      width: auto;
+      margin-top: 40px 0;
+      margin-bottom: 40px;
+    }
+    table, th, td {
+      border: 1px solid #d1d5db; /* gray-300 */
+    }
+    th {
+      padding: 8px 8px;
+      text-align: center;
+      background-color: #f9fafb; /* gray-50 */
+      font-weight: 600;
+      color: #111827; /* gray-900 */
+    }
+    td {
+      padding: 2px 2px;
+      text-align: center;
+      color: #1f2937; /* gray-800 */
+    }
+    blockquote {
+      border-left: 4px solid #9ca3af; /* gray-400 */
+      padding: 12px 16px;
+      margin-left: 0;
+      margin-right: 0;
+      background-color: #f9fafb; /* gray-50 */
+      color: #374151; /* gray-700 */
+      font-style: italic;
+      border-radius: 0 4px 4px 0;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 4px;
+      margin: 16px 0;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      color: #111827; /* gray-900 */
+      font-weight: 700;
+      margin-top: 24px;
+      margin-bottom: 16px;
+      line-height: 1.25;
+    }
+    h2, h3, h4, h5, h6 {
+      margin-top: 40px;
+    }
+    h1 {
+      font-size: 2em;
+      border-bottom: 1px solid #e5e7eb; /* gray-200 */
+      padding-bottom: 0.3em;
+    }
+    h2 {
+      font-size: 1.5em;
+      border-bottom: 1px solid #e5e7eb; /* gray-200 */
+      padding-bottom: 0.3em;
+    }
+    h3 {
+      font-size: 1.25em;
+    }
+    p {
+      margin-top: 30px;
+      margin-bottom: 16px;
+    }
+    a {
+      color: #2563eb; /* blue-600 */
+      text-decoration: none;
+    }
+    details {
+      margin-top: 40px;
+      margin-bottom: 40px;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    ul, ol {
+      padding-left: 2em;
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+    li {
+      margin-bottom: 4px;
+    }
+    li > ul, li > ol {
+      margin-top: 4px;
+      margin-bottom: 0;
+    }
+  </style>
+  <style>
+.pagination {
+  display: inline-block;
+  padding-top: 40px;
+}
+
+.pagination a {
+  color: black;
+  background-color: #66cfc8;
+  float: left;
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: background-color .3s;
+  border: 1px solid #ddd;
+}
+
+.pagination a.active {
+  background-color: #4CAF50;
+  color: white;
+  border: 1px solid #4CAF50;
+}
+
+.pagination a:hover:not(.active) {background-color: #ddd;}
+</style>                  
+        </head>
+        <body>
+<h1 id="симулятор-фрод-транзакций.-главная-страница">Симулятор фрод
+транзакций. Главная страница</h1>
+<h2 id="о-чем-этот-проект">О чем этот проект</h2>
+<p>Изначально я хотел найти датасет с банковскими транзакциями в котором
+есть фрод и провести анализ. Я начал искать и нашел довольно популярный
+датасет с реальными транзакциями и другими данными - Berka dataset
+(Czech bank dataset). Но сперва я не учел, что это данные 90-х годов и
+фрод с транзакциями там вряд ли будет. Еще немного поискав, в целом я
+понял, что реальных банковских данных, тем более с фродом, наверное не
+найти. Поэтому я решил сгенерировать транзакции сам при помощи python. И
+от Berka dataset я взял только клиентов и таблицу с районами их
+проживания, которые потом было решено переделать под Россию - поменять
+чешские районы на российские города - т.к. хотелось чтобы у транзакций
+были координаты реальных населенных пунктов в границах этих населенных
+пунктов, а для городов РФ найти их границы проще чем для чешских
+районов.</p>
+<p>В итоге работать над этим я продолжил скорее не для того, чтобы потом
+анализировать сгенерированные данные, а именно из интереса смоделировать
+транзакции и создать интерфейс в виде веб-приложения для их
+просмотра.</p>
+<p><strong>На данный момент</strong> готов генератор транзакций.
+Веб-приложение для просмотра транзакций находится в разработке. Поэтому
+на данный момент я хочу продемонстрировать генератор транзакций.</p>
+<h2 id="части-проекта">Части проекта</h2>
+<h3 id="генератор-транзакций">1. Генератор транзакций</h3>
+<p><strong>Цель:</strong> генерация легальных и фрод транзакций.<br />
+<strong>Используемые технологии</strong>: python и его библиотеки:
+pandas, numpy, geopandas, seaborn, matplotlib и другие.<br />
+<strong>Статус:</strong> готов.<br />
+<strong>Установка и запуск:</strong> <a
+href="https://github.com/iaroslav-dzh/fraud_txns_simulator/blob/main/README.md">ссылка
+на readme</a></p>
+<p><strong>Включает в себя</strong></p>
+<ol type="1">
+<li>Создание данных на основании которых будут генерироваться
+транзакции, например: клиенты, оффлайн мерчанты с координатами в
+границах городов, IP-адреса для клиентов и мошенников, устройства для
+клиентов и мошенников, категории товаров и их характеристики и др.</li>
+<li>Генерация легальных транзакций</li>
+<li>Генерация compromised client fraud транзакций. Т.е. когда клиент
+скомпрометирован и кто-то совершает транзакции либо с его аккаунта либо
+с его карты. Подразумевается генерация фрод попадающего под несколько
+антифрод правил, например: быстрая смена геолокации между транзакциями,
+транзакция на большую сумму в другом городе и с другого устройства,
+резкое учащение транзакций и др. Сейчас правил пять.</li>
+<li>Генерация дроп фрода. Включает два типа дропов:
+<ul>
+<li>дропы распределители - <em>distributors</em>. Получают деньги и либо
+переводят их дальше либо снимают, либо иногда покупают криптовалюту.
+Через них идет поток денег.</li>
+<li>дропы покупатели - <em>purchasers</em>. Получают деньги и покупают
+на них товары. Подразумевается, что они так отмывают деньги.</li>
+</ul></li>
+<li>Объединение всех разделов генерации в единый генератор
+транзакций</li>
+<li>Загрузка транзакций и других данных в базу данных SQL для
+использования веб-приложением</li>
+</ol>
+<p><strong>Подробнее о генераторе транзакций.</strong> По ссылке более
+подробное описание генерации транзакций, <strong>включая</strong> список
+ссылок на все Jupyter ноутбуки в формате веб-страниц и развернуты
+описания каждого раздела генерации.</p>
+<h3 id="веб-приложение">2. Веб-приложение</h3>
+<p><strong>Цель:</strong> симуляция интерфейса антифрод системы где
+можно смотреть сгенерированные транзакции и данные о них.<br />
+<strong>Используемые технологии</strong>: python, python фреймворки
+Streamlit или Dash для интерфейса, PostgreSQL.<br />
+<strong>Статус:</strong> в разработке.</p>
+<p><strong>Т.к. находится в разработке то опишу примерные
+идеи.</strong></p>
+<ol type="1">
+<li>Веб-приложение берет данные из SQL базы</li>
+<li>Просмотр транзакций в списке транзакций.</li>
+<li>Карточка транзакции с её данными</li>
+<li>Карточка клиента</li>
+<li>Визуализация геопозиции транзакции на карте. В идеале если резкий
+скачок между координатами транзакций то визуализация предыдущей и
+текущей транзакций на одной карте.</li>
+<li>Визуализация переводов виде графов, если фрод переводы были внутри
+банка</li>
+</ol>
+<div class="pagination">
+  <a href="02_Страница_генератора_транзакций.html">Генератор транзакций</a>
+</div>  
+        </body>
+        </html>

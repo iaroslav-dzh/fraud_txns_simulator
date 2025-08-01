@@ -20,6 +20,10 @@ table, .output_subarea {
     overflow-x: auto;
     white-space: nowrap;
 }
+.cm-editor, .cm-s-jupyter {
+    white-space: nowrap;
+    overflow-x: auto;
+}
 .output_area {
     overflow-x: auto;
     margin-bottom: 1em;

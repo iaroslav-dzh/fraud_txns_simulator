@@ -1,21 +1,5 @@
-# Конвертация ноутбуков в html
+/* вставлять перед </head> */
 
-```
-jupyter nbconvert --output-dir='./docs' --to html notebooks_clean/*.ipynb
-```
-
-# Стили для отображения на github pages
-
-## Чтобы был скролл для таблиц и пэддинг для ноутбука
-
-**В чате искать**
-```
-Отлично — сделаем так, чтобы твой Jupyter HTML выглядел прилично на GitHub Pages, с горизонтальным скроллом для широких таблиц и вывода.
-```
-
-**Вставлять перед `</head>`**
-
-```html
 <style>
 /* Горизонтальный скролл для широких таблиц */
 table, .output_subarea {
@@ -72,12 +56,35 @@ div.text_cell_render {
     font-size: 16px;
 }
 </style>
-```
 
 
-### Полный скрипт вставки этих стилей во все html файлы с `</head>` в указанной папке либо текущей директории
-
-В [чате](https://chatgpt.com/c/6880984b-5d28-832b-90ba-bc1fdb65673f) искать. В репе это скрипт `inject_minimal_styles.py`
-```
-давай скрипт автоматической вставки минимальных стилей для всех html в указанной папке
-```
+<!-- ОТДЕЛЬНЫЙ СТИЛЬ, СО СКРОЛЛОМ ИНПУТА-->>
+<style>
+body {
+    max-width: 960px;
+    margin: 2em auto;
+    padding: 0 1em;
+    font-family: sans-serif;
+    line-height: 1.6;
+    background-color: white;
+    color: black;
+}
+table, .output_subarea {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+.cm-editor, .cm-s-jupyter {
+    white-space: nowrap;
+    overflow-x: auto;
+}
+.output_area {
+    overflow-x: auto;
+    margin-bottom: 1em;
+}
+.output_subarea {
+    background-color: #f8f8f8;
+    padding: 8px;
+    border-radius: 6px;
+}
+</style>

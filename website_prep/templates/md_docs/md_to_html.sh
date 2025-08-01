@@ -1,0 +1,1 @@
+Get-ChildItem -Filter *.md | ForEach-Object { pandoc --standalone --template present_template.html $_.FullName -o "converted/$($_.BaseName).html"}

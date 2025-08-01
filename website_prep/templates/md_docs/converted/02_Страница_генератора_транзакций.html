@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title></title>
+
+<style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      color: #111827; /* darker text for better contrast */
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+    }
+    pre {
+      background-color: #f3f4f6; /* gray-100 */
+      border-radius: 6px;
+      padding: 16px;
+      overflow: auto;
+      border: 1px solid #e5e7eb; /* gray-200 */
+    }
+    code {
+      font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      background-color: #f3f4f6; /* gray-100 */
+      color: #111827; /* gray-900 */
+      border-radius: 4px;
+      padding: 0.2em 0.4em;
+      font-weight: 500;
+    }
+    table {
+      border-collapse: collapse;
+      width: auto;
+      margin-top: 40px 0;
+      margin-bottom: 40px;
+    }
+    table, th, td {
+      border: 1px solid #d1d5db; /* gray-300 */
+    }
+    th {
+      padding: 8px 8px;
+      text-align: center;
+      background-color: #f9fafb; /* gray-50 */
+      font-weight: 600;
+      color: #111827; /* gray-900 */
+    }
+    td {
+      padding: 2px 2px;
+      text-align: center;
+      color: #1f2937; /* gray-800 */
+    }
+    blockquote {
+      border-left: 4px solid #9ca3af; /* gray-400 */
+      padding: 12px 16px;
+      margin-left: 0;
+      margin-right: 0;
+      background-color: #f9fafb; /* gray-50 */
+      color: #374151; /* gray-700 */
+      font-style: italic;
+      border-radius: 0 4px 4px 0;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 4px;
+      margin: 16px 0;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      color: #111827; /* gray-900 */
+      font-weight: 700;
+      margin-top: 24px;
+      margin-bottom: 16px;
+      line-height: 1.25;
+    }
+    h2, h3, h4, h5, h6 {
+      margin-top: 40px;
+    }
+    h1 {
+      font-size: 2em;
+      border-bottom: 1px solid #e5e7eb; /* gray-200 */
+      padding-bottom: 0.3em;
+    }
+    h2 {
+      font-size: 1.5em;
+      border-bottom: 1px solid #e5e7eb; /* gray-200 */
+      padding-bottom: 0.3em;
+    }
+    h3 {
+      font-size: 1.25em;
+    }
+    p {
+      margin-top: 30px;
+      margin-bottom: 16px;
+    }
+    a {
+      color: #2563eb; /* blue-600 */
+      text-decoration: none;
+    }
+    details {
+      margin-top: 40px;
+      margin-bottom: 40px;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    ul, ol {
+      padding-left: 2em;
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+    li {
+      margin-bottom: 4px;
+    }
+    li > ul, li > ol {
+      margin-top: 4px;
+      margin-bottom: 0;
+    }
+  </style>
+  <style>
+.pagination {
+  display: inline-block;
+  padding-top: 40px;
+}
+
+.pagination a {
+  color: black;
+  background-color: #66cfc8;
+  float: left;
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: background-color .3s;
+  border: 1px solid #ddd;
+}
+
+.pagination a.active {
+  background-color: #4CAF50;
+  color: white;
+  border: 1px solid #4CAF50;
+}
+
+.pagination a:hover:not(.active) {background-color: #ddd;}
+</style>                  
+        </head>
+        <body>
+<div class="pagination">
+  <a href="01_Главная_страница_проекта_af01.html">Главная</a>
+  <a href="03_Генерация_легальных_транзакций.html">Легальные транзакции - Далее ❯</a>
+</div> 
+<h1 id="генератор-транзакций.-главная-страница">Генератор транзакций.
+Главная страница</h1>
+<h2 id="установка-зависимостей-и-запуск">Установка зависимостей и
+запуск</h2>
+<ul>
+<li><strong><a
+href="https://github.com/iaroslav-dzh/fraud_txns_simulator/blob/main/README.md">Readme</a></strong>
+файл</li>
+</ul>
+<h2 id="список-jupyter-ноутбуков">Список Jupyter ноутбуков</h2>
+<p>Ниже ноутбуки в которых по порядку продемонстрирован процесс
+написания генератора транзакций с демонстрацией основных классов и
+функций генератора. Начинается с создания данных необходимых для
+генерации транзакций и продолжается описанием и демонстрацией частей
+генератора. Заканчивается все описанием и демонстрацией конечного
+скрипта агрегирующего все разделы генерации: легальные транзакции и фрод
+всех типов.</p>
+<p>Также в конце добавил ноутбук о загрузке транзакций и других данных в
+SQL базу данных.</p>
+<ul>
+<li><a href="notebooks/01_Очистка_данных.html" target="_blank">01. Очистка данных</a></li>
+<li><a href="notebooks/02_Генерация_гео_данных.html" target="_blank">02. Генерация гео данных</a></li>
+<li><a href="notebooks/03_Создание_оффлайн_мерчантов_и_клиентов.html" target="_blank">03. Создание оффлайн мерчантов и клиентов</a></li>
+<li><a href="notebooks/04_Создание_ip_адресов.html" target="_blank">04. Создание IP-адресов</a></li>
+<li><a href="notebooks/05_Устройства_и_онлайн_мерчанты.html" target="_blank">05. Устройства и онлайн мерчанты</a></li>
+<li><a href="notebooks/06_Базовая_генерация_времени.html" target="_blank">06. Базовая генерация времени</a></li>
+<li><a href="notebooks/07_Создание_дополнительных_данных.html" target="_blank">07. Создание дополнительных данных</a></li>
+<li><a href="notebooks/08_Генерация_легальных_транзакций.html" target="_blank">08. Генерация легальных транзакций</a></li>
+<li><a href="notebooks/09_Генерация_compromised_clients_фрода.html" target="_blank">09. Генерация compromised clients фрода</a></li>
+<li><a href="notebooks/10_Дроп_фрод_основные_инструменты.ipynb.html" target="_blank">10. Дроп фрод основные инструменты</a></li>
+<li><a href="notebooks/11_Дропы_генерация_транзакций.html" target="_blank">11. Дропы генерация транзакций</a></li>
+<li><a href="notebooks/12_Дропы_симуляция_активности.html" target="_blank">12. Дропы симуляция активности</a></li>
+<li><a href="notebooks/13_Объединение_всех_видов_генерации.html" target="_blank">13. Объединение всех видов генерации</a></li>
+<li><a href="notebooks/14_Загрузка_данных_в_SQL_БД.html" target="_blank">14. Загрузка данных в SQL БД</a></li>
+
+</ul>
+<h2 id="общее-описание-генератора-транзакций">Общее описание генератора
+транзакций</h2>
+<p><strong>Пояснение:</strong> <em>compromised client fraud</em> это
+фрод когда либо аккаунт либо карта клиента скомпрометированы. Т.е.
+кто-то другой совершает операции через них. В генерации нет конкретного
+обозначения аккаунта или карты, есть просто <em>online</em> статус
+транзакции, т.е. транзакция либо онлайн - как-будто мобильное приложение
+или веб-приложение на ПК; либо оффлайн - как-будто карта. Далее иногда
+буду называть этот фрод просто <em>compromised fraud</em>.</p>
+<p><strong>Генератор состоит из четырех разделов генерации:</strong></p>
+<ol type="1">
+<li>легальные транзакции</li>
+<li>compromised client fraud транзакции</li>
+<li>транзакции дропов распределителей</li>
+<li>транзакции дропов покупателей</li>
+</ol>
+<p><strong>Генератор написан с применением функций и классов как
+основы</strong>. Разделы генерации легальных транзакций и compromised
+фрода больше основаны на функциях и частично на классах. При написании
+генерации дропов я решил перейти полностью на классы как основу кода, а
+функции как вспомогательный инструмент.</p>
+<p><strong>Параметры генерации</strong> задаются в <code>yaml</code>
+файлах в папке <code>config/</code></p>
+<p><strong>Принцип генерации - каскадный</strong>. Все разделы
+генерируются по очереди: легальные, compromised fraud, дропы
+распределители, дропы покупатели.</p>
+<p><strong>Между разделами есть зависимости</strong>. Генерация
+compromised fraud зависит от легальных транзакций т.к. клиенты у кого
+будет compromised fraud это случайно выбранная часть клиентов для кого
+мы сгенерировали легальные транзакции. Генерация фрода под некоторые
+типы правил требует наличия легальных транзакций у клиента - резкая
+смена геопозиции между транзакциями.</p>
+<p>Генерация транзакций дропов зависит от предыдущих этапов только в
+плане расчета того, сколько примерно транзакций нужно сгенерировать.
+Т.к. берется число фактически сгенерированных легальных транзакций и от
+него считается сколько транзакций должно быть у дропов, чтобы вписаться
+в выставленный <em>drop rate</em>. Из расчитанного количества транзакций
+берется число клиентов необходимых для генерации этого числа
+транзакций.</p>
+<p><strong>О числе транзакций и клиентов говорится “примерно”
+т.к.</strong> в генерации легальных транзакций количество транзакций для
+каждого клиента это случайное число из нормального обрезанного
+распределения. Желаемое количество транзакций выставляется в конфиг
+файле, но из-за рандомизации все же колеблется. В compromised фроде тоже
+есть элемент случайности числа транзакций для одного из правил.</p>
+<p><strong>В целом все выглядит так</strong>:</p>
+<ol type="1">
+<li>генерируется случайное число легальных транзакций</li>
+<li>перед генерацией compromised фрода в зависимости от общего fraud
+rate и входящего в него compromised rate, на основании фактического
+числа легальных транзакций рассчитывается примерное количество
+транзакций compromised фрода соответствующее fraud rate и compromised
+rate. И от этого числа считается количество клиентов для семплирования
+под compromised фрод</li>
+<li>генерируется случайное compromised фрод число транзакций в районе
+рассчитанного количества</li>
+<li>перед генерацией транзакций дропов распределителей снова обращаемся
+к фактическому числу легальных транзакций и fraud rate с входящей в нее
+долей фрода дропов распределителей. Снова считаем сколько примерно нужно
+клиентов для соответствия выставленной доле.</li>
+<li>генерируется также случайное число транзакций дропов распределителей
+в районе рассчитанного количества</li>
+<li>затем такой же расчет для дропов покупателей и генерация</li>
+</ol>
+<p><strong>В итоге</strong> все разделы генерации объединяются в единый
+генератор в скрипте <code>run_generator.py</code></p>
+<p><strong>Таблица транзакций состоит из колонок</strong></p>
+<table>
+<thead>
+<tr>
+<th>Название колонки</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>client_id</td>
+<td>ID клиента</td>
+</tr>
+<tr>
+<td>txn_time</td>
+<td>Время транзакции</td>
+</tr>
+<tr>
+<td>unix_time</td>
+<td>UNIX-время</td>
+</tr>
+<tr>
+<td>amount</td>
+<td>Сумма</td>
+</tr>
+<tr>
+<td>type</td>
+<td>Тип транзакции</td>
+</tr>
+<tr>
+<td>channel</td>
+<td>Канал</td>
+</tr>
+<tr>
+<td>category</td>
+<td>Категория</td>
+</tr>
+<tr>
+<td>online</td>
+<td>Онлайн (да/нет)</td>
+</tr>
+<tr>
+<td>merchant_id</td>
+<td>ID торговой точки</td>
+</tr>
+<tr>
+<td>trans_city</td>
+<td>Город транзакции</td>
+</tr>
+<tr>
+<td>trans_lat</td>
+<td>Широта</td>
+</tr>
+<tr>
+<td>trans_lon</td>
+<td>Долгота</td>
+</tr>
+<tr>
+<td>trans_ip</td>
+<td>IP-адрес</td>
+</tr>
+<tr>
+<td>device_id</td>
+<td>ID устройства</td>
+</tr>
+<tr>
+<td>account</td>
+<td>Счёт</td>
+</tr>
+<tr>
+<td>is_fraud</td>
+<td>Фрод (да/нет)</td>
+</tr>
+<tr>
+<td>is_suspicious</td>
+<td>Подозрение (да/нет)</td>
+</tr>
+<tr>
+<td>status</td>
+<td>Статус транзакции</td>
+</tr>
+<tr>
+<td>rule</td>
+<td>Антифрод правило</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Файлы создаваемых транзакций пишутся</strong> в две
+директории: индивидуальную директорию создаваемую под текущий запуск
+генератора - для хранения истории запусков - и постоянную директорию для
+файлов созданных при последнем запуске - файлы перезаписываются каждый
+запуск.</p>
+<h2 id="разделы-генерации">Разделы генерации</h2>
+<p><strong>Список разделов</strong>. По ссылкам развернутое описание
+каждого раздела</p>
+<ol type="1">
+<li><a href="03_Генерация_легальных_транзакций.html">Генерация легальных
+транзакций</a></li>
+<li><a href="04_Compromised_client_fraud.html">Генерация compromised
+fraud транзакций</a></li>
+<li><a href="05_Дропы.html">Дропы</a></li>
+<li><a href="06_Объединение_всего_в_цельный_генератор.html">Объединение
+всех разделов в цельный генератор</a></li>
+</ol>
+<div class="pagination">
+  <a href="01_Главная_страница_проекта_af01">Главная</a>
+  <a href="03_Генерация_легальных_транзакций.html">Легальные транзакции - Далее ❯</a>
+</div>  
+        </body>
+        </html>

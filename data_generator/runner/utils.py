@@ -54,30 +54,6 @@ def spinner_decorator(func):
         sys.stdout.flush()
         return result
     return wrapper
-# def spinner_decorator(func):
-#     def wrapper(self, *args, **kwargs):
-#         done = False
-#         text = self.text
-
-#         def spinner():
-#             wheel =  itertools.cycle(['|', '\\', '-', '|', '-', '/'])
-#             while not done:
-#                 ch = next(wheel)
-#                 sys.stdout.write(f"\r{text} in progress... {ch}")
-#                 sys.stdout.flush()
-#                 time.sleep(0.1)
-
-#         thread = threading.Thread(target=spinner)
-#         thread.start()
-#         try:
-#             result = func(self, *args, **kwargs)
-#         finally:
-#             done = True
-#             thread.join()
-#             sys.stdout.write(f"\r{text}... completed.{' ' * 10}\n")
-#             sys.stdout.flush()
-#         return result
-#     return wrapper
 
 
 def notifier(text):

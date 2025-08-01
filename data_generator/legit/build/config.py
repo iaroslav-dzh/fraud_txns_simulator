@@ -7,6 +7,8 @@ import os
 from data_generator.general_time import create_timestamps_range_df, get_all_time_patterns
 from data_generator.utils import create_txns_df
 from data_generator.configs import LegitCfg
+
+
 # 1.
 
 class LegitConfigBuilder:

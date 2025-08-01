@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title></title>
+
+<style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      color: #111827; /* darker text for better contrast */
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+    }
+    pre {
+      background-color: #f3f4f6; /* gray-100 */
+      border-radius: 6px;
+      padding: 16px;
+      overflow: auto;
+      border: 1px solid #e5e7eb; /* gray-200 */
+    }
+    code {
+      font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      background-color: #f3f4f6; /* gray-100 */
+      color: #111827; /* gray-900 */
+      border-radius: 4px;
+      padding: 0.2em 0.4em;
+      font-weight: 500;
+    }
+    table {
+      border-collapse: collapse;
+      width: auto;
+      margin-top: 40px 0;
+      margin-bottom: 40px;
+    }
+    table, th, td {
+      border: 1px solid #d1d5db; /* gray-300 */
+    }
+    th {
+      padding: 8px 8px;
+      text-align: center;
+      background-color: #f9fafb; /* gray-50 */
+      font-weight: 600;
+      color: #111827; /* gray-900 */
+    }
+    td {
+      padding: 2px 2px;
+      text-align: center;
+      color: #1f2937; /* gray-800 */
+    }
+    blockquote {
+      border-left: 4px solid #9ca3af; /* gray-400 */
+      padding: 12px 16px;
+      margin-left: 0;
+      margin-right: 0;
+      background-color: #f9fafb; /* gray-50 */
+      color: #374151; /* gray-700 */
+      font-style: italic;
+      border-radius: 0 4px 4px 0;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 4px;
+      margin: 16px 0;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      color: #111827; /* gray-900 */
+      font-weight: 700;
+      margin-top: 24px;
+      margin-bottom: 16px;
+      line-height: 1.25;
+    }
+    h2, h3, h4, h5, h6 {
+      margin-top: 40px;
+    }
+    h1 {
+      font-size: 2em;
+      border-bottom: 1px solid #e5e7eb; /* gray-200 */
+      padding-bottom: 0.3em;
+    }
+    h2 {
+      font-size: 1.5em;
+      border-bottom: 1px solid #e5e7eb; /* gray-200 */
+      padding-bottom: 0.3em;
+    }
+    h3 {
+      font-size: 1.25em;
+    }
+    p {
+      margin-top: 30px;
+      margin-bottom: 16px;
+    }
+    a {
+      color: #2563eb; /* blue-600 */
+      text-decoration: none;
+    }
+    details {
+      margin-top: 40px;
+      margin-bottom: 40px;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    ul, ol {
+      padding-left: 2em;
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+    li {
+      margin-bottom: 4px;
+    }
+    li > ul, li > ol {
+      margin-top: 4px;
+      margin-bottom: 0;
+    }
+  </style>
+  <style>
+.pagination {
+  display: inline-block;
+  padding-top: 40px;
+}
+
+.pagination a {
+  color: black;
+  background-color: #66cfc8;
+  float: left;
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: background-color .3s;
+  border: 1px solid #ddd;
+}
+
+.pagination a.active {
+  background-color: #4CAF50;
+  color: rgb(255, 255, 255);
+  border: 1px solid #4CAF50;
+}
+
+.pagination a:hover:not(.active) {background-color: #ddd;}
+</style>   
+
+        </head>
+        <body>
+<div class="pagination">
+  <a href="01_Главная_страница_проекта_af01.html">Главная</a>
+  <a href="05_Дропы.html">❮ Назад - Дропы</a>
+  <a href="#">Установка и запуск - Далее ❯</a>
+</div> 
+<h1 id="объединение-всех-разделов-в-цельный-генератор">Объединение всех
+разделов в цельный генератор</h1>
+<p><strong>Цельный генератор</strong> скрипт
+<code>run_generator.py</code>, объединяющий в себе все разделы
+генерации: легальные транз., compromised фрод, дропы. Это единая входная
+точка. На выходе будет единый файл со всеми транзакциями.</p>
+<p><strong>Ноутбук</strong>: ==ссылка==</p>
+<h2 id="логика-run_generator.py">Логика
+<code>run_generator.py</code></h2>
+<ol type="1">
+<li>загрузка всех конфигов из <code>config/</code></li>
+<li>валидация конфигов при помощи <code>ConfigsValidator</code></li>
+<li>создание директории под текущий запуск</li>
+<li>поочередное создание объектов-оркестраторов каждого раздела
+генерации и запуск генерации для каждого раздела.
+<strong>Порядок</strong>:
+<ul>
+<li>создать объект <code>LegitRunner</code>, запустить генерацию
+легальных транзакций</li>
+<li>после, создать объект <code>ComprRunner</code>, запустить генерацию
+compromised fraud транзакций</li>
+<li>после, создать объект <code>DropsRunner</code> для дропов
+<em>распределителей</em>, запустить генерацию транзакций</li>
+<li>после, создать объект <code>DropsRunner</code> для дропов
+<em>покупателей</em>, запустить генерацию транзакций</li>
+</ul></li>
+<li>создание объекта <code>AllTxnsRecorder</code> на основании конфиг
+файлов и пути директории текущего запуска</li>
+<li>сборка единого датафрейма и запись в файл в две директории: текущего
+запуска и последнего запуска при помощи метода
+<code>AllTxnsRecorder.build_and_write()</code></li>
+<li>Вывод сообщения о том где искать конечный файл со сгенерированными
+транзакциями</li>
+</ol>
+<h2 id="валидация-конфигураций-в-yaml-файлах">Валидация конфигураций в
+<code>yaml</code> файлах</h2>
+<p>Класс <code>ConfigsValidator</code>.</p>
+<p><strong>Основной функционал</strong></p>
+<ul>
+<li>валидация некоторых конфигураций в <code>yaml</code> файлах из папки
+<code>configs/</code>.</li>
+<li>подразумевается использование в начале запуска генератора перед
+генерацией транзакций, чтобы избежать случаев когда часть данных
+сгенерируется, а потом из-за невыполнимых конфигов будет ошибка и
+генерация не завершится, но время будет потрачено. Особенно это
+актуально если успешно сгенерировались легальные транзакции, которые
+генерируются самыми первыми и дольше всего, при том значительно дольше
+других разделов генерации; а потом ошибка в генерации compromised фрода
+или дроп фрода из-за того что их конфиги невыполнимы.
+<ul>
+<li>Например, легальные транзакции и compromised fraud использовали всех
+клиентов под свою генерацию либо просто слишком много и для
+выставленного в конфигах желаемого процента дроп фрода, клиентов уже не
+хватает, следовательно, выходит ошибка, но время уже потрачено на
+генерацию легальных и compromised, и приходится менять конфиги и
+запускать заново. И если конфиги снова невыполнимы, то снова тратится
+время на генерацию прежде чем все “упадет”.</li>
+<li>также тексты ошибок валидатора помогают быстрее понять, что дело в
+конфигах и в каких именно</li>
+</ul></li>
+</ul>
+<p><strong>Примеры частей валидации</strong>:</p>
+<ul>
+<li><strong>валидация compromised client fraud rate</strong>. Клиентов
+под compromised фрод мы берем из числа клиентов использованных для
+генерации легальных транзакций. Но в отличии от легальных транзакций,
+где на одного клиента много транзакций, что значит что на 3000 клиентов
+можно сгенерировать например 10000 транзакций; в compromised фроде число
+транзакций немногим больше числа клиентов т.к. генерация под все
+антифрод правила кроме одного подразумевает 1 транзакцию на 1 клиента.
+Если fraud rate в конфигах слишком высок или входящий в него compromised
+fraud rate слишком высок или и то и другое, то может случиться, что
+клиентов для фрода, нужно больше чем было задействовано клиентов под
+легальные транзакции.</li>
+<li><strong>валидация drop rate.</strong> Под дропов берутся клиенты не
+задействованные в генерации легальных и compromised fraud транзакций.
+Следовательно, может быть так, что легальные и compromised возьмут
+слишком много клиентов и для генерации drop rate процента транзакций
+клиентов уже не хватит</li>
+</ul>
+<h2 id="запись-всех-созданных-транзакций-в-единый-файл">Запись всех
+созданных транзакций в единый файл</h2>
+<p>Класс <code>AllTxnsRecorder</code></p>
+<p><strong>Основная логика</strong></p>
+<ul>
+<li>когда сгенерированы транзакции всех разделов:
+<ol type="1">
+<li>читает транзакции из всех отдельных файлов каждого раздела</li>
+<li>создает из них единый датафрейм и сортирует по времени
+транзакции</li>
+<li>пишет датафрейм в <code>parquet</code> файл в две директории</li>
+</ol></li>
+</ul>
+<div class="pagination">
+  <a href="01_Главная_страница_проекта_af01.html">Главная</a>
+  <a href="05_Дропы.html">❮ Назад - Дропы</a>
+  <a href="#">Установка и запуск - Далее ❯</a>
+</div>  
+        </body>
+        </html>

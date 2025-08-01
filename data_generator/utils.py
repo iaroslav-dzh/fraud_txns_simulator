@@ -18,7 +18,8 @@ def Random_Points_in_Bounds(polygon, number):
     y = np.random.uniform( miny, maxy, number )
     return x, y
 
-#.
+
+# 2.
 
 def gen_trans_coordinates(polygon, number):
     """
@@ -39,7 +40,7 @@ def gen_trans_coordinates(polygon, number):
 
     return pnts_in_poly, gdf_poly
 
-# .
+# 3.
 
 def build_transaction(client_id, txn_time, txn_unix, amount, txn_type, channel, category_name, online, merchant_id, \
                       trans_city, trans_lat, trans_lon, trans_ip, device_id, account, is_fraud, is_suspicious, \
@@ -59,7 +60,7 @@ def build_transaction(client_id, txn_time, txn_unix, amount, txn_type, channel, 
     return txn_dict
 
 
-# 2. 
+# 4. 
 
 def gen_trans_number_norm(avg_num, num_std, low_bound=1, up_bound=120):
     """
@@ -80,7 +81,7 @@ def gen_trans_number_norm(avg_num, num_std, low_bound=1, up_bound=120):
     return random_float.astype(int)[0]
 
 
-# 3. 
+# 5. 
 
 def get_values_from_truncnorm(low_bound, high_bound, mean, std, size=1):
     """
@@ -97,7 +98,7 @@ def get_values_from_truncnorm(low_bound, high_bound, mean, std, size=1):
     """
     return truncnorm.rvs((low_bound - mean) / std, (high_bound - mean) / std, loc=mean, scale=std, size=size)
 
-# 4.
+# 6.
 
 def calc_distance(lat_01, lon_01, lat_02, lon_02, km=True):
     """
@@ -122,7 +123,7 @@ def calc_distance(lat_01, lon_01, lat_02, lon_02, km=True):
     return round(distance_m)
 
 
-# . Функция sample_category. На данный момент предназначена только для фрода
+# 7. Функция sample_category. На данный момент предназначена только для фрода
 
 def sample_category(categories, online=None, is_fraud=None, rule=None):
     """
@@ -150,7 +151,7 @@ def sample_category(categories, online=None, is_fraud=None, rule=None):
         return cat_sample
 
 
-# Функция семплирования антифрод-правила
+# 8. Функция семплирования антифрод-правила
 def sample_rule(rules):
     """
     rules - pd.DataFrame с названиями правил и их весами
@@ -158,7 +159,7 @@ def sample_rule(rules):
     return rules.rule.sample(1, weights=rules.weight).iat[0]
 
 
-# Функция создания пустого датафрейма под транзакции
+# 9.Функция создания пустого датафрейма под транзакции
 def create_txns_df(configs):
     """
     configs: dict. Словарь с парами 'название колонки':'тип данных'
@@ -171,7 +172,7 @@ def create_txns_df(configs):
     return pd.DataFrame(to_df)
 
 
-# Создать прогрессбар
+# 10. Создать прогрессбар
 def create_progress_bar(obj, text=None):
     """
     Создать tqdm прогресс бар.
@@ -184,7 +185,7 @@ def create_progress_bar(obj, text=None):
     return tqdm(total=total, desc=text)
 
 
-# Случайное округление суммы
+# 11. Случайное округление суммы
 def amt_rounding(amount, rate=0.6):
     """
     Целочисленное округление.
@@ -203,6 +204,7 @@ def amt_rounding(amount, rate=0.6):
     return amount // divider * divider
 
 
+# 12.
 def load_configs(path, encoding="utf8"):
     """
     Загрузить конфиги из yaml файла.
