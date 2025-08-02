@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title></title>
+
+<style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      color: #111827; /* darker text for better contrast */
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+    }
+    pre {
+      background-color: #f3f4f6; /* gray-100 */
+      border-radius: 6px;
+      padding: 16px;
+      overflow: auto;
+      border: 1px solid #e5e7eb; /* gray-200 */
+    }
+    code {
+      font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      background-color: #f3f4f6; /* gray-100 */
+      color: #111827; /* gray-900 */
+      border-radius: 4px;
+      padding: 0.2em 0.4em;
+      font-weight: 500;
+    }
+    table {
+      border-collapse: collapse;
+      width: auto;
+      margin-top: 40px 0;
+      margin-bottom: 40px;
+    }
+    table, th, td {
+      border: 1px solid #d1d5db; /* gray-300 */
+    }
+    th {
+      padding: 8px 8px;
+      text-align: center;
+      background-color: #f9fafb; /* gray-50 */
+      font-weight: 600;
+      color: #111827; /* gray-900 */
+    }
+    td {
+      padding: 2px 2px;
+      text-align: center;
+      color: #1f2937; /* gray-800 */
+    }
+    blockquote {
+      border-left: 4px solid #9ca3af; /* gray-400 */
+      padding: 12px 16px;
+      margin-left: 0;
+      margin-right: 0;
+      background-color: #f9fafb; /* gray-50 */
+      color: #374151; /* gray-700 */
+      font-style: italic;
+      border-radius: 0 4px 4px 0;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 4px;
+      margin: 16px 0;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      color: #111827; /* gray-900 */
+      font-weight: 700;
+      margin-top: 24px;
+      margin-bottom: 16px;
+      line-height: 1.25;
+    }
+    h2, h3, h4, h5, h6 {
+      margin-top: 40px;
+    }
+    h1 {
+      font-size: 2em;
+      border-bottom: 1px solid #e5e7eb; /* gray-200 */
+      padding-bottom: 0.3em;
+    }
+    h2 {
+      font-size: 1.5em;
+      border-bottom: 1px solid #e5e7eb; /* gray-200 */
+      padding-bottom: 0.3em;
+    }
+    h3 {
+      font-size: 1.25em;
+    }
+    p {
+      margin-top: 30px;
+      margin-bottom: 16px;
+    }
+    a {
+      color: #2563eb; /* blue-600 */
+      text-decoration: none;
+    }
+    details {
+      margin-top: 40px;
+      margin-bottom: 40px;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    ul, ol {
+      padding-left: 2em;
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+    li {
+      margin-bottom: 4px;
+    }
+    li > ul, li > ol {
+      margin-top: 4px;
+      margin-bottom: 0;
+    }
+  </style>
+  <style>
+.pagination {
+  display: inline-block;
+  padding-top: 40px;
+}
+
+.pagination a {
+  color: black;
+  background-color: #66cfc8;
+  float: left;
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: background-color .3s;
+  border: 1px solid #ddd;
+}
+
+.pagination a.active {
+  background-color: #4CAF50;
+  color: white;
+  border: 1px solid #4CAF50;
+}
+
+.pagination a:hover:not(.active) {background-color: #ddd;}
+</style>                  
+        </head>
+        <body>
+<div class="pagination">
+  <a href="#">Главная</a>
+  <a href="#">❮ Назад - Текст</a>
+  <a href="#">Вперед - Текст ❯</a>
+</div>  
+<h1 id="симулятор-фрод-транзакций">Симулятор фрод транзакций</h1>
+<h2 id="указатель">Указатель</h2>
+<ul>
+<li><a href="#о-чем-этот-проект">О чем этот проект</a></li>
+<li><a href="#установка-зависимостей-проекта">Установка зависимостей
+проекта</a>
+<ul>
+<li><a href="#клонирование-репозитория">Клонирование
+репозитория</a></li>
+<li><a href="#установка-poetry">Установка poetry</a></li>
+<li><a href="#создание-виртуальной-среды">Создание виртуальной
+среды</a></li>
+<li><a href="#активация-виртуальной-среды">Активация виртуальной
+среды</a></li>
+</ul></li>
+<li><a href="#возможные-ошибки-при-настройке-окружения">Возможные ошибки
+при настройке окружения</a></li>
+<li><a href="#другие-инструкции">Другие инструкции</a>
+<ul>
+<li><a href="#подключение-poetry-env-как-kernel-в-jupyter">Подключение
+poetry env как kernel в Jupyter</a></li>
+</ul></li>
+<li><a href="#запуск-генератора">Запуск генератора</a></li>
+</ul>
+<h2 id="о-чем-этот-проект">О чем этот проект</h2>
+<ol type="1">
+<li>Генерация синтетических банковских транзакций: легальных и
+фрода.</li>
+<li>Веб-приложение для просмотра сгенерированных транзакций. Симуляция
+интерфейса антифрод системы. Писать планирую либо на фреймворке
+Streamlit либо на Dash. - <strong>в разработке</strong></li>
+</ol>
+<p>Более развернутое описание проекта <strong><a
+href="https://iaroslav-dzh.github.io/fraud_txns_simulator/01_%D0%93%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F_%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0_%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%B0_af01.html">по
+ссылке</a></strong> - это сайт проекта. Там более подробное описание в
+целом и подробное описание генератора транзакций по разделам.</p>
+<p><strong>Генератор транзакций уже готов</strong> и может быть запущен
+локально после установки зависимостей проекта, об этом далее.</p>
+<p><strong>Фрода два типа:</strong> 1. <em>compromised client fraud</em>
+- банковский аккаунт или карта клиента скомпрометированы. 2. дроп фрод -
+клиент является дропом, дропов два типа: которые просто посредники в
+переправке потока денег (<em>распределители</em>) и которые занимаются
+отмыванием через покупку товаров на присланные им деньги
+(<em>покупатели</em>)</p>
+<p>Фрод генерируется в соответствии с антифрод правилами. Т.е.
+транзакции генерируются с такими характеристиками, чтобы попадать под
+конкретные антифрод правила. В случае с <em>compromised client
+fraud</em> правило выбирается случайно и под него генерируется
+транзакция/и.</p>
+<h2 id="установка-зависимостей-проекта">Установка зависимостей
+проекта</h2>
+<p><strong>Все зависимости</strong>, включая модули проекта прописаны в
+<code>pyproject.toml</code> файле. Предлагаю установить при помощи
+менеджера зависимостей <strong><a
+href="https://python-poetry.org/">poetry</a></strong>.</p>
+<h3 id="клонирование-репозитория">Клонирование репозитория</h3>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/iaroslav-dzh/fraud_txns_simulator.git</span></code></pre></div>
+<h3 id="установка-poetry">Установка poetry</h3>
+<h4 id="windows-powershell">Windows (Powershell)</h4>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">(</span><span class="fu">Invoke-WebRequest</span> <span class="op">-</span>Uri https<span class="op">://</span>install<span class="op">.</span><span class="fu">python</span><span class="op">-</span>poetry<span class="op">.</span><span class="fu">org</span> <span class="op">-</span>UseBasicParsing<span class="op">).</span><span class="fu">Content</span> <span class="op">|</span> py <span class="op">-</span></span></code></pre></div>
+<p>При установке для <strong>Windows</strong> через powershell добавить
+путь ниже в <code>path</code> <strong>для пользователя</strong></p>
+<pre><code>C:\Users\&lt;ИМЯ ПОЛЬЗОВАТЕЛЯ&gt;\AppData\Roaming\Python\Scripts</code></pre>
+<ul>
+<li><a href="https://remontka.pro/add-to-path-variable-windows/">Как
+добавить путь в переменную среды PATH в Windows</a></li>
+</ul>
+<p><strong>После установки и добавления пути в <code>path</code>
+перезапустить терминал</strong>, затем проверить:</p>
+<pre><code>poetry --version</code></pre>
+<h4 id="linux-macos-windows-wsl">Linux, macOS, Windows (WSL)</h4>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-sSL</span> https://install.python-poetry.org <span class="kw">|</span> <span class="ex">python3</span> <span class="at">-</span></span></code></pre></div>
+<p>При установке для <strong>Линукс</strong> или <strong>macOS</strong>
+добавить путь ниже в <code>PATH</code></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="va">$HOME</span><span class="ex">/.local/bin</span></span></code></pre></div>
+<ul>
+<li><a
+href="https://iaroslav-dzh.github.io/fraud_txns_simulator/installation/how_to_add_poetry_to_path_linux.html">Как
+добавить путь в PATH на <strong>Линукс</strong></a></li>
+</ul>
+<p><strong>После установки и добавления пути в <code>PATH</code>
+перезапустить терминал</strong>, затем проверить:</p>
+<pre><code>poetry --version</code></pre>
+<h3 id="создание-виртуальной-среды">Создание виртуальной среды</h3>
+<ul>
+<li>Создание среды, установка всех зависимостей, включая собственные
+модули согласно файлу <code>pyproject.toml</code></li>
+</ul>
+<p><strong>Перейти в директорию проекта(клонированного репозитория) и
+исполнить команду</strong></p>
+<pre><code>poetry install</code></pre>
+<p>Будет создана виртуальная среда и установлены все зависимости</p>
+<h3 id="активация-виртуальной-среды">Активация виртуальной среды</h3>
+<p>Чтобы войти виртуальную среду где установлены все зависимости.<br />
+Документация Poetry: <a
+href="https://python-poetry.org/docs/managing-environments/#activating-the-environment">Activating
+the environment</a></p>
+<h4 id="windows-powershell-1">Windows (powershell)</h4>
+<p><strong>Находясь в директории проекта в терминале исполнить
+команду</strong></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Invoke-Expression</span> <span class="op">(</span>poetry env activate<span class="op">)</span></span></code></pre></div>
+<p>ЛИБО</p>
+<p><strong>Исполнить</strong></p>
+<pre><code>poetry env activate</code></pre>
+<p><strong>И затем скопировать вывод команды. Если это путь к скрипту,
+например</strong>:</p>
+<pre><code>&quot;C:\Users\&lt;ИМЯ_ПОЛЬЗОВАТЕЛЯ&gt;\AppData\Local\pypoetry\Cache\virtualenvs\&lt;НАЗВАНИЕ_СРЕДЫ&gt;\Scripts\activate.ps1&quot;</code></pre>
+<p><strong>И вставляем вывод в терминал, нажимаем Enter</strong></p>
+<pre><code>C:\Users\&lt;ИМЯ_ПОЛЬЗОВАТЕЛЯ&gt;\AppData\Local\pypoetry\Cache\virtualenvs\&lt;НАЗВАНИЕ_СРЕДЫ&gt;\Scripts\activate.ps1</code></pre>
+<h4 id="линукс">Линукс</h4>
+<p><strong>Находясь в директории проекта в терминале исполнить
+команду</strong></p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">eval</span> <span class="va">$(</span><span class="ex">poetry</span> env activate<span class="va">)</span></span></code></pre></div>
+<p>ЛИБО</p>
+<p><strong>Исполнить</strong></p>
+<pre><code>poetry env activate</code></pre>
+<p><strong>И затем скопировать вывод команды. Это может быть команда и
+путь, например</strong>:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> home/<span class="op">&lt;</span>ИМЯ_ПОЛЬЗОВАТЕЛЯ<span class="op">&gt;</span>/.cache/pypoetry/virtualenvs/<span class="op">&lt;</span>ИМЯ_СРЕДЫ<span class="op">&gt;</span>/activate</span></code></pre></div>
+<p><strong>Затем вставить вывод в терминал, нажимаем Enter</strong></p>
+<h2 id="возможные-ошибки-при-настройке-окружения">Возможные ошибки при
+настройке окружения</h2>
+<h3 id="ошибка-returned-non-zero-exit-status-9009">Ошибка
+<code>returned non-zero exit status 9009</code></h3>
+<p>Poetry не может найти python.</p>
+<p><strong>Если в консоли будет что-то типа:</strong></p>
+<pre><code>Command &#39;[&#39;C:\\Users\\&lt;USER&gt;\\AppData\\Local\\Microsoft\\WindowsApps\\python.EXE&#39;, &#39;-EsSc&#39;, &#39;import sys; print(sys.executable)&#39;]&#39; returned non-zero exit status 9009.</code></pre>
+<p><strong>Это исправляется командой:</strong></p>
+<pre><code>poetry config virtualenvs.use-poetry-python true</code></pre>
+<p>Теперь poetry использует python который использовался при ее
+установке.</p>
+<h3
+id="unauthorizedaccess-error-в-powershell"><code>UnauthorizedAccess Error</code>
+в powershell</h3>
+<p>Исполнить команду ниже. Для разрешения исполнения скриптов в текущей
+сессии powershell</p>
+<pre><code>Set-ExecutionPolicy RemoteSigned -Scope Process</code></pre>
+<p>Справка: -
+https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy?view=powershell-7.5</p>
+<h2 id="другие-инструкции">Другие инструкции</h2>
+<h3 id="подключение-poetry-env-как-kernel-в-jupyter">Подключение poetry
+env как kernel в Jupyter</h3>
+<ol type="1">
+<li>Зайти в виртуальную среду</li>
+<li>Установить ipykernel <code>poetry add ipykernel</code></li>
+<li>Зарегистрировать poetry среду как ядро в Jupyter</li>
+</ol>
+<pre><code>python -m ipykernel install --user --name=poetry-env --display-name &quot;Python (poetry-env)&quot;</code></pre>
+<ol start="4" type="1">
+<li>Запустить Jupyter Notebook (можно из Anaconda или терминала), и в
+списке ядер (kernels) выберfnm <code>Python (poetry-env)</code>.</li>
+</ol>
+<h2 id="запуск-генератора">Запуск генератора</h2>
+<p>Чтобы запустить генератор транзакций: 1. Войти в виртуальную среду
+проекта 2. Исполнить команду</p>
+<pre><code>python run_generator.py</code></pre>
+<p>У генератора транзакций могут быть заданы конфигурации через
+<code>yaml</code> файлы в папке <code>config/</code>. Подробнее об этом
+в [Основные конфигурации и запуск
+генератора]((https://iaroslav-dzh.github.io/fraud_txns_simulator/07_generator_configs_and_start.html)</p>
+<div class="pagination">
+  <a href="#">Главная</a>
+  <a href="#">❮ Назад - Текст</a>
+  <a href="#">Вперед - Текст ❯</a>
+</div>  
+        </body>
+        </html>

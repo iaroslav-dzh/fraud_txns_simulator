@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title></title>
+
+<style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      color: #111827; /* darker text for better contrast */
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+    }
+    pre {
+      background-color: #f3f4f6; /* gray-100 */
+      border-radius: 6px;
+      padding: 16px;
+      overflow: auto;
+      border: 1px solid #e5e7eb; /* gray-200 */
+    }
+    code {
+      font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      background-color: #f3f4f6; /* gray-100 */
+      color: #111827; /* gray-900 */
+      border-radius: 4px;
+      padding: 0.2em 0.4em;
+      font-weight: 500;
+    }
+    table {
+      border-collapse: collapse;
+      width: auto;
+      margin-top: 40px 0;
+      margin-bottom: 40px;
+    }
+    table, th, td {
+      border: 1px solid #d1d5db; /* gray-300 */
+    }
+    th {
+      padding: 8px 8px;
+      text-align: center;
+      background-color: #f9fafb; /* gray-50 */
+      font-weight: 600;
+      color: #111827; /* gray-900 */
+    }
+    td {
+      padding: 2px 2px;
+      text-align: center;
+      color: #1f2937; /* gray-800 */
+    }
+    blockquote {
+      border-left: 4px solid #9ca3af; /* gray-400 */
+      padding: 12px 16px;
+      margin-left: 0;
+      margin-right: 0;
+      background-color: #f9fafb; /* gray-50 */
+      color: #374151; /* gray-700 */
+      font-style: italic;
+      border-radius: 0 4px 4px 0;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 4px;
+      margin: 16px 0;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      color: #111827; /* gray-900 */
+      font-weight: 700;
+      margin-top: 24px;
+      margin-bottom: 16px;
+      line-height: 1.25;
+    }
+    h2, h3, h4, h5, h6 {
+      margin-top: 40px;
+    }
+    h1 {
+      font-size: 2em;
+      border-bottom: 1px solid #e5e7eb; /* gray-200 */
+      padding-bottom: 0.3em;
+    }
+    h2 {
+      font-size: 1.5em;
+      border-bottom: 1px solid #e5e7eb; /* gray-200 */
+      padding-bottom: 0.3em;
+    }
+    h3 {
+      font-size: 1.25em;
+    }
+    p {
+      margin-top: 30px;
+      margin-bottom: 16px;
+    }
+    a {
+      color: #2563eb; /* blue-600 */
+      text-decoration: none;
+    }
+    details {
+      margin-top: 40px;
+      margin-bottom: 40px;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    ul, ol {
+      padding-left: 2em;
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+    li {
+      margin-bottom: 4px;
+    }
+    li > ul, li > ol {
+      margin-top: 4px;
+      margin-bottom: 0;
+    }
+  </style>
+  <style>
+.pagination {
+  display: inline-block;
+  padding-top: 40px;
+}
+
+.pagination a {
+  color: black;
+  background-color: #66cfc8;
+  float: left;
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: background-color .3s;
+  border: 1px solid #ddd;
+}
+
+.pagination a.active {
+  background-color: #4CAF50;
+  color: white;
+  border: 1px solid #4CAF50;
+}
+
+.pagination a:hover:not(.active) {background-color: #ddd;}
+</style>                  
+        </head>
+        <body>
+<div class="pagination">
+  <a href="#">Главная</a>
+  <a href="#">❮ Назад - Текст</a>
+  <a href="#">Вперед - Текст ❯</a>
+</div>  
+<h1 id="основные-конфигурации-и-запуск-генератора">Основные конфигурации
+и запуск генератора</h1>
+<p>Конфигурации генератора находятся в папке <code>config/</code> в
+<code>yaml</code> файлах. Основные из них валидируются при запуске
+генератора перед началом генерации.</p>
+<h2 id="указатель">Указатель</h2>
+<ul>
+<li><a href="##%20Время">Время</a></li>
+<li><a href="##%20Легальные%20транзакции">Легальные транзакции</a></li>
+<li><a href="##%20Фрод">Фрод</a></li>
+<li><a href="##%20Запуск%20генератора">Запуск генератора</a></li>
+</ul>
+<h2 id="время">Время</h2>
+<p>Файл <code>time.yaml</code></p>
+<p>Основные настройки это диапазон времени в котором генерируются
+транзакции. Верхняя граница диапазона не строгая, т.к. генерация времени
+частично сделана так, что может быть незначительный выход за её пределы,
+например если случайно выбранное время “конфликтует” со временем других
+транзакций, например находится слишком близко при этом не являясь фродом
+и т.п.</p>
+<p><strong>Часть <code>time.yaml</code></strong></p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">timestamps</span><span class="kw">:</span><span class="co"> # Генерация timestamp-ов для времени транзакций</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">start</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;2025-01-01&quot;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">end</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;2025-01-20&quot;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">format</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;%Y-%m-%d&quot;</span><span class="co"> # Строка формата stftime. Формат передаваемых start и end.</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">freq</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;min&quot;</span><span class="co"> # частота генерации timestamp-ов. Минуты, секунды, дни и т.д. &#39;min&#39;, &#39;s&#39;, &#39;D&#39; etc.</span></span></code></pre></div>
+<h2 id="легальные-транзакции">Легальные транзакции</h2>
+<p>Файл <code>legit.yaml</code><br />
+Основными для легальных транзакций являются конфигурации количества
+транзакций. Генерация легальных транзакций это самая долгая часть
+генерации, так что если не хочется долго ждать, то лучше не выставлять
+слишком большие числа. Уже 10000 хватит чтобы продемонстрировать работу
+генератора.</p>
+<p><strong>Важно</strong>. От количества легальных транзакций зависит
+кол-во фрод транзакций. Если выставить слишком маленькое число
+конфигурация может не пройти валидацию т.к. при таком числе не будет
+фрода. В целом, если что, то валидация выдаст ошибку и укажет, что можно
+изменить. Подробнее о валидации конфигов <a
+href="06_Объединение_всего_в_цельный_генератор.html">Объединение всех
+разделов в цельный генератор</a></p>
+<p><strong>Часть <code>legit.yaml</code> где настраивается кол-во
+транзакций</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">txn_num</span><span class="kw">:</span><span class="co"> # настройки кол-ва транзакций.</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">total_txns</span><span class="kw">:</span><span class="at"> </span><span class="dv">5000</span><span class="co"> # Сколько примерно транзакций сгенерировать</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">  # Размер чанка. Каждый чанк транз-ций пишется в отдельный файл.</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">  # Это на случай генерации очень большого кол-ва, чтобы не занимать память.</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">  # Потом из чанков собирается целый датафрейм и пишется в целый файл.</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">chunk_size</span><span class="kw">:</span><span class="at"> </span><span class="dv">4000</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">avg_txn_num</span><span class="kw">:</span><span class="at"> </span><span class="dv">30</span><span class="co"> # Среднее кол-во на клиента</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">txn_num_std</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span><span class="co"> # Стандартное откл. кол-ва транзакций на клиента</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">low_bound</span><span class="kw">:</span><span class="at"> </span><span class="dv">1</span><span class="co"> # мин. транз-ций на клиента</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">up_bound</span><span class="kw">:</span><span class="at"> </span><span class="dv">120</span><span class="co"> # макс. транз-ций на клиента</span></span></code></pre></div>
+<h2 id="фрод">Фрод</h2>
+<p>Основными конфигами фрода являются доли общего фрода и отдельных
+видов фрода. Они выставляются в <code>fraud.yaml</code>.</p>
+<p>Доля общего фрода это доля от всего количества транзакций. Доли
+отдельного фрода это доли от общего фрода.</p>
+<p><strong>Важно</strong>. Абсолютные значения соответствующие долям
+фрода это примерные числа, т.к. начиная с генерации легальных
+транзакций, число транзакций является случайным, как видно из конфига в
+<code>legit.yaml</code>. В compromised фроде тоже есть доля случайности
+в числе транзакций, как и в количестве транзакций дропов.</p>
+<p>Настройки долей фрода также подлежат валидации в начале работы
+генератора.</p>
+<p><strong>Часть <code>fraud.yaml</code></strong></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fraud_rates</span><span class="kw">:</span><span class="at"> </span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">total</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.01</span><span class="co"> # доля фрода от всех транзакций</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">  # Ниже по типам фрода доли от всего фрода </span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">compr_client</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.5</span><span class="co"> # фрод с компрометацией данных/аккаунтов клиентов.</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">drops</span><span class="kw">:</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">distributor</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.30</span><span class="co"> # дропы которые переводят и снимают полученные деньги</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">purchaser</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.20</span><span class="co"> # дропы которые покупают товары на полученные деньги</span></span></code></pre></div>
+<p><strong>Конфиг файлы для фрода</strong></p>
+<ol type="1">
+<li><code>fraud.yaml</code> - общие конфиги</li>
+<li><code>compr.yaml</code> - compromised фрод</li>
+<li><code>drops.yaml</code> - дропы</li>
+</ol>
+<h2 id="запуск-генератора">Запуск генератора</h2>
+<ol type="1">
+<li>Должна быть настроена виртуальная среда, см. <a
+href="https://github.com/iaroslav-dzh/fraud_txns_simulator/blob/main/README.md">README</a><br />
+</li>
+<li>Если нужно, измените конфиги в <code>config/</code></li>
+<li>В терминале перейдите в директорию проекта, выполните команду</li>
+</ol>
+<pre><code>python run_generator.py</code></pre>
+<ol start="4" type="1">
+<li>Генератор будет выводить в терминале информацию о том на каком он
+этапе</li>
+<li>По завершении он скажет где найти сгенерированные файлы. Вам
+вероятнее всего просто понадобится конечный файл со всеми транзакциями
+<code>all_txns.parquet</code></li>
+</ol>
+<div class="pagination">
+  <a href="#">Главная</a>
+  <a href="#">❮ Назад - Текст</a>
+  <a href="#">Вперед - Текст ❯</a>
+</div>  
+        </body>
+        </html>
