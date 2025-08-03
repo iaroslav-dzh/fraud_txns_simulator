@@ -48,10 +48,8 @@
 git clone https://github.com/iaroslav-dzh/fraud_txns_simulator.git
 ```  
 <br>
-
 ### Установка poetry
 <br>
-
 #### Windows (Powershell)
 ```powershell
 (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
