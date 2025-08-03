@@ -35,7 +35,7 @@
 2. дроп фрод - клиент является дропом, дропов два типа: которые просто посредники в переправке потока денег (*распределители*) и которые занимаются отмыванием через покупку товаров на присланные им деньги (*покупатели*)    
 
 Фрод генерируется в соответствии с антифрод правилами. Т.е. транзакции генерируются с такими характеристиками, чтобы попадать под конкретные антифрод правила. В случае с *compromised client fraud* правило выбирается случайно и под него генерируется транзакция/и.  
-
+<br><br>
 
 ## Установка зависимостей проекта
 
@@ -47,10 +47,10 @@
 ```bash
 git clone https://github.com/iaroslav-dzh/fraud_txns_simulator.git
 ```  
-
+<br>
 
 ### Установка poetry
-
+<br>
 
 #### Windows (Powershell)
 ```powershell
@@ -63,10 +63,11 @@ C:\Users\<ИМЯ ПОЛЬЗОВАТЕЛЯ>\AppData\Roaming\Python\Scripts
 ```
 - [Как добавить путь в переменную среды PATH в Windows](https://remontka.pro/add-to-path-variable-windows/)  
 
-**После установки и добавления пути в `path` перезапустить терминал**, затем проверить:
+После установки и добавления пути в `path` перезапустить терминал, затем проверить:
 ```
 poetry --version
 ```  
+<br>
 
 #### Linux, macOS, Windows (WSL)
 ```bash
@@ -79,93 +80,95 @@ $HOME/.local/bin
 ```
 - [Как добавить путь в PATH на **Линукс**](https://iaroslav-dzh.github.io/fraud_txns_simulator/installation/how_to_add_poetry_to_path_linux.html)  
 
-**После установки и добавления пути в `PATH` перезапустить терминал**, затем проверить:
+После установки и добавления пути в `PATH` перезапустить терминал, затем проверить:
 ```
 poetry --version
 ```    
-
+<br><br>
 
 ### Создание виртуальной среды
 
 - Создание среды, установка всех зависимостей, включая собственные модули согласно  файлу `pyproject.toml`
+<br>
 
-**Перейти в директорию проекта(клонированного репозитория) и исполнить команду**
+Перейти в директорию проекта(клонированного репозитория) и исполнить команду
 ```
 poetry install
 ```    
 
 Будет создана виртуальная среда и установлены все зависимости    
-
+<br><br>
 
 ### Активация виртуальной среды
 
-Чтобы войти виртуальную среду где установлены все зависимости.  
+Чтобы войти в виртуальную среду где установлены все зависимости.  
 Документация Poetry: [Activating the environment](https://python-poetry.org/docs/managing-environments/#activating-the-environment)  
+<br>
 
 #### Windows (powershell)
 
-**Находясь в директории проекта в терминале исполнить команду**
+Находясь в директории проекта в терминале исполнить команду
 ```powershell
 Invoke-Expression (poetry env activate)
 ```  
 
-ЛИБО  
+**ЛИБО**<br>
 
-**Исполнить**
+Исполнить
 ```
 poetry env activate
 ```  
 
-**И затем скопировать вывод команды. Если это путь к скрипту, например**:
+И затем скопировать вывод команды. Если это путь к скрипту, например:
 ```
 "C:\Users\<ИМЯ_ПОЛЬЗОВАТЕЛЯ>\AppData\Local\pypoetry\Cache\virtualenvs\<НАЗВАНИЕ_СРЕДЫ>\Scripts\activate.ps1"
 ```  
 
-**И вставляем вывод в терминал, нажимаем Enter**
+И вставляем вывод в терминал, нажимаем Enter
 ```
 C:\Users\<ИМЯ_ПОЛЬЗОВАТЕЛЯ>\AppData\Local\pypoetry\Cache\virtualenvs\<НАЗВАНИЕ_СРЕДЫ>\Scripts\activate.ps1
 ```  
-
+<br>
 #### Линукс
 
-**Находясь в директории проекта в терминале исполнить команду**
+Находясь в директории проекта в терминале исполнить команду
 ```bash
 eval $(poetry env activate)
 ```  
 
-ЛИБО  
+**ЛИБО**<br>
 
-**Исполнить**
+Исполнить
 ```
 poetry env activate
 ```  
 
-**И затем скопировать вывод команды. Это может быть команда и путь, например**:
+И затем скопировать вывод команды. Это может быть команда и путь, например:
 ```bash
 source home/<ИМЯ_ПОЛЬЗОВАТЕЛЯ>/.cache/pypoetry/virtualenvs/<ИМЯ_СРЕДЫ>/activate
 ```  
 
-**Затем вставить вывод в терминал, нажимаем Enter**  
-
+Затем вставить вывод в терминал, нажимаем Enter 
+<br><br>
 
 ## Возможные ошибки при настройке окружения
-
+<br>
 ### Ошибка  `returned non-zero exit status 9009`
 
 Poetry не может найти python.  
 
-**Если в консоли будет что-то типа:**
+Если в консоли будет что-то типа:
 ```
 Command '['C:\\Users\\<USER>\\AppData\\Local\\Microsoft\\WindowsApps\\python.EXE', '-EsSc', 'import sys; print(sys.executable)']' returned non-zero exit status 9009.
 ```  
 
-**Это исправляется командой:**
+Это исправляется командой:
 ```
 poetry config virtualenvs.use-poetry-python true
 ```  
 
 Теперь poetry использует python который использовался при ее установке.    
-
+<br><br>
 
 ### `UnauthorizedAccess Error` в powershell 
 
@@ -176,7 +179,7 @@ Set-ExecutionPolicy RemoteSigned -Scope Process
 
 Справка:
 - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy?view=powershell-7.5  
-
+<br><br>
 
 ## Другие инструкции
 
@@ -191,7 +194,7 @@ python -m ipykernel install --user --name=poetry-env --display-name "Python (poe
 ```
 
 4. Запустить Jupyter Notebook (можно из Anaconda или терминала), и в списке ядер (kernels) выберfnm `Python (poetry-env)`.   
-
+<br><br>
 
 ## Запуск генератора
 
