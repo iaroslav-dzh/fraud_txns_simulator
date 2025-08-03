@@ -3,7 +3,7 @@ name = "antifraud-simulator"
 version = "0.1.0"
 description = "Synthetic transaction generator for anti-fraud analysis"
 authors = [
-    {name = "Shantor Chervitz"}
+    {name = "Iaroslav Dzhurov"}
 ]
 license = {text = "MIT"}
 readme = "README.md"
