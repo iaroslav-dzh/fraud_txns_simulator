@@ -128,6 +128,7 @@ poetry env activate
 C:\Users\<ИМЯ_ПОЛЬЗОВАТЕЛЯ>\AppData\Local\pypoetry\Cache\virtualenvs\<НАЗВАНИЕ_СРЕДЫ>\Scripts\activate.ps1
 ```  
 <br>
+
 #### Линукс
 
 Находясь в директории проекта в терминале исполнить команду
@@ -151,7 +152,9 @@ source home/<ИМЯ_ПОЛЬЗОВАТЕЛЯ>/.cache/pypoetry/virtualenvs/<ИМ�
 <br><br>
 
 ## Возможные ошибки при настройке окружения
-<br>
+
+---------------------------------
+
 ### Ошибка  `returned non-zero exit status 9009`
 
 Poetry не может найти python.  
@@ -167,7 +170,7 @@ poetry config virtualenvs.use-poetry-python true
 ```  
 
 Теперь poetry использует python который использовался при ее установке.    
-<br><br>
+<br>
 
 ### `UnauthorizedAccess Error` в powershell 
 
@@ -181,6 +184,7 @@ Set-ExecutionPolicy RemoteSigned -Scope Process
 <br><br>
 
 ## Другие инструкции
+----------------------------------
 
 ### Подключение poetry env как kernel в Jupyter
 
