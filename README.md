@@ -196,7 +196,7 @@ Set-ExecutionPolicy RemoteSigned -Scope Process
 python -m ipykernel install --user --name=poetry-env --display-name "Python (poetry-env)"
 ```
 
-4. Запустить Jupyter Notebook (можно из Anaconda или терминала), и в списке ядер (kernels) выберfnm `Python (poetry-env)`.   
+4. Запустить Jupyter Notebook (можно из Anaconda или терминала), и в списке ядер (kernels) выберите `Python (poetry-env)`.   
 <br><br>
 
 ## Запуск генератора
