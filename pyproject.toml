@@ -1,5 +1,5 @@
 [project]
-name = "antifraud-simulator"
+name = "fraud-simulator"
 version = "0.1.0"
 description = "Synthetic transaction generator for anti-fraud analysis"
 authors = [
