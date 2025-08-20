@@ -7,7 +7,7 @@ rules: # Конфиги для правил
   freq_txn: # Правило trans_freq_increase
     txn_num: # Кол-во транз-ций для такого правила
       min: 4
-      max: 8
+      max: 5
     amount:
       min: 2000
       max: 10000
