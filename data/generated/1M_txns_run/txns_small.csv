@@ -1,6 +1,0 @@
-txn_id;client_id;txn_time;unix_time;amount;type;channel;category;online;merchant_id;trans_city;trans_lat;trans_lon;trans_ip;device_id;account;is_fraud;is_suspicious;status;rule
-1;3135;2025-01-01 00:01:00;1735689660;410.0;purchase;ecom;misc_net;True;6944,0;Кемерово;55.3909721;86.0467864;2.60.11.155;5322.0;;False;False;approved;not applicable
-2;11034;2025-01-01 00:02:00;1735689720;2404.68;purchase;ecom;misc_net;True;6885,0;Москва;55.7538789;37.6203735;2.60.20.15;9247.0;;False;False;approved;not applicable
-4;9833;2025-01-01 00:05:00;1735689900;1100.0;purchase;ecom;grocery_net;True;6886,0;Махачкала;42.9848572;47.5046303;2.60.19.182;9092.0;;False;False;approved;not applicable
-5;4025;2025-01-01 00:05:00;1735689900;1200.0;purchase;ecom;grocery_net;True;6805,0;Ижевск;56.8527444;53.2113961;2.60.14.228;6846.0;;False;False;approved;not applicable
-3;700;2025-01-01 00:05:00;1735689900;2143.25;purchase;ecom;shopping_net;True;6850,0;Петрозаводск;61.78909;34.3596263;2.60.2.157;1174.0;;False;False;approved;not applicable
