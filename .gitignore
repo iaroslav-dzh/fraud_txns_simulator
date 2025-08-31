@@ -14,6 +14,7 @@ data/cleaned_data/offline_merchants_points.csv
 data/cleaned_data/transaction_df_clean.csv 
 data/clients/clients_sample.gpkg
 data/generated/history/
+data/generated/1M_txns_run/
 data/raw/trans.asc
 data/raw/geo/
 data/test/
