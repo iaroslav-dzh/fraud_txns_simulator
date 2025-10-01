@@ -13,7 +13,7 @@
 		- [Windows (powershell)](#windows-powershell-1)
 		- [Linux](#linux)
 - [Possible errors when setting up the environment](#possible-errors-when-setting-up-the-environment)
-	- [Error `returned non-zero exit status 9009`](#error-returned-non-zero-exit-status-9009)
+	- [Error `returned non-zero exit status 9009`](#error--returned-non-zero-exit-status-9009)
 	- [`UnauthorizedAccess Error` in powershell](#unauthorizedaccess-error-in-powershell)
 - [Other instructions](#other-instructions)
 	- [Connecting poetry env as a kernel in Jupyter](#connecting-poetry-env-as-a-kernel-in-jupyter)
